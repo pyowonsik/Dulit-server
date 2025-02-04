@@ -45,6 +45,7 @@ export class UserController {
   }
 
   @Post('/match')
+  // 트랜잭션 적용 필요
   async matchCouple(@Body() body: { myId: string; partnerId: string }) {
     return this.userService.matchCouple(body.myId, body.partnerId);
   }

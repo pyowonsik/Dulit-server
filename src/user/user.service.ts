@@ -85,8 +85,16 @@ export class UserService {
     user1.matchedUser = user2;
     user2.matchedUser = user1;
 
+    
+    // 커플 테이블 생성 (커플 정보 , 데이트 관리 , 커뮤니티에서 사용할 게시물 관리)
+    // 커플 코드 등록후
+    // 간단한 커플 정보 (사귄날짜 , 특징 등등..) 저장 하면서 커플 테이블 생성
+    // 커플테이블에서 user1,user2 가져와서 matchedUser , chatRoom 생성 및 저장
+    
+    // matchedUser 저장
     await this.userRepository.save([user1, user2]);
 
+    // chatRoom 생성 및 저장
     await this.chatRoomRepository.save({
       users: [user1, user2],
     });

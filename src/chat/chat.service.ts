@@ -66,9 +66,17 @@ export class ChatService {
       chatRoom,
     });
 
-    const client = this.connectedClients.get(user.id);
+    // chatRoom.users.forEach((roomUser) => {
+    //   const client = this.connectedClients.get(roomUser.id);
+    //   if (client) {
+    //     client
+    //       .to(chatRoom.id.toString())
+    //       .emit('newMessage', plainToClass(Chat, msgModel));
+    //   }
+    // });
 
-    // chatRooms.id의 client(socket)으로 메세지 emit 
+    const client = this.connectedClients.get(user.id);
+    // chatRooms.id의 client(socket)으로 메세지 emit
     client
       .to(chatRoom.id.toString())
       .emit('newMessage', plainToClass(Chat, msgModel));
@@ -76,7 +84,6 @@ export class ChatService {
     return message;
   }
 
-  
   // async getOrCreateChatRoom(user: User, qr: QueryRunner, room?: number) {
   //   if (user.role === Role.admin) {
   //     if (!room) {
@@ -116,5 +123,4 @@ export class ChatService {
 
   //   return chatRoom;
   // }
-
 }
