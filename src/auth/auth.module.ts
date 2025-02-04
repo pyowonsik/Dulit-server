@@ -6,7 +6,7 @@ import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from 'src/user/entities/user.entity';
+import { User } from 'src/user/entity/user.entity';
 import { UserModule } from 'src/user/user.module';
 import { JwtModule } from '@nestjs/jwt';
 
@@ -20,5 +20,6 @@ import { JwtModule } from '@nestjs/jwt';
   ],
   controllers: [AuthController], // 컨트롤러 추가
   providers: [KakaoStrategy, AuthService],
+  exports: [AuthService, JwtModule],
 })
 export class AuthModule {}

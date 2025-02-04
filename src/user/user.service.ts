@@ -5,16 +5,19 @@ import {
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { User } from './entities/user.entity';
+import { User } from './entity/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
+import { ChatRoom } from 'src/chat/entity/chat-room.entity';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(ChatRoom)
+    private readonly chatRoomRepository: Repository<ChatRoom>,
     private readonly configService: ConfigService,
   ) {}
 
@@ -60,15 +63,15 @@ export class UserService {
     return `This action removes a #${id} user`;
   }
 
-  async matchCouple(kakaoId1: string, kakaoId2: string) {
+  async matchCouple(myId: string, partnerId: string) {
     const user1 = await this.userRepository.findOne({
-      where: { kakaoId: kakaoId1 },
-      relations: ['matchedUser'], // 'matchedUser' 관계를 포함
+      where: { kakaoId: myId },
+      relations: ['matchedUser'],
     });
 
     const user2 = await this.userRepository.findOne({
-      where: { kakaoId: kakaoId2 },
-      relations: ['matchedUser'], // 'matchedUser' 관계를 포함
+      where: { kakaoId: partnerId },
+      relations: ['matchedUser'],
     });
 
     if (!user1 || !user2) {
@@ -84,10 +87,14 @@ export class UserService {
 
     await this.userRepository.save([user1, user2]);
 
+    await this.chatRoomRepository.save({
+      users: [user1, user2],
+    });
+
     const user = await this.userRepository
       .createQueryBuilder('user')
       .innerJoinAndSelect('user.matchedUser', 'matchedUser')
-      .where('user.kakaoId = :kakaoId', { kakaoId: kakaoId1 })
+      .where('user.kakaoId = :kakaoId', { kakaoId: myId })
       .getOne();
 
     return user;

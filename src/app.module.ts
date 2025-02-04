@@ -10,11 +10,14 @@ import * as Joi from 'joi';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { envVariableKeys } from './common/const/env.const';
 import { UserModule } from './user/user.module';
-import { User } from './user/entities/user.entity';
+import { User } from './user/entity/user.entity';
 import { BearerTokenMiddleWare } from './auth/middleware/bearer-token.middlewear';
 import { JwtModule } from '@nestjs/jwt';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from './auth/guard/auth.guard';
+import { ChatModule } from './chat/chat.module';
+import { Chat } from './chat/entity/chat.entity';
+import { ChatRoom } from './chat/entity/chat-room.entity';
 
 @Module({
   imports: [
@@ -46,7 +49,7 @@ import { AuthGuard } from './auth/guard/auth.guard';
         username: configService.get<string>(envVariableKeys.dbUsername),
         password: configService.get<string>(envVariableKeys.dbPassword),
         database: configService.get<string>(envVariableKeys.dbDataBase),
-        entities: [User],
+        entities: [User, Chat, ChatRoom],
         synchronize: true,
       }),
       inject: [ConfigService],
@@ -54,6 +57,7 @@ import { AuthGuard } from './auth/guard/auth.guard';
     AuthModule,
     UserModule,
     JwtModule.register({}),
+    ChatModule,
   ],
   controllers: [],
   providers: [
