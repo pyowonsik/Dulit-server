@@ -4,9 +4,10 @@ import { UserController } from './user.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './entity/user.entity';
 import { ChatRoom } from 'src/chat/entity/chat-room.entity';
+import { Couple } from './entity/couple.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User,ChatRoom])],
+  imports: [TypeOrmModule.forFeature([User,ChatRoom,Couple])],
   controllers: [UserController],
   providers: [UserService],
   exports: [UserService],

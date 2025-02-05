@@ -7,9 +7,11 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entity/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { QueryRunner, Repository } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
 import { ChatRoom } from 'src/chat/entity/chat-room.entity';
+import { Couple } from './entity/couple.entity';
+import { CreateCoupleDto } from './dto/create-couple.dto';
 
 @Injectable()
 export class UserService {
@@ -18,6 +20,8 @@ export class UserService {
     private readonly userRepository: Repository<User>,
     @InjectRepository(ChatRoom)
     private readonly chatRoomRepository: Repository<ChatRoom>,
+    @InjectRepository(Couple)
+    private readonly coupleRepository: Repository<Couple>,
     private readonly configService: ConfigService,
   ) {}
 
@@ -62,48 +66,53 @@ export class UserService {
   remove(id: number) {
     return `This action removes a #${id} user`;
   }
-
-  async matchCouple(myId: string, partnerId: string) {
-    const user1 = await this.userRepository.findOne({
-      where: { kakaoId: myId },
-      relations: ['matchedUser'],
+  async matchCouple(createCoupleDto: CreateCoupleDto, qr: QueryRunner) {
+    const me = await qr.manager.findOne(User, {
+      where: { kakaoId: createCoupleDto.myId },
+      relations: ['couple'],
+    });
+    const partner = await qr.manager.findOne(User, {
+      where: { kakaoId: createCoupleDto.partnerId },
+      relations: ['couple'],
     });
 
-    const user2 = await this.userRepository.findOne({
-      where: { kakaoId: partnerId },
-      relations: ['matchedUser'],
-    });
-
-    if (!user1 || !user2) {
+    if (!me || !partner)
       throw new NotFoundException('사용자가 존재하지 않습니다.');
-    }
-
-    if (user1.matchedUser || user2.matchedUser) {
+    if (me.couple || partner.couple)
       throw new BadRequestException('이미 매칭된 사용자입니다.');
-    }
 
-    user1.matchedUser = user2;
-    user2.matchedUser = user1;
+    // 명시적 엔티티 생성 -> .save()는 객체 전체를 업데이트 하기 때문에 .create()후 .save() 권장
+    const newChatRoom = qr.manager.create(ChatRoom, {
+      users: [me, partner],
+    });
+    await qr.manager.save(newChatRoom);
 
-    
-    // 커플 테이블 생성 (커플 정보 , 데이트 관리 , 커뮤니티에서 사용할 게시물 관리)
-    // 커플 코드 등록후
-    // 간단한 커플 정보 (사귄날짜 , 특징 등등..) 저장 하면서 커플 테이블 생성
-    // 커플테이블에서 user1,user2 가져와서 matchedUser , chatRoom 생성 및 저장
-    
-    // matchedUser 저장
-    await this.userRepository.save([user1, user2]);
+    const newCouple = qr.manager.create(Couple, {
+      users: [me, partner],
+      chatRoom: newChatRoom,
+    });
+    await qr.manager.save(newCouple);
 
-    // chatRoom 생성 및 저장
-    await this.chatRoomRepository.save({
-      users: [user1, user2],
+    // const newChatRoom = await qr.manager.save(ChatRoom, {
+    //   users: [me, partner],
+    // });
+    // await qr.manager.save(Couple, {
+    //   users: [me, partner],
+    //   chatRoom: newChatRoom,
+    // });
+
+    // 쿼리 최적화
+    const user = await qr.manager.findOne(User, {
+      where: { kakaoId: createCoupleDto.myId },
+      relations: ['couple', 'chatRooms'],
     });
 
-    const user = await this.userRepository
-      .createQueryBuilder('user')
-      .innerJoinAndSelect('user.matchedUser', 'matchedUser')
-      .where('user.kakaoId = :kakaoId', { kakaoId: myId })
-      .getOne();
+    // const user = await qr.manager
+    //   .createQueryBuilder(User, 'user')
+    //   .leftJoinAndSelect('user.couple', 'couple')
+    //   .leftJoinAndSelect('user.chatRooms', 'chatRooms')
+    //   .where('user.kakaoId = :kakaoId', { kakaoId: createCoupleDto.myId })
+    //   .getOne();
 
     return user;
   }

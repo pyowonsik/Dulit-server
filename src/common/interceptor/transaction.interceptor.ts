@@ -15,6 +15,7 @@ export class TransactionInterceptor implements NestInterceptor {
     context: ExecutionContext,
     next: CallHandler<any>,
   ): Promise<Observable<any>> {
+    // 해당 엔드포인트로 요청이 오게되면, 트랜잭션 실행 준비.
     const req = context.switchToHttp().getRequest();
 
     const qr = this.dataSource.createQueryRunner();

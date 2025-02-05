@@ -12,6 +12,7 @@ export const QueryRunner = createParamDecorator(
     if (!request || !request.queryRunner) {
       throw new InternalServerErrorException('');
     }
+
     return request.queryRunner;
   },
 );

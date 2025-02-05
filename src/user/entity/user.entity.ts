@@ -6,10 +6,13 @@ import {
   Entity,
   JoinColumn,
   ManyToMany,
+  ManyToOne,
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { Couple } from './couple.entity';
+import { Post } from 'src/post/entities/post.entity';
 export enum Role {
   admin,
   user,
@@ -35,14 +38,20 @@ export class User extends BaseTable {
   })
   role: Role;
 
-  // 자기 자신과 일대일 관계 (매칭)
-  @OneToOne(() => User, { nullable: true })
-  @JoinColumn() // ForeignKey 역할을 하는 컬럼 (기본적으로 user_id를 생성)
-  matchedUser: User | null; // 매칭된 사용자
-
   @OneToMany(() => Chat, (chat) => chat.author)
   chats: Chat[];
 
   @ManyToMany(() => ChatRoom, (chatRoom) => chatRoom.users)
   chatRooms: ChatRoom[];
+
+  @ManyToOne(() => Couple, (couple) => couple.users)
+  @JoinColumn()
+  couple: Couple;
+
+  @OneToMany(() => Post, (post) => post.author)
+  posts : Post[];
+
 }
+
+// @JoinColumn() : OneToOne , ManyToOne
+// @JoinTable() : ManyToMany

@@ -18,6 +18,9 @@ import { AuthGuard } from './auth/guard/auth.guard';
 import { ChatModule } from './chat/chat.module';
 import { Chat } from './chat/entity/chat.entity';
 import { ChatRoom } from './chat/entity/chat-room.entity';
+import { Couple } from './user/entity/couple.entity';
+import { PostModule } from './post/post.module';
+import { Post } from './post/entities/post.entity';
 
 @Module({
   imports: [
@@ -49,7 +52,7 @@ import { ChatRoom } from './chat/entity/chat-room.entity';
         username: configService.get<string>(envVariableKeys.dbUsername),
         password: configService.get<string>(envVariableKeys.dbPassword),
         database: configService.get<string>(envVariableKeys.dbDataBase),
-        entities: [User, Chat, ChatRoom],
+        entities: [User, Chat, ChatRoom,Couple,Post],
         synchronize: true,
       }),
       inject: [ConfigService],
@@ -58,6 +61,7 @@ import { ChatRoom } from './chat/entity/chat-room.entity';
     UserModule,
     JwtModule.register({}),
     ChatModule,
+    PostModule,
   ],
   controllers: [],
   providers: [

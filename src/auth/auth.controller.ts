@@ -28,9 +28,9 @@ export class AuthController {
     };
   }
 
-  // @Post('token/test')
-  // // @Public()
-  // async tokenTest(@Request() req: any) {
-  //   return 'Success';
-  // }
+  @Post('token/test')
+  // @Public()
+  async tokenTest(@Request() req: any) {
+    return 'Success';
+  }
 }

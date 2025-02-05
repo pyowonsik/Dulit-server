@@ -7,7 +7,6 @@ import { User } from 'src/user/entity/user.entity';
 import { QueryRunner, Repository } from 'typeorm';
 import { CreateChatDto } from './create-chat.dto';
 import { plainToClass } from 'class-transformer';
-import { WsException } from '@nestjs/websockets';
 
 @Injectable()
 export class ChatService {
@@ -56,7 +55,8 @@ export class ChatService {
 
     const chatRoom = await qr.manager
       .createQueryBuilder(ChatRoom, 'chatRoom')
-      .innerJoinAndSelect('chatRoom.users', 'user')
+      .leftJoinAndSelect('chatRoom.users', 'user')
+      .leftJoinAndSelect('chatRoom.chats', 'chat')
       .where('user.id = :userId', { userId: payload.sub })
       .getOne();
 
@@ -66,17 +66,11 @@ export class ChatService {
       chatRoom,
     });
 
-    // chatRoom.users.forEach((roomUser) => {
-    //   const client = this.connectedClients.get(roomUser.id);
-    //   if (client) {
-    //     client
-    //       .to(chatRoom.id.toString())
-    //       .emit('newMessage', plainToClass(Chat, msgModel));
-    //   }
-    // });
-
     const client = this.connectedClients.get(user.id);
-    // chatRooms.id의 client(socket)으로 메세지 emit
+
+    // chat이 비어있을때 roomCreated 처리 가능
+
+    // chatRooms.id의 'newMessage'스트림으로 client(socket)으로 메세지 emit
     client
       .to(chatRoom.id.toString())
       .emit('newMessage', plainToClass(Chat, msgModel));

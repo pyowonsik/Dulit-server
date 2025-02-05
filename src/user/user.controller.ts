@@ -7,10 +7,16 @@ import {
   Param,
   Delete,
   ParseIntPipe,
+  UseInterceptors,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { TransactionInterceptor } from 'src/common/interceptor/transaction.interceptor';
+import { QueryRunner as QR } from 'typeorm';
+import { QueryRunner } from 'src/common/decorator/query-runner.decorator';
+import { CreateCoupleDto } from './dto/create-couple.dto';
+import { Request } from 'express';
 
 @Controller('user')
 export class UserController {
@@ -45,8 +51,11 @@ export class UserController {
   }
 
   @Post('/match')
-  // 트랜잭션 적용 필요
-  async matchCouple(@Body() body: { myId: string; partnerId: string }) {
-    return this.userService.matchCouple(body.myId, body.partnerId);
+  @UseInterceptors(TransactionInterceptor)
+  async matchCouple(
+    @Body() createCoupleDto: CreateCoupleDto,
+    @QueryRunner() qr: QR, // 트랜잭션 미적용을 감지하기 위한 데코레이터
+  ) {
+    return this.userService.matchCouple(createCoupleDto, qr);
   }
 }
