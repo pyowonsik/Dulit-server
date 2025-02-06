@@ -26,5 +26,5 @@ export class CreatePostDto {
   @IsArray()
   @ArrayNotEmpty()
   @IsString({ each: true })
-  photoFilePath: string[];
+  filePaths: string[];
 }

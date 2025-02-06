@@ -1,3 +1,4 @@
+import { Transform } from 'class-transformer';
 import { Couple } from 'src/user/entity/couple.entity';
 import { User } from 'src/user/entity/user.entity';
 import {
@@ -11,7 +12,7 @@ import {
 } from 'typeorm';
 
 @Entity()
-    export class Post extends BaseEntity {
+export class Post extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -22,8 +23,11 @@ import {
   description: string;
 
   // PostgreSQL의 text[] 배열 타입으로 설정
-  @Column("text", { array: true })
-  photoFilePath: string[]
+  @Column('text', { array: true })
+  @Transform(({ value }) =>
+    value.map((filePath) => `http://localhost:3000/${filePath}`),
+  )
+  filePaths: string[];
 
   // User , Couple
   @ManyToOne(() => User, (user) => user.posts)
