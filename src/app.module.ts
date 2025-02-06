@@ -24,6 +24,8 @@ import { Post } from './post/entities/post.entity';
 import { CommonModule } from './common/common.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { PlanModule } from './plan/plan.module';
+import { Plan } from './plan/entities/plan.entity';
 
 @Module({
   imports: [
@@ -55,7 +57,7 @@ import { join } from 'path';
         username: configService.get<string>(envVariableKeys.dbUsername),
         password: configService.get<string>(envVariableKeys.dbPassword),
         database: configService.get<string>(envVariableKeys.dbDataBase),
-        entities: [User, Chat, ChatRoom, Couple, Post],
+        entities: [User, Chat, ChatRoom, Couple, Post,Plan],
         synchronize: true,
       }),
       inject: [ConfigService],
@@ -72,6 +74,7 @@ import { join } from 'path';
     ChatModule,
     PostModule,
     CommonModule,
+    PlanModule,
   ],
   controllers: [],
   providers: [

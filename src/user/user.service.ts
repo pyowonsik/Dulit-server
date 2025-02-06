@@ -66,6 +66,7 @@ export class UserService {
   remove(id: number) {
     return `This action removes a #${id} user`;
   }
+  
   async matchCouple(createCoupleDto: CreateCoupleDto, qr: QueryRunner) {
     const me = await qr.manager.findOne(User, {
       where: { kakaoId: createCoupleDto.myId },
@@ -93,26 +94,11 @@ export class UserService {
     });
     await qr.manager.save(newCouple);
 
-    // const newChatRoom = await qr.manager.save(ChatRoom, {
-    //   users: [me, partner],
-    // });
-    // await qr.manager.save(Couple, {
-    //   users: [me, partner],
-    //   chatRoom: newChatRoom,
-    // });
-
     // 쿼리 최적화
     const user = await qr.manager.findOne(User, {
       where: { kakaoId: createCoupleDto.myId },
       relations: ['couple', 'chatRooms'],
     });
-
-    // const user = await qr.manager
-    //   .createQueryBuilder(User, 'user')
-    //   .leftJoinAndSelect('user.couple', 'couple')
-    //   .leftJoinAndSelect('user.chatRooms', 'chatRooms')
-    //   .where('user.kakaoId = :kakaoId', { kakaoId: createCoupleDto.myId })
-    //   .getOne();
 
     return user;
   }

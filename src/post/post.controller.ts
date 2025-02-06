@@ -44,11 +44,13 @@ export class PostController {
   }
 
   @Patch(':id')
+  @UseInterceptors(TransactionInterceptor)
   async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updatePostDto: UpdatePostDto,
+    @QueryRunner() qr: QR, // 트랜잭션 미적용을 감지하기 위한 데코레이터
   ) {
-    return this.postService.update(id, updatePostDto);
+    return this.postService.update(id, updatePostDto,qr);
   }
 
   @Delete(':id')

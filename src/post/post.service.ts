@@ -13,7 +13,7 @@ import { Couple } from 'src/user/entity/couple.entity';
 import { Post } from './entities/post.entity';
 import { join } from 'path';
 import { rename } from 'fs/promises';
-import { existsSync, mkdirSync } from 'fs';
+import { existsSync, mkdirSync, unlinkSync } from 'fs';
 
 @Injectable()
 export class PostService {
@@ -101,11 +101,70 @@ export class PostService {
     return post;
   }
 
-  async update(id: number, updatePostDto: UpdatePostDto) {
-    return `This action updates a #${id} post`;
+  async update(id: number, updatePostDto: UpdatePostDto, qr: QueryRunner) {
+    // 수정 기능 .
+    // author가 현재 post의 author일 경우 .
+    // title , description , filePaths
+
+    const post = await qr.manager.findOne(Post, {
+      where: {
+        id,
+      },
+    });
+
+    if (!post) {
+      throw new NotFoundException('존재하지 않는 POST의 ID 입니다.');
+    }
+
+    // movie 생성시, temp폴더의 movieFile을 movie폴더로 이동 시킨다.
+    const tempFolder = join('public', 'temp');
+    const filesFolder = join('public', 'files');
+
+    // 1. public/files의 post.filePaths 삭제
+    post.filePaths.forEach((file) => {
+      const filePath = join(filesFolder, file);
+      if (existsSync(filePath)) {
+        unlinkSync(filePath);
+      }
+    });
+
+    // 2. 파일 이동 (병렬 처리)
+    await Promise.all(
+      updatePostDto.filePaths.map(
+        async (file) =>
+          await rename(
+            join(process.cwd(), tempFolder, file),
+            join(process.cwd(), filesFolder, file),
+          ),
+      ),
+    );
+
+    // 3. post의 filePaths 수정
+    await qr.manager.update(
+      Post,
+      { id },
+      { ...updatePostDto, filePaths: updatePostDto.filePaths },
+    );
+
+    const newPost = await qr.manager.findOne(Post, { where: { id } });
+
+    return newPost;
   }
 
   async remove(id: number) {
-    return `This action removes a #${id} post`;
+    // post 내부에 중첩된 삭제해야할 내용이 없으므로 post만 삭제하면됨.
+    const post = await this.postRepository.findOne({
+      where: {
+        id,
+      },
+    });
+
+    if (!post) {
+      throw new NotFoundException('존재하지 않는 POST의 ID 입니다.');
+    }
+
+    await this.postRepository.delete(post.id);
+
+    return id;
   }
 }
