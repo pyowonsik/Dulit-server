@@ -78,8 +78,7 @@ export class PostService {
 
     await qr.manager.save(Post, post);
 
-    // 현재 posts 조회해야됨.
-    return await qr.manager.find(Post);
+    return post;
   }
 
   async findAll() {

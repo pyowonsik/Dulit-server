@@ -78,7 +78,7 @@ export class ChatService {
     return message;
   }
 
-  // async getOrCreateChatRoom(user: User, qr: QueryRunner, room?: number) {
+  // async getOrCreateChatRoom(user: sUser, qr: QueryRunner, room?: number) {
   //   if (user.role === Role.admin) {
   //     if (!room) {
   //       throw new WsException('어드민은 room 값을 필수로 제공해야합니다.');

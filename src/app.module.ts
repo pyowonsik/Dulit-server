@@ -26,6 +26,8 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { PlanModule } from './plan/plan.module';
 import { Plan } from './plan/entities/plan.entity';
+import { ScheduleModule } from '@nestjs/schedule';
+import { NotificationModule } from './notification/notification.module';
 
 @Module({
   imports: [
@@ -68,6 +70,8 @@ import { Plan } from './plan/entities/plan.entity';
       rootPath: join(process.cwd(), 'public'),
       serveRoot: '/public/',
     }),
+    // Cron 작업 설정정
+    ScheduleModule.forRoot(),
     AuthModule,
     UserModule,
     JwtModule.register({}),
@@ -75,6 +79,7 @@ import { Plan } from './plan/entities/plan.entity';
     PostModule,
     CommonModule,
     PlanModule,
+    NotificationModule,
   ],
   controllers: [],
   providers: [

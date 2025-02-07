@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  Request,
   ParseIntPipe,
   UseInterceptors,
 } from '@nestjs/common';
@@ -22,12 +23,18 @@ export class PlanController {
   constructor(private readonly planService: PlanService) {}
 
   @Post()
-  create(@Body() createPlanDto: CreatePlanDto) {
-    return this.planService.create(createPlanDto);
+  @UseInterceptors(TransactionInterceptor)
+  async create(
+    @Request() req: any,
+    @QueryRunner() qr: QR, // 트랜잭션 미적용을 감지하기 위한 데코레이터
+    @Body() createPlanDto: CreatePlanDto,
+  ) {    
+    const userId = req.user.sub;
+    return this.planService.create(userId , createPlanDto,qr);
   }
 
   @Get()
-  findAll() {
+  async findAll() {
     return this.planService.findAll();
   }
 
@@ -35,7 +42,7 @@ export class PlanController {
   async findOne(@Param('id', ParseIntPipe) id: number) {
     return this.planService.findOne(id);
   }
-  
+
   @Patch(':id')
   @UseInterceptors(TransactionInterceptor)
   async update(
@@ -43,7 +50,7 @@ export class PlanController {
     @Body() updatePlanDto: UpdatePlanDto,
     @QueryRunner() qr: QR, // 트랜잭션 미적용을 감지하기 위한 데코레이터
   ) {
-    return this.planService.update(id, updatePlanDto);
+    return this.planService.update(id, updatePlanDto,qr);
   }
 
   @Delete(':id')

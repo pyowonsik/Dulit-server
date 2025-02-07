@@ -5,7 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Couple } from 'src/user/entity/couple.entity';
 import { Plan } from './entities/plan.entity';
 import { User } from 'src/user/entity/user.entity';
-import { Repository } from 'typeorm';
+import { In, QueryRunner, Repository } from 'typeorm';
 
 @Injectable()
 export class PlanService {
@@ -17,8 +17,40 @@ export class PlanService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
   ) {}
-  async create(createPlanDto: CreatePlanDto) {
-    return 'This action adds a new plan';
+  async create(id: number, createPlanDto: CreatePlanDto, qr: QueryRunner) {
+    // createDto : topic , location , time
+    // topic : 발산역 데이트
+    // location : 서울특별시 강서구 공항대로 지하267 (마곡동 727-1496)
+    // time : 14:00
+    // find : couple , author
+
+    const couple = await qr.manager.findOne(Couple, {
+      where: {
+        users: {
+          id: In([id]),
+        },
+      },
+    });
+
+    if (!couple) {
+      throw new NotFoundException('존재하지 않는 COUPLE의 ID 입니다.');
+    }
+
+    const author = await qr.manager.findOne(User, { where: { id } });
+
+    if (!author) {
+      throw new NotFoundException('존재하지 않는 USER의 ID 입니다.');
+    }
+
+    const plan = await qr.manager.create(Plan, {
+      ...createPlanDto,
+      author,
+      couple,
+    });
+
+    await qr.manager.save(Plan, plan);
+
+    return plan;
   }
 
   async findAll() {
@@ -40,8 +72,36 @@ export class PlanService {
     return plan;
   }
 
-  async update(id: number, updatePlanDto: UpdatePlanDto) {
-    return `This action updates a #${id} plan`;
+  async update(id: number, updatePlanDto: UpdatePlanDto, qr: QueryRunner) {
+    // updateDto : topic? , location? , time?
+    // topic : 발산역 데이트
+    // location : 서울특별시 강서구 공항대로 지하267 (마곡동 727-1496)
+    // time : 14:00
+    // find : couple , author
+
+    // const testObj = await this.userRepository
+    //   .createQueryBuilder('user')
+    //   .leftJoinAndSelect('user.couple', 'couple')
+    //   .leftJoinAndSelect('user.posts', 'posts')
+    //   .leftJoinAndSelect('user.plans', 'plans')
+    //   .where('user.id = :userId', { userId: 1 })
+    //   .getOne();
+
+    const plan = qr.manager.findOne(Plan, {
+      where: {
+        id,
+      },
+    });
+
+    if (!plan) {
+      throw new NotFoundException('존재하지 않는 PLAN의 ID 입니다.');
+    }
+
+    await qr.manager.update(Plan, id, updatePlanDto);
+
+    const newPlan = await qr.manager.findOne(Plan, { where: { id } });
+
+    return newPlan;
   }
 
   async remove(id: number) {

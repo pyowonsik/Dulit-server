@@ -15,6 +15,11 @@ export class CreatePostDto {
   @IsString()
   description: string;
 
+  @IsArray()
+  @ArrayNotEmpty()
+  @IsString({ each: true })
+  filePaths: string[];
+
   //   @IsNotEmpty()
   //   @IsNumber()
   //   authorId: number;
@@ -22,9 +27,4 @@ export class CreatePostDto {
   //   @IsNotEmpty()
   //   @IsNumber()
   //   coupleId: number;
-
-  @IsArray()
-  @ArrayNotEmpty()
-  @IsString({ each: true })
-  filePaths: string[];
 }

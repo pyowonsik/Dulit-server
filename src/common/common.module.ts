@@ -7,6 +7,10 @@ import { v4 } from 'uuid';
 import { join } from 'path';
 import { diskStorage } from 'multer';
 import { Post } from 'src/post/entities/post.entity';
+import { TaskService } from './task.service';
+import { Plan } from 'src/plan/entities/plan.entity';
+import { NotificationModule } from 'src/notification/notification.module';
+import { Couple } from 'src/user/entity/couple.entity';
 
 @Module({
   imports: [
@@ -22,11 +26,11 @@ import { Post } from 'src/post/entities/post.entity';
         },
       }),
     }),
-
-    TypeOrmModule.forFeature([Post]),
+    TypeOrmModule.forFeature([Post, Plan,Couple]),
+    NotificationModule,
   ],
   controllers: [CommonController],
-  providers: [CommonService],
+  providers: [CommonService, TaskService],
   exports: [CommonService],
 })
 export class CommonModule {}
