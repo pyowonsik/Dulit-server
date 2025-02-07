@@ -28,9 +28,9 @@ export class AuthController {
     };
   }
 
-  @Post('token/test')
+  @Get('token/me')
   // @Public()
-  async tokenTest(@Request() req: any) {
-    return 'Success';
+  async getMe(@Request() req: any) {
+    return this.authService.getMe(req.sub);
   }
 }

@@ -39,9 +39,6 @@ export class User extends BaseTable {
   })
   role: Role;
 
-  @OneToMany(() => Chat, (chat) => chat.author)
-  chats: Chat[];
-
   @ManyToMany(() => ChatRoom, (chatRoom) => chatRoom.users)
   chatRooms: ChatRoom[];
 
@@ -49,10 +46,13 @@ export class User extends BaseTable {
   @JoinColumn()
   couple: Couple;
 
-  @OneToMany(() => Post, (post) => post.author)
+  @OneToMany(() => Chat, (chat) => chat.author, { onDelete: 'CASCADE' })
+  chats: Chat[];
+
+  @OneToMany(() => Post, (post) => post.author, { onDelete: 'CASCADE' })
   posts: Post[];
 
-  @OneToMany(() => Plan, (plan) => plan.couple)
+  @OneToMany(() => Plan, (plan) => plan.couple, { onDelete: 'CASCADE' })
   plans: Plan[];
 }
 

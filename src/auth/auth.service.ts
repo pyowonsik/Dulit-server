@@ -1,5 +1,10 @@
 // auth.service.ts
-import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Role, User } from 'src/user/entity/user.entity';
 import { Repository } from 'typeorm';
@@ -14,6 +19,8 @@ export class AuthService {
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
   ) {}
 
   async kakaoLogin(req) {
@@ -97,5 +104,19 @@ export class AuthService {
         expiresIn: isRefresh ? '24h' : '24h',
       },
     );
+  }
+
+  async getMe(userId: number) {
+    const user = await this.userRepository.findOne({
+      where: {
+        id: userId,
+      },
+    });
+
+    if (!user) {
+      throw new NotFoundException('존재하지 않는 유저의 ID 입니다.');
+    }
+
+    return user;
   }
 }

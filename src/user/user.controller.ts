@@ -37,17 +37,21 @@ export class UserController {
     return this.userService.findOne(id);
   }
 
-  @Patch(':id')
-  update(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() updateUserDto: UpdateUserDto,
-  ) {
-    return this.userService.update(id, updateUserDto);
-  }
+  // @Patch(':id')
+  // update(
+  //   @Param('id', ParseIntPipe) id: number,
+  //   @Body() updateUserDto: UpdateUserDto,
+  // ) {
+  //   return this.userService.update(id, updateUserDto);
+  // }
 
   @Delete(':id')
-  remove(@Param('id', ParseIntPipe) id: number) {
-    return this.userService.remove(id);
+  @UseInterceptors(TransactionInterceptor)
+  remove(
+    @Param('id', ParseIntPipe) id: number,
+    @QueryRunner() qr: QR, // 트랜잭션 미적용을 감지하기 위한 데코레이터
+  ) {
+    return this.userService.remove(id,qr);
   }
 
   @Post('/match')
