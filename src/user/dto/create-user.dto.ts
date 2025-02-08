@@ -1,12 +1,18 @@
-import { IsEmail, IsString } from 'class-validator';
+import { IsEmail, IsEnum, IsString } from 'class-validator';
+import { SocialProvider } from '../entity/user.entity';
 
 export class CreateUserDto {
-    @IsString()
-    kakaoId: string;
-  
-    @IsString()
-    email: string;
+  @IsString()
+  socialId: string;
 
-    @IsString()
-    name: string;
+  @IsString()
+  email: string;
+
+  @IsString()
+  name: string;
+
+  @IsEnum(SocialProvider, {
+    message: 'provider must be one of KAKAO, APPLE, NAVER',
+  })
+  socialProvider: SocialProvider;
 }

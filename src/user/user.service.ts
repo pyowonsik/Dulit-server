@@ -27,14 +27,15 @@ export class UserService {
 
   async create(createUserDto: CreateUserDto) {
     let user = await this.userRepository.findOne({
-      where: { kakaoId: createUserDto.kakaoId },
+      where: { socialId: createUserDto.socialId },
     });
 
     if (!user) {
       user = await this.userRepository.save({
-        kakaoId: createUserDto.kakaoId,
+        socialId: createUserDto.socialId,
         email: createUserDto.email,
         name: createUserDto.name,
+        socialProvider: createUserDto.socialProvider,
       });
     }
 
@@ -65,7 +66,7 @@ export class UserService {
   //   return `This action updates a #${id} user`;
   // }
 
-  // 트랜잭션 적용 : 삭제 과정중 실패시 쿼리가 실행 되면 안됨 
+  // 트랜잭션 적용 : 삭제 과정중 실패시 쿼리가 실행 되면 안됨
   async remove(id: number, qr: QueryRunner) {
     const user = await qr.manager.findOne(User, {
       where: { id },
@@ -107,11 +108,11 @@ export class UserService {
 
   async matchCouple(createCoupleDto: CreateCoupleDto, qr: QueryRunner) {
     const me = await qr.manager.findOne(User, {
-      where: { kakaoId: createCoupleDto.myId },
+      where: { socialId: createCoupleDto.myId },
       relations: ['couple'],
     });
     const partner = await qr.manager.findOne(User, {
-      where: { kakaoId: createCoupleDto.partnerId },
+      where: { socialId: createCoupleDto.partnerId },
       relations: ['couple'],
     });
 
@@ -134,7 +135,7 @@ export class UserService {
 
     // 쿼리 최적화
     const user = await qr.manager.findOne(User, {
-      where: { kakaoId: createCoupleDto.myId },
+      where: { socialId: createCoupleDto.myId },
       relations: ['couple', 'chatRooms'],
     });
 

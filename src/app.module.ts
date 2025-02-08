@@ -45,9 +45,12 @@ import { NotificationModule } from './notification/notification.module';
         HASH_ROUNDS: Joi.number().required(),
         REFRESH_TOKEN_SECRET: Joi.string().required(),
         ACCESS_TOKEN_SECRET: Joi.string().required(),
-        CLIENT_ID: Joi.string().required(),
-        CLIENT_SECRET: Joi.string().required(),
-        CALLBACK_URL: Joi.string().required(),
+        KAKAO_CLIENT_ID: Joi.string().required(),
+        KAKAO_CLIENT_SECRET: Joi.string().required(),
+        KAKAO_CALLBACK_URL: Joi.string().required(),
+        NAVER_CLIENT_ID: Joi.string().required(),
+        NAVER_CLIENT_SECRET: Joi.string().required(),
+        NAVER_CALLBACK_URL: Joi.string().required(),
       }),
     }),
     // TypeORM 적용
@@ -59,12 +62,12 @@ import { NotificationModule } from './notification/notification.module';
         username: configService.get<string>(envVariableKeys.dbUsername),
         password: configService.get<string>(envVariableKeys.dbPassword),
         database: configService.get<string>(envVariableKeys.dbDataBase),
-        entities: [User, Chat, ChatRoom, Couple, Post,Plan],
+        entities: [User, Chat, ChatRoom, Couple, Post, Plan],
         synchronize: true,
       }),
       inject: [ConfigService],
     }),
-    // files 내부 파일 접근 : public 요청시 반드시 /public/ 붙여서 요청해야함. 
+    // files 내부 파일 접근 : public 요청시 반드시 /public/ 붙여서 요청해야함.
     // -> files/uuid~~ 로 요청하게 되면 url이 겹치기 때문에(Not Found Exception 발생) public/files/uuid ~~ 로 요청하도록 하기 위함
     ServeStaticModule.forRoot({
       rootPath: join(process.cwd(), 'public'),

@@ -1,4 +1,12 @@
-import { Controller, Get, UseGuards, Request, Res, Post } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  UseGuards,
+  Request,
+  Res,
+  Post,
+  Req,
+} from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { Public } from './decorator/public.decorator';
@@ -7,6 +15,7 @@ import { Public } from './decorator/public.decorator';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  // kakao 로그인
   @Get('kakao')
   @Public()
   @UseGuards(AuthGuard('kakao'))
@@ -17,6 +26,19 @@ export class AuthController {
   @UseGuards(AuthGuard('kakao'))
   async kakaoLoginCallback(@Request() req) {
     return this.authService.kakaoLogin(req);
+  }
+
+  // naver 로그인
+  @Get('naver')
+  @Public()
+  @UseGuards(AuthGuard('naver'))
+  async naverLogin() {}
+
+  @Get('naver/callback')
+  @Public()
+  @UseGuards(AuthGuard('naver'))
+  async naverAuthCallback(@Request() req) {
+    return this.authService.naverLogin(req);
   }
 
   @Post('token/access')

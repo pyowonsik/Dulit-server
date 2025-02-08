@@ -6,7 +6,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Role, User } from 'src/user/entity/user.entity';
+import { Role, SocialProvider, User } from 'src/user/entity/user.entity';
 import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -27,9 +27,31 @@ export class AuthService {
     const kakaoUser = req.user.info;
 
     const user = await this.userService.create({
-      kakaoId: kakaoUser.kakaoId,
+      socialId: kakaoUser.socialId,
       email: kakaoUser.email,
       name: kakaoUser.name,
+      socialProvider: SocialProvider.kakao,
+    });
+
+    // JWT 토큰 생성
+    // midleware나 guard에서 토큰이 유효한지 검증
+    return {
+      accessToken: await this.issueToken(user, false),
+      refreshToken: await this.issueToken(user, true),
+    };
+  }
+
+  // appleLogin()
+
+  // naverLogin()
+  async naverLogin(req) {
+    const naverUser = req.user.info;
+
+    const user = await this.userService.create({
+      socialId: naverUser.socialId,
+      email: naverUser.email,
+      name: naverUser.name,
+      socialProvider: SocialProvider.naver,
     });
 
     // JWT 토큰 생성
@@ -81,7 +103,7 @@ export class AuthService {
 
   // user 정보를 통해 accessToken , refreshToken 발급
   async issueToken(
-    user: { id: number; role: Role; kakaoId: string },
+    user: { id: number; role: Role; socialId: string },
     isRefresh: boolean,
   ) {
     // 환경변수(.env) ACCESS_TOKEN_SECRET,REFRESH_TOKEN_SECRET 저장
@@ -96,7 +118,7 @@ export class AuthService {
       {
         sub: user.id,
         role: user.role,
-        kakaoId: user.kakaoId,
+        socialId: user.socialId,
         type: isRefresh ? 'refresh' : 'access',
       },
       {

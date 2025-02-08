@@ -8,9 +8,13 @@ const dbDataBase = 'DB_DATABASE';
 const hashRounds = 'HASH_ROUNDS';
 const refreshTokenSecret = 'REFRESH_TOKEN_SECRET';
 const accessTokenSecret = 'ACCESS_TOKEN_SECRET';
-const clientId = 'CLIENT_ID';
-const clientSecret = 'CLIENT_SECRET';
-const callbackUrl = 'CALLBACK_URL';
+const kakaoClientId = 'KAKAO_CLIENT_ID';
+const kakaoClientSecret = 'KAKAO_CLIENT_SECRET';
+const kakaoCallbackUrl = 'KAKAO_CALLBACK_URL';
+
+const naverClientId = 'NAVER_CLIENT_ID';
+const naverClientSecret = 'NAVER_CLIENT_SECRET';
+const naverCallbackUrl = 'NAVER_CALLBACK_URL';
 export const envVariableKeys = {
   env,
   dbType,
@@ -22,7 +26,10 @@ export const envVariableKeys = {
   hashRounds,
   refreshTokenSecret,
   accessTokenSecret,
-  clientId,
-  clientSecret,
-  callbackUrl
+  kakaoClientId,
+  kakaoClientSecret,
+  kakaoCallbackUrl,
+  naverClientId,
+  naverClientSecret,
+  naverCallbackUrl,
 };

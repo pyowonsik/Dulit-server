@@ -19,16 +19,29 @@ export enum Role {
   user,
 }
 
+export enum SocialProvider {
+  kakao = 'kakao',
+  apple = 'apple',
+  naver = 'naver',
+  unknown = 'unknwon',
+}
+
 @Entity()
 export class User extends BaseTable {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column({ unique: true })
-  kakaoId: string;
+  socialId: string;
 
   @Column()
   email: string;
+
+  @Column({
+    enum: SocialProvider,
+    default: SocialProvider.unknown,
+  })
+  socialProvider: SocialProvider;
 
   @Column()
   name: string;
