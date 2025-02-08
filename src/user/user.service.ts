@@ -12,6 +12,9 @@ import { ConfigService } from '@nestjs/config';
 import { ChatRoom } from 'src/chat/entity/chat-room.entity';
 import { Couple } from './entity/couple.entity';
 import { CreateCoupleDto } from './dto/create-couple.dto';
+import { Plan } from 'src/plan/entities/plan.entity';
+import { Post } from 'src/post/entities/post.entity';
+import { Chat } from 'src/chat/entity/chat.entity';
 
 @Injectable()
 export class UserService {
@@ -77,25 +80,39 @@ export class UserService {
       throw new NotFoundException('존재하지 않는 유저의 ID 입니다.');
     }
 
-    // 1. 유저가 속한 chatRoom 삭제
+    // 1. 유저가 속한 chatRoom - chat 삭제
     if (user.chatRooms.length > 0) {
+      // 채팅방 - 채팅 사이 자식 관계 지우기
+
+      await qr.manager.delete(Chat, {
+        chatRoom: user.chatRooms[0],
+      });
+
       await qr.manager.delete(ChatRoom, user.chatRooms[0].id);
     }
 
-    // 2. 커플 정보 가져오기 및 커플 관계 해제
+    // 2. 유저가 속한 couple - plan , post 삭제
     if (user.couple) {
+      // couple - plan , post 사이 자식 관계 지우기
+
       const couple = await qr.manager.findOne(Couple, {
         where: { id: user.couple.id },
         relations: ['users'],
       });
 
-      // (커플 테이블에서 해당 커플 삭제 및 유저 테이블에서 커플 관계 해제)
       if (couple?.users) {
         await Promise.all(
           couple.users.map((user) =>
             qr.manager.update(User, user.id, { couple: null }),
           ),
         );
+        await qr.manager.delete(Plan, {
+          couple: user.couple,
+        });
+        await qr.manager.delete(Post, {
+          couple: user.couple,
+        });
+
         await qr.manager.delete(Couple, couple.id);
       }
     }
@@ -106,7 +123,7 @@ export class UserService {
     return id;
   }
 
-  async matchCouple(createCoupleDto: CreateCoupleDto, qr: QueryRunner) {
+  async connectCouple(createCoupleDto: CreateCoupleDto, qr: QueryRunner) {
     const me = await qr.manager.findOne(User, {
       where: { socialId: createCoupleDto.myId },
       relations: ['couple'],
@@ -140,5 +157,55 @@ export class UserService {
     });
 
     return user;
+  }
+
+  async disConnectCouple(id: number, qr: QueryRunner) {
+    const user = await qr.manager.findOne(User, {
+      where: { id },
+      relations: ['chatRooms', 'couple'],
+    });
+
+    if (!user) {
+      throw new NotFoundException('존재하지 않는 유저의 ID 입니다.');
+    }
+
+    // 1. 유저가 속한 chatRoom - chat 삭제
+    if (user.chatRooms.length > 0) {
+      // 채팅방 - 채팅 사이 자식 관계 지우기
+
+      await qr.manager.delete(Chat, {
+        chatRoom: user.chatRooms[0],
+      });
+
+      await qr.manager.delete(ChatRoom, user.chatRooms[0].id);
+    }
+
+    // 2. 유저가 속한 couple - plan , post 삭제
+    if (user.couple) {
+      // couple - plan , post 사이 자식 관계 지우기
+
+      const couple = await qr.manager.findOne(Couple, {
+        where: { id: user.couple.id },
+        relations: ['users'],
+      });
+
+      if (couple?.users) {
+        await Promise.all(
+          couple.users.map((user) =>
+            qr.manager.update(User, user.id, { couple: null }),
+          ),
+        );
+        await qr.manager.delete(Plan, {
+          couple: user.couple,
+        });
+        await qr.manager.delete(Post, {
+          couple: user.couple,
+        });
+
+        await qr.manager.delete(Couple, couple.id);
+      }
+    }
+
+    return id;
   }
 }

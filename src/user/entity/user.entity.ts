@@ -59,17 +59,17 @@ export class User extends BaseTable {
   @JoinColumn()
   couple: Couple;
 
-  @OneToMany(() => Chat, (chat) => chat.author, { onDelete: 'CASCADE' })
+  @OneToMany(() => Chat, (chat) => chat.author)
   chats: Chat[];
 
-  @OneToMany(() => Post, (post) => post.author, { onDelete: 'CASCADE' })
+  @OneToMany(() => Post, (post) => post.author)
   posts: Post[];
 
-  @OneToMany(() => Plan, (plan) => plan.couple, { onDelete: 'CASCADE' })
+  @OneToMany(() => Plan, (plan) => plan.couple)
   plans: Plan[];
 }
 
-// @JoinColumn() : OneToOne , ManyToOne  -> tableId
+// @JoinColumn() : OneToOne , ManyToOne -> tableId
 // @JoinTable() : ManyToMany
 
 // CASCADE -> 데이터 수정 , 삭제 , 생성시 연관되어 있는 다른 테이블에 영향을 끼칠수 있는데
@@ -79,7 +79,10 @@ export class User extends BaseTable {
 // -> 예를 들면 Movie - MovieDetail 의 부모 - 자식 관계에서 Movie 테이블에서 movie를
 // MovieDetail 테이블에서 movieDetail을 삭제 해야 한다.
 
-// 명시적 작업 필요 유무
-// (생성)	필요 없음 Cascade 설정이 없는 경우에도 연관 관계만 잘 설정되면 부모-자식 관계는 자동으로 연결됩니다.
-// (수정)	필    요 양방향 관계에서 한쪽 수정 후 다른쪽 객체를 명시적으로 수정해야 할 수 있습니다.
-// (삭제)	필    요 Cascade가 없으면 부모-자식 관계가 있을 때 양쪽 객체를 명시적으로 삭제해야 할 수 있습니다.
+// 트랜잭션이나 쿼리 빌더 내에서 해당 옵션이 자동으로 적용되지는 않습니다.
+// 즉, 트랜잭션이나 쿼리 빌더를 사용할 때 onDelete: 'CASCADE' 옵션은 자동으로 동작하지 않습니다.
+// 자식 엔티티 삭제를 명시적으로 처리해야 합니다.
+
+// 일단 트랜잭션 , 쿼리 빌더 사용시 삭제 cascade 가 적용이 안됨, 따라서 수정,삭제시 오류 처리하려면
+// 1. 명시적 삭제를 하는 방법과
+// 2.onDelete : 'cascade' 옵션을 사용하면서  .relation(Movie, 'genres').of(movieId) 이런식으로 관계를 만들어줘야함.

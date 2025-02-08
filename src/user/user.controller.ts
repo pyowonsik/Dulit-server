@@ -51,15 +51,24 @@ export class UserController {
     @Param('id', ParseIntPipe) id: number,
     @QueryRunner() qr: QR, // 트랜잭션 미적용을 감지하기 위한 데코레이터
   ) {
-    return this.userService.remove(id,qr);
+    return this.userService.remove(id, qr);
   }
 
-  @Post('/match')
+  @Post('/connect')
   @UseInterceptors(TransactionInterceptor)
-  async matchCouple(
+  async connectCouple(
     @Body() createCoupleDto: CreateCoupleDto,
     @QueryRunner() qr: QR, // 트랜잭션 미적용을 감지하기 위한 데코레이터
   ) {
-    return this.userService.matchCouple(createCoupleDto, qr);
+    return this.userService.connectCouple(createCoupleDto, qr);
+  }
+
+  @Post('/disconnect/:id')
+  @UseInterceptors(TransactionInterceptor)
+  async disconnectCouple(
+    @Param('id', ParseIntPipe) userId: number,
+    @QueryRunner() qr: QR, // 트랜잭션 미적용을 감지하기 위한 데코레이터
+  ) {
+    return this.userService.disConnectCouple(userId, qr);
   }
 }

@@ -50,7 +50,7 @@ export class AuthController {
     };
   }
 
-  @Get('token/me')
+  @Get('/me')
   // @Public()
   async getMe(@Request() req: any) {
     return this.authService.getMe(req.sub);
