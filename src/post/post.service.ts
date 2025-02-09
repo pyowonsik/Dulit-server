@@ -10,10 +10,12 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { In, QueryRunner, Repository } from 'typeorm';
 import { User } from 'src/user/entity/user.entity';
 import { Couple } from 'src/user/entity/couple.entity';
-import { Post } from './entities/post.entity';
+import { Post } from './entity/post.entity';
 import { join } from 'path';
 import { rename } from 'fs/promises';
 import { existsSync, mkdirSync, unlinkSync } from 'fs';
+import { CommentModel } from './comment/entity/comment.entity';
+import { console } from 'inspector';
 
 @Injectable()
 export class PostService {
@@ -24,6 +26,8 @@ export class PostService {
     private readonly coupleRepository: Repository<Couple>,
     @InjectRepository(Post)
     private readonly postRepository: Repository<Post>,
+    @InjectRepository(CommentModel)
+    private readonly commentRepository: Repository<CommentModel>,
   ) {}
 
   async create(id: number, createPostDto: CreatePostDto, qr: QueryRunner) {
@@ -82,7 +86,9 @@ export class PostService {
   }
 
   async findAll() {
-    const posts = await this.postRepository.find();
+    const posts = await this.postRepository.find({
+      relations: ['comments'],
+    });
     return posts;
   }
 
@@ -115,28 +121,30 @@ export class PostService {
       throw new NotFoundException('존재하지 않는 POST의 ID 입니다.');
     }
 
-    // movie 생성시, temp폴더의 movieFile을 movie폴더로 이동 시킨다.
-    const tempFolder = join('public', 'temp');
-    const filesFolder = join('public', 'files');
+    if (updatePostDto.filePaths) {
+      // movie 생성시, temp폴더의 movieFile을 movie폴더로 이동 시킨다.
+      const tempFolder = join('public', 'temp');
+      const filesFolder = join('public', 'files');
 
-    // 1. public/files의 post.filePaths 삭제
-    post.filePaths.forEach((file) => {
-      const filePath = join(filesFolder, file);
-      if (existsSync(filePath)) {
-        unlinkSync(filePath);
-      }
-    });
+      // 1. public/files의 post.filePaths 삭제
+      post.filePaths.forEach((file) => {
+        const filePath = join(filesFolder, file);
+        if (existsSync(filePath)) {
+          unlinkSync(filePath);
+        }
+      });
 
-    // 2. 파일 이동 (병렬 처리)
-    await Promise.all(
-      updatePostDto.filePaths.map(
-        async (file) =>
-          await rename(
-            join(process.cwd(), tempFolder, file),
-            join(process.cwd(), filesFolder, file),
-          ),
-      ),
-    );
+      // 2. 파일 이동 (병렬 처리)
+      await Promise.all(
+        updatePostDto.filePaths.map(
+          async (file) =>
+            await rename(
+              join(process.cwd(), tempFolder, file),
+              join(process.cwd(), filesFolder, file),
+            ),
+        ),
+      );
+    }
 
     // 3. post의 filePaths 수정
     await qr.manager.update(
@@ -156,11 +164,16 @@ export class PostService {
       where: {
         id,
       },
+      relations: ['comments'],
     });
 
     if (!post) {
       throw new NotFoundException('존재하지 않는 POST의 ID 입니다.');
     }
+
+    await this.commentRepository.delete({
+      post,
+    });
 
     await this.postRepository.delete(post.id);
 

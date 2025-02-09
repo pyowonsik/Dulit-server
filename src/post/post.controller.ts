@@ -17,7 +17,6 @@ import { TransactionInterceptor } from 'src/common/interceptor/transaction.inter
 import { QueryRunner } from 'src/common/decorator/query-runner.decorator';
 import { QueryRunner as QR } from 'typeorm';
 
-
 @Controller('post')
 export class PostController {
   constructor(private readonly postService: PostService) {}
@@ -30,7 +29,7 @@ export class PostController {
     @QueryRunner() qr: QR, // 트랜잭션 미적용을 감지하기 위한 데코레이터
   ) {
     const userId = req.user.sub;
-    return this.postService.create(userId, createPostDto,qr);
+    return this.postService.create(userId, createPostDto, qr);
   }
 
   @Get()
@@ -50,7 +49,7 @@ export class PostController {
     @Body() updatePostDto: UpdatePostDto,
     @QueryRunner() qr: QR, // 트랜잭션 미적용을 감지하기 위한 데코레이터
   ) {
-    return this.postService.update(id, updatePostDto,qr);
+    return this.postService.update(id, updatePostDto, qr);
   }
 
   @Delete(':id')

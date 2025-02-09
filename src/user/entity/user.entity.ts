@@ -81,8 +81,6 @@ export class User extends BaseTable {
 
 // 트랜잭션이나 쿼리 빌더 내에서 해당 옵션이 자동으로 적용되지는 않습니다.
 // 즉, 트랜잭션이나 쿼리 빌더를 사용할 때 onDelete: 'CASCADE' 옵션은 자동으로 동작하지 않습니다.
-// 자식 엔티티 삭제를 명시적으로 처리해야 합니다.
-
-// 일단 트랜잭션 , 쿼리 빌더 사용시 삭제 cascade 가 적용이 안됨, 따라서 수정,삭제시 오류 처리하려면
+// 따라서 수정,삭제시 오류 처리하려면
 // 1. 명시적 삭제를 하는 방법과
-// 2.onDelete : 'cascade' 옵션을 사용하면서  .relation(Movie, 'genres').of(movieId) 이런식으로 관계를 만들어줘야함.
+// 2. onDelete : 'cascade' 옵션을 사용하면서  .relation(Movie, 'genres').of(movieId) 이런식으로 관계를 만들어줘야함.
