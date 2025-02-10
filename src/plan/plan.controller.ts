@@ -9,6 +9,7 @@ import {
   Request,
   ParseIntPipe,
   UseInterceptors,
+  UseGuards,
 } from '@nestjs/common';
 import { PlanService } from './plan.service';
 import { CreatePlanDto } from './dto/create-plan.dto';
@@ -17,6 +18,7 @@ import { TransactionInterceptor } from 'src/common/interceptor/transaction.inter
 import { UpdatePostDto } from 'src/post/dto/update-post.dto';
 import { QueryRunner } from 'src/common/decorator/query-runner.decorator';
 import { QueryRunner as QR } from 'typeorm';
+import { IsPlanMineOrAdminGuard } from './guard/is-plan-couple-or-admin.guard';
 
 @Controller('plan')
 export class PlanController {
@@ -28,9 +30,9 @@ export class PlanController {
     @Request() req: any,
     @QueryRunner() qr: QR, // 트랜잭션 미적용을 감지하기 위한 데코레이터
     @Body() createPlanDto: CreatePlanDto,
-  ) {    
+  ) {
     const userId = req.user.sub;
-    return this.planService.create(userId , createPlanDto,qr);
+    return this.planService.create(userId, createPlanDto, qr);
   }
 
   @Get()
@@ -38,23 +40,25 @@ export class PlanController {
     return this.planService.findAll();
   }
 
-  @Get(':id')
-  async findOne(@Param('id', ParseIntPipe) id: number) {
+  @Get(':planId')
+  async findOne(@Param('planId', ParseIntPipe) id: number) {
     return this.planService.findOne(id);
   }
 
-  @Patch(':id')
+  @Patch(':planId')
   @UseInterceptors(TransactionInterceptor)
+  @UseGuards(IsPlanMineOrAdminGuard)
   async update(
-    @Param('id', ParseIntPipe) id: number,
+    @Param('planId', ParseIntPipe) id: number,
     @Body() updatePlanDto: UpdatePlanDto,
     @QueryRunner() qr: QR, // 트랜잭션 미적용을 감지하기 위한 데코레이터
   ) {
-    return this.planService.update(id, updatePlanDto,qr);
+    return this.planService.update(id, updatePlanDto, qr);
   }
 
-  @Delete(':id')
-  async remove(@Param('id', ParseIntPipe) id: number) {
+  @Delete(':planId')
+  @UseGuards(IsPlanMineOrAdminGuard)
+  async remove(@Param('planId', ParseIntPipe) id: number) {
     return this.planService.remove(id);
   }
 }

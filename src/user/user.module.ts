@@ -6,7 +6,7 @@ import { User } from './entity/user.entity';
 import { ChatRoom } from 'src/chat/entity/chat-room.entity';
 import { Couple } from './entity/couple.entity';
 import { Chat } from 'src/chat/entity/chat.entity';
-import { Post } from 'src/post/entities/post.entity';
+import { Post } from 'src/post/entity/post.entity';
 
 @Module({
   imports: [TypeOrmModule.forFeature([User, ChatRoom, Couple, Post, Chat])],

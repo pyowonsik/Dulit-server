@@ -24,6 +24,7 @@ export class AuthService {
   ) {}
 
   async kakaoLogin(req) {
+    
     const kakaoUser = req.user.info;
 
     const user = await this.userService.create({

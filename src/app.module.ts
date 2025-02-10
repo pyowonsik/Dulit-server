@@ -20,7 +20,7 @@ import { Chat } from './chat/entity/chat.entity';
 import { ChatRoom } from './chat/entity/chat-room.entity';
 import { Couple } from './user/entity/couple.entity';
 import { PostModule } from './post/post.module';
-import { Post } from './post/entities/post.entity';
+import { Post } from './post/entity/post.entity';
 import { CommonModule } from './common/common.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
@@ -28,6 +28,7 @@ import { PlanModule } from './plan/plan.module';
 import { Plan } from './plan/entities/plan.entity';
 import { ScheduleModule } from '@nestjs/schedule';
 import { NotificationModule } from './notification/notification.module';
+import { CommentModel } from './post/comment/entity/comment.entity';
 
 @Module({
   imports: [
@@ -62,7 +63,7 @@ import { NotificationModule } from './notification/notification.module';
         username: configService.get<string>(envVariableKeys.dbUsername),
         password: configService.get<string>(envVariableKeys.dbPassword),
         database: configService.get<string>(envVariableKeys.dbDataBase),
-        entities: [User, Chat, ChatRoom, Couple, Post, Plan],
+        entities: [User, Chat, ChatRoom, Couple, Post, Plan,CommentModel],
         synchronize: true,
       }),
       inject: [ConfigService],
@@ -73,7 +74,7 @@ import { NotificationModule } from './notification/notification.module';
       rootPath: join(process.cwd(), 'public'),
       serveRoot: '/public/',
     }),
-    // Cron 작업 설정정
+    // Cron 작업 설정
     ScheduleModule.forRoot(),
     AuthModule,
     UserModule,

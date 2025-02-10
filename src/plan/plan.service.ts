@@ -119,4 +119,36 @@ export class PlanService {
 
     return id;
   }
+
+  async isPlanMine(userId: number, planId: number) {
+    // const user = await this.userRepository.findOne({
+    //   where: {
+    //     id: userId,
+    //   },
+    //   relations: ['couple'],
+    // });
+
+    // const isOk =  await this.planRepository.exists({
+    //   where: {
+    //     id: planId,
+    //     couple: user.couple,
+    //   },
+    //   relations: {
+    //     author: true,
+    //     couple: true,
+    //   },
+    // });
+
+    return this.planRepository.exists({
+      where: {
+        id: planId,
+        author: {
+          id: userId,
+        },
+      },
+      relations: {
+        author: true,
+      },
+    });
+  }
 }

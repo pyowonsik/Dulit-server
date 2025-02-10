@@ -12,8 +12,9 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Couple } from './couple.entity';
-import { Post } from 'src/post/entities/post.entity';
 import { Plan } from 'src/plan/entities/plan.entity';
+import { Post } from 'src/post/entity/post.entity';
+import { CommentModel } from 'src/post/comment/entity/comment.entity';
 export enum Role {
   admin,
   user,
@@ -67,6 +68,9 @@ export class User extends BaseTable {
 
   @OneToMany(() => Plan, (plan) => plan.couple)
   plans: Plan[];
+
+  @OneToMany(() => CommentModel, (comment) => comment.author)
+  comments: CommentModel[];
 }
 
 // @JoinColumn() : OneToOne , ManyToOne -> tableId

@@ -6,7 +6,7 @@ import { MulterModule } from '@nestjs/platform-express';
 import { v4 } from 'uuid';
 import { join } from 'path';
 import { diskStorage } from 'multer';
-import { Post } from 'src/post/entities/post.entity';
+import { Post } from 'src/post/entity/post.entity';
 import { TaskService } from './task.service';
 import { Plan } from 'src/plan/entities/plan.entity';
 import { NotificationModule } from 'src/notification/notification.module';

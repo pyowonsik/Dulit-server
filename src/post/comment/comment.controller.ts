@@ -8,10 +8,12 @@ import {
   Request,
   Delete,
   ParseIntPipe,
+  UseGuards,
 } from '@nestjs/common';
 import { CommentService } from './comment.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
+import { IsCommentMineOrAdminGuard } from './guard/is-comment-mine-or-admin.guard';
 
 @Controller('post/:postId/comment')
 export class CommentController {
@@ -32,21 +34,23 @@ export class CommentController {
     return this.commentService.findAll(postId);
   }
 
-  @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number) {
+  @Get(':commentId')
+  findOne(@Param('commentId', ParseIntPipe) id: number) {
     return this.commentService.findOne(id);
   }
 
-  // @Patch(':id')
+  // @Patch(':commentId')
+  // @UseGuards(IsPostMineOrAdminGuard)
   // update(
-  //   @Param('id', ParseIntPipe) id: number,
+  //   @Param('commentId', ParseIntPipe) id: number,
   //   @Body() updateCommentDto: UpdateCommentDto,
   // ) {
   //   return this.commentService.update(id, updateCommentDto);
   // }
 
-  @Delete(':id')
-  remove(@Param('id', ParseIntPipe) id: number) {
+  @Delete(':commentId')
+  @UseGuards(IsCommentMineOrAdminGuard)
+  remove(@Param('commentId', ParseIntPipe) id: number) {
     return this.commentService.remove(id);
   }
 }

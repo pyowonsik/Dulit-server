@@ -13,8 +13,9 @@ import { ChatRoom } from 'src/chat/entity/chat-room.entity';
 import { Couple } from './entity/couple.entity';
 import { CreateCoupleDto } from './dto/create-couple.dto';
 import { Plan } from 'src/plan/entities/plan.entity';
-import { Post } from 'src/post/entities/post.entity';
 import { Chat } from 'src/chat/entity/chat.entity';
+import { Post } from 'src/post/entity/post.entity';
+import { CommentModel } from 'src/post/comment/entity/comment.entity';
 
 @Injectable()
 export class UserService {
@@ -102,13 +103,19 @@ export class UserService {
 
       if (couple?.users) {
         await Promise.all(
-          couple.users.map((user) =>
-            qr.manager.update(User, user.id, { couple: null }),
-          ),
+          couple.users.map(async (user) => {
+            await qr.manager.update(User, user.id, { couple: null });
+            // 커플간 post가 지워지는 거면 , 커플에 속한 user들 comments가 지워져야함
+            await qr.manager.delete(CommentModel, {
+              author: user,
+            });
+          }),
         );
+
         await qr.manager.delete(Plan, {
           couple: user.couple,
         });
+
         await qr.manager.delete(Post, {
           couple: user.couple,
         });
@@ -191,9 +198,13 @@ export class UserService {
 
       if (couple?.users) {
         await Promise.all(
-          couple.users.map((user) =>
-            qr.manager.update(User, user.id, { couple: null }),
-          ),
+          couple.users.map(async (user) => {
+            await qr.manager.update(User, user.id, { couple: null });
+            // 커플간 post가 지워지는 거면 , 커플에 속한 user들 comments가 지워져야함
+            await qr.manager.delete(CommentModel, {
+              author: user,
+            });
+          }),
         );
         await qr.manager.delete(Plan, {
           couple: user.couple,

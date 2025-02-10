@@ -159,7 +159,6 @@ export class PostService {
   }
 
   async remove(id: number) {
-    // post 내부에 중첩된 삭제해야할 내용이 없으므로 post만 삭제하면됨.
     const post = await this.postRepository.findOne({
       where: {
         id,
@@ -178,5 +177,19 @@ export class PostService {
     await this.postRepository.delete(post.id);
 
     return id;
+  }
+
+  async isPostMine(userId: number, postId: number) {
+    return this.postRepository.exists({
+      where: {
+        id: postId,
+        author: {
+          id: userId,
+        },
+      },
+      relations: {
+        author: true,
+      },
+    });
   }
 }
