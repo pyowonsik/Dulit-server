@@ -18,6 +18,7 @@ import { TransactionInterceptor } from 'src/common/interceptor/transaction.inter
 import { QueryRunner } from 'src/common/decorator/query-runner.decorator';
 import { QueryRunner as QR } from 'typeorm';
 import { IsPostMineOrAdminGuard } from './guard/is-post-mine-or-admin.guard';
+import { UserId } from 'src/user/decorator/user-id.decorator';
 
 @Controller('post')
 export class PostController {
@@ -59,5 +60,21 @@ export class PostController {
   @UseGuards(IsPostMineOrAdminGuard)
   async remove(@Param('postId', ParseIntPipe) id: number) {
     return this.postService.remove(id);
+  }
+
+  @Post(':postId/like')
+  createPostLike(
+    @Param('postId', ParseIntPipe) postId: number,
+    @UserId() userId: number,
+  ) {
+    return this.postService.togglePostLike(postId, userId, true);
+  }
+
+  @Post(':postId/dislike')
+  createPostDisLike(
+    @Param('postId', ParseIntPipe) postId: number,
+    @UserId() userId: number,
+  ) {
+    return this.postService.togglePostLike(postId, userId, false);
   }
 }

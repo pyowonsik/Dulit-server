@@ -6,6 +6,7 @@ import {
   Res,
   Post,
   Req,
+  Param,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
@@ -53,6 +54,14 @@ export class AuthController {
   @Get('/me')
   // @Public()
   async getMe(@Request() req: any) {
-    return this.authService.getMe(req.sub);
+    return this.authService.getMe(req.user.sub);
+  }
+
+  // socialId 로그인 후, postMan env accessToken에 넣기 
+  // -> social login을 직접 호출할수 없어서 생성한 test endpoint
+  @Post('social/login/:socialId')
+  @Public()
+  async socialIdLogin(@Param('socialId') socialId: string) {
+    return this.authService.socialIdLogin(socialId);
   }
 }

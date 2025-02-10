@@ -13,6 +13,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { CommentModel } from '../comment/entity/comment.entity';
+import { PostUserLike } from '../comment/entity/post-user-like.entity';
 
 @Entity()
 export class Post extends BaseTable {
@@ -43,4 +44,8 @@ export class Post extends BaseTable {
 
   @OneToMany(() => CommentModel, (comment) => comment.post)
   comments: CommentModel[];
+
+  @OneToMany(() => PostUserLike, (pul) => pul.post)
+  likedUsers : PostUserLike[];
+
 }

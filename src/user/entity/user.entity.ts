@@ -15,6 +15,7 @@ import { Couple } from './couple.entity';
 import { Plan } from 'src/plan/entities/plan.entity';
 import { Post } from 'src/post/entity/post.entity';
 import { CommentModel } from 'src/post/comment/entity/comment.entity';
+import { PostUserLike } from 'src/post/comment/entity/post-user-like.entity';
 export enum Role {
   admin,
   user,
@@ -71,6 +72,10 @@ export class User extends BaseTable {
 
   @OneToMany(() => CommentModel, (comment) => comment.author)
   comments: CommentModel[];
+
+  @OneToMany(() => PostUserLike,(pul) => pul.user)
+  likedPosts : PostUserLike[];
+  
 }
 
 // @JoinColumn() : OneToOne , ManyToOne -> tableId

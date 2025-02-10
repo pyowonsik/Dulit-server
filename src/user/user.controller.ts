@@ -17,6 +17,7 @@ import { QueryRunner as QR } from 'typeorm';
 import { QueryRunner } from 'src/common/decorator/query-runner.decorator';
 import { CreateCoupleDto } from './dto/create-couple.dto';
 import { Request } from 'express';
+import { UserId } from './decorator/user-id.decorator';
 
 @Controller('user')
 export class UserController {
@@ -63,10 +64,10 @@ export class UserController {
     return this.userService.connectCouple(createCoupleDto, qr);
   }
 
-  @Post('/disconnect/:id')
+  @Post('/disconnect')
   @UseInterceptors(TransactionInterceptor)
   async disconnectCouple(
-    @Param('id', ParseIntPipe) userId: number,
+    @UserId() userId: number,
     @QueryRunner() qr: QR, // 트랜잭션 미적용을 감지하기 위한 데코레이터
   ) {
     return this.userService.disConnectCouple(userId, qr);

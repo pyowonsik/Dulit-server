@@ -59,6 +59,7 @@ export class CommentService {
 
   async findAll(postId: number) {
     const comments = await this.commentRepository.find();
+
     return comments;
   }
 

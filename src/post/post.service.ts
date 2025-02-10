@@ -3,6 +3,7 @@ import {
   Injectable,
   InternalServerErrorException,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
@@ -16,6 +17,7 @@ import { rename } from 'fs/promises';
 import { existsSync, mkdirSync, unlinkSync } from 'fs';
 import { CommentModel } from './comment/entity/comment.entity';
 import { console } from 'inspector';
+import { PostUserLike } from './comment/entity/post-user-like.entity';
 
 @Injectable()
 export class PostService {
@@ -28,6 +30,8 @@ export class PostService {
     private readonly postRepository: Repository<Post>,
     @InjectRepository(CommentModel)
     private readonly commentRepository: Repository<CommentModel>,
+    @InjectRepository(PostUserLike)
+    private readonly postUserLikeRepository: Repository<PostUserLike>,
   ) {}
 
   async create(id: number, createPostDto: CreatePostDto, qr: QueryRunner) {
@@ -191,5 +195,69 @@ export class PostService {
         author: true,
       },
     });
+  }
+
+  /* istanbul ignore next */
+  async getLikedRecord(postId: number, userId: number) {
+    return await this.postUserLikeRepository
+      .createQueryBuilder('pul')
+      .leftJoinAndSelect('pul.post', 'post')
+      .leftJoinAndSelect('pul.user', 'user')
+      .where('post.id = :postId', { postId })
+      .andWhere('user.id = :userId', { userId })
+      .getOne();
+  }
+
+  async togglePostLike(postId: number, userId: number, isLike: boolean) {
+    const post = await this.postRepository.findOne({
+      where: {
+        id: postId,
+      },
+    });
+
+    if (!post) {
+      throw new NotFoundException('존재하지 않는 POST의 ID 입니다.');
+    }
+
+    const user = await this.userRepository.findOne({
+      where: {
+        id: userId,
+      },
+    });
+
+    if (!user) {
+      throw new NotFoundException('존재하지 않는 USER의 ID 입니다.');
+    }
+
+    const likeRecord = await this.getLikedRecord(postId, userId);
+    
+    if (likeRecord) {
+      if (isLike === likeRecord.isLike) {
+        // 좋아요에서 좋아요 누르면 삭제
+        await this.postUserLikeRepository.delete({ post, user });
+      } else {
+        // 좋아요에서 싫어요 누르면 해당 post,user 싫어요
+        await this.postUserLikeRepository.update(
+          {
+            post,
+            user,
+          },
+          { isLike },
+        );
+      }
+    } else {
+      // likeRecord 없다면 해당 movie,user의 postUserLike 좋아요
+      await this.postUserLikeRepository.save({
+        post,
+        user,
+        isLike,
+      });
+    }
+
+    const result = await this.getLikedRecord(postId, userId);
+
+    return {
+      isLike: result && result.isLike,
+    };
   }
 }

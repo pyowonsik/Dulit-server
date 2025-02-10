@@ -42,7 +42,7 @@ export class CommentController {
   // @Patch(':commentId')
   // @UseGuards(IsPostMineOrAdminGuard)
   // update(
-  //   @Param('commentId', ParseIntPipe) id: number,
+  //   @Param('id', ParseIntPipe) id: number,
   //   @Body() updateCommentDto: UpdateCommentDto,
   // ) {
   //   return this.commentService.update(id, updateCommentDto);

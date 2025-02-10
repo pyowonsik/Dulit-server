@@ -7,10 +7,11 @@ import { Couple } from 'src/user/entity/couple.entity';
 import { Post } from './entity/post.entity';
 import { CommentModule } from './comment/comment.module';
 import { CommentModel } from './comment/entity/comment.entity';
+import { PostUserLike } from './comment/entity/post-user-like.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, Couple, Post, CommentModel]),
+    TypeOrmModule.forFeature([User, Couple, Post, CommentModel,PostUserLike]),
     CommentModule,
   ],
   controllers: [PostController],

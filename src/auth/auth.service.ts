@@ -63,6 +63,23 @@ export class AuthService {
     };
   }
 
+  async socialIdLogin(socialId:string){
+    const user = await this.userRepository.findOne({
+      where : {
+        socialId
+      }
+    });
+
+    if (!user) {
+      throw new NotFoundException('존재하지 않는 USER의 ID 입니다.');
+    }
+
+    return {
+      accessToken : await this.issueToken(user, false),
+      refreshToken : await this.issueToken(user, true),
+    }
+  }
+
   // ${Bearer token} -> Bearer 토큰 분리해서 검증후 payload 반환
   async parserBearerToken(rawToken: string, isRefresh: boolean) {
     // (1) Bearer 토큰 분리
