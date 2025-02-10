@@ -18,6 +18,7 @@ export class BearerTokenMiddleWare implements NestMiddleware {
   async use(req: Request, res: Response, next: NextFunction) {
     const authHeader = req.headers['authorization'];
 
+
     if (!authHeader) {
       next();
       return;

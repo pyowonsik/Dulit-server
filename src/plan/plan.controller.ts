@@ -19,12 +19,19 @@ import { UpdatePostDto } from 'src/post/dto/update-post.dto';
 import { QueryRunner } from 'src/common/decorator/query-runner.decorator';
 import { QueryRunner as QR } from 'typeorm';
 import { IsPlanMineOrAdminGuard } from './guard/is-plan-couple-or-admin.guard';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 @Controller('plan')
+@ApiTags('plan')
+@ApiBearerAuth()
 export class PlanController {
   constructor(private readonly planService: PlanService) {}
 
   @Post()
+  @ApiOperation({
+    summary: '약속 생성',
+    description: '약속 생성',
+  })
   @UseInterceptors(TransactionInterceptor)
   async create(
     @Request() req: any,
@@ -36,16 +43,28 @@ export class PlanController {
   }
 
   @Get()
+  @ApiOperation({
+    summary: '전체 약속 조회',
+    description: '전체 약속 조회',
+  })
   async findAll() {
     return this.planService.findAll();
   }
 
   @Get(':planId')
+  @ApiOperation({
+    summary: '약속 단건 조회',
+    description: '약속 단건 조회',
+  })
   async findOne(@Param('planId', ParseIntPipe) id: number) {
     return this.planService.findOne(id);
   }
 
   @Patch(':planId')
+  @ApiOperation({
+    summary: '약속 수정',
+    description: '약속 수정',
+  })
   @UseInterceptors(TransactionInterceptor)
   @UseGuards(IsPlanMineOrAdminGuard)
   async update(
@@ -57,6 +76,10 @@ export class PlanController {
   }
 
   @Delete(':planId')
+  @ApiOperation({
+    summary: '약속 삭제',
+    description: '약속 삭제',
+  })
   @UseGuards(IsPlanMineOrAdminGuard)
   async remove(@Param('planId', ParseIntPipe) id: number) {
     return this.planService.remove(id);

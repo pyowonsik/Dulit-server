@@ -19,12 +19,25 @@ import { QueryRunner } from 'src/common/decorator/query-runner.decorator';
 import { QueryRunner as QR } from 'typeorm';
 import { IsPostMineOrAdminGuard } from './guard/is-post-mine-or-admin.guard';
 import { UserId } from 'src/user/decorator/user-id.decorator';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
+import { Plan } from 'src/plan/entities/plan.entity';
 
 @Controller('post')
+@ApiTags('post')
+@ApiBearerAuth()
 export class PostController {
   constructor(private readonly postService: PostService) {}
 
   @Post()
+  @ApiOperation({
+    summary: '게시글 작성',
+    description: '게시글 작성',
+  })
   @UseInterceptors(TransactionInterceptor)
   async create(
     @Request() req: any,
@@ -36,16 +49,28 @@ export class PostController {
   }
 
   @Get()
+  @ApiOperation({
+    summary: '게시글 전체 조회',
+    description: '게시글 전체 조회',
+  })
   async findAll() {
     return this.postService.findAll();
   }
 
   @Get(':postId')
+  @ApiOperation({
+    summary: '게시글 단건 조회',
+    description: '게시글 단건 조회',
+  })
   async findOne(@Param('postId', ParseIntPipe) id: number) {
     return this.postService.findOne(id);
   }
 
   @Patch(':postId')
+  @ApiOperation({
+    summary: '게시글 수정',
+    description: '게시글 수정',
+  })
   @UseInterceptors(TransactionInterceptor)
   @UseGuards(IsPostMineOrAdminGuard)
   async update(
@@ -57,12 +82,20 @@ export class PostController {
   }
 
   @Delete(':postId')
+  @ApiOperation({
+    summary: '게시글 삭제',
+    description: '게시글 삭제',
+  })
   @UseGuards(IsPostMineOrAdminGuard)
   async remove(@Param('postId', ParseIntPipe) id: number) {
     return this.postService.remove(id);
   }
 
   @Post(':postId/like')
+  @ApiOperation({
+    summary: '게시글 좋아요',
+    description: '게시글 좋아요',
+  })
   createPostLike(
     @Param('postId', ParseIntPipe) postId: number,
     @UserId() userId: number,
@@ -71,6 +104,10 @@ export class PostController {
   }
 
   @Post(':postId/dislike')
+  @ApiOperation({
+    summary: '게시글 싫어요',
+    description: '게시글 싫어요',
+  })
   createPostDisLike(
     @Param('postId', ParseIntPipe) postId: number,
     @UserId() userId: number,

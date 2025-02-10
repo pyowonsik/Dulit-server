@@ -42,10 +42,10 @@ export class Post extends BaseTable {
   @JoinColumn()
   couple: Couple;
 
+  // 댓글 , 좋아요
   @OneToMany(() => CommentModel, (comment) => comment.post)
   comments: CommentModel[];
 
   @OneToMany(() => PostUserLike, (pul) => pul.post)
   likedUsers : PostUserLike[];
-
 }
