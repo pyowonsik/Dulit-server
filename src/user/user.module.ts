@@ -7,9 +7,13 @@ import { ChatRoom } from 'src/chat/entity/chat-room.entity';
 import { Couple } from './entity/couple.entity';
 import { Chat } from 'src/chat/entity/chat.entity';
 import { Post } from 'src/post/entity/post.entity';
+import { NotificationModule } from 'src/notification/notification.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, ChatRoom, Couple, Post, Chat])],
+  imports: [
+    TypeOrmModule.forFeature([User, ChatRoom, Couple, Post, Chat]),
+    NotificationModule,
+  ],
   controllers: [UserController],
   providers: [UserService],
   exports: [UserService],

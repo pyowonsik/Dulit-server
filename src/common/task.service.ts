@@ -25,17 +25,15 @@ export class TaskService {
       const planTime = new Date(plan.time);
       const hoursDiff = (planTime.getTime() - now.getTime()) / (1000 * 60 * 60);
 
-      console.log(plan);
+      // console.log(plan);
       // 약속 시간이 두 시간 이내인 경우 알림
       if (hoursDiff <= 2 && hoursDiff > 0) {
-        console.log(hoursDiff);
+        // console.log(hoursDiff);
         const users = plan.couple?.users || [];
         // console.log(users);
         users.forEach((user) => {
-          this.notificationService.sendNotification(
-            user.id,
-            '약속 시간 2시간 전입니다.',
-          );
+          this.notificationService.sendNotification(user.id, 'coupleMatched');
+
         });
       }
     }

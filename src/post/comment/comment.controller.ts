@@ -17,7 +17,7 @@ import { IsCommentMineOrAdminGuard } from './guard/is-comment-mine-or-admin.guar
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 @Controller('post/:postId/comment')
-@ApiTags('post/:postId/comment')
+@ApiTags('comment')
 @ApiBearerAuth()
 export class CommentController {
   constructor(private readonly commentService: CommentService) {}

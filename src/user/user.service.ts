@@ -16,6 +16,8 @@ import { Plan } from 'src/plan/entities/plan.entity';
 import { Chat } from 'src/chat/entity/chat.entity';
 import { Post } from 'src/post/entity/post.entity';
 import { CommentModel } from 'src/post/comment/entity/comment.entity';
+import { NotificationGateway } from 'src/notification/notification.gateway';
+import { NotificationService } from 'src/notification/notification.service';
 
 @Injectable()
 export class UserService {
@@ -27,6 +29,7 @@ export class UserService {
     @InjectRepository(Couple)
     private readonly coupleRepository: Repository<Couple>,
     private readonly configService: ConfigService,
+    private readonly notificationService: NotificationService,
   ) {}
 
   async create(createUserDto: CreateUserDto) {
@@ -156,6 +159,9 @@ export class UserService {
       chatRoom: newChatRoom,
     });
     await qr.manager.save(newCouple);
+    
+    this.notificationService.sendNotification(me.id, 'coupleMatched');
+    this.notificationService.sendNotification(partner.id, 'coupleMatched');
 
     // 쿼리 최적화
     const user = await qr.manager.findOne(User, {

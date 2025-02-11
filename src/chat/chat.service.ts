@@ -73,7 +73,7 @@ export class ChatService {
     // chatRooms.id의 'newMessage'스트림으로 client(socket)으로 메세지 emit
     client
       .to(chatRoom.id.toString())
-      .emit('newMessage', plainToClass(Chat, msgModel));
+      .emit('sendMessage', plainToClass(Chat, msgModel));
 
     return message;
   }

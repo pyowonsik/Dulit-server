@@ -10,6 +10,7 @@ import { User } from 'src/user/entity/user.entity';
 import { UserModule } from 'src/user/user.module';
 import { JwtModule } from '@nestjs/jwt';
 import { NaverStrategy } from './strategy/naver.strategy';
+import { NotificationModule } from 'src/notification/notification.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { NaverStrategy } from './strategy/naver.strategy';
     ConfigModule,
     UserModule,
     JwtModule.register({}),
+    NotificationModule
   ],
   controllers: [AuthController], // 컨트롤러 추가
   providers: [KakaoStrategy, AuthService, NaverStrategy],
