@@ -13,6 +13,7 @@ import { AuthService } from './auth.service';
 import { Public } from './decorator/public.decorator';
 import {
   ApiBasicAuth,
+  ApiBearerAuth,
   ApiExcludeEndpoint,
   ApiOperation,
   ApiTags,
@@ -71,7 +72,7 @@ export class AuthController {
     summary: '내 유저 정보 조회',
     description: '내 유저 정보 조회',
   })
-  // @Public()
+  @ApiBearerAuth()
   async getMe(@Request() req: any) {
     return this.authService.getMe(req.user.sub);
   }

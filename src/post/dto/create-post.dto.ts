@@ -33,11 +33,4 @@ export class CreatePostDto {
   @IsString({ each: true })
   filePaths: string[];
 
-  //   @IsNotEmpty()
-  //   @IsNumber()
-  //   authorId: number;
-
-  //   @IsNotEmpty()
-  //   @IsNumber()
-  //   coupleId: number;
 }

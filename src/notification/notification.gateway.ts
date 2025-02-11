@@ -46,16 +46,5 @@ export class NotificationGateway
       client.disconnect();
     }
   }
-  
-  // TaskService (크론)에서 직접호출 되는 형태.
-  // @SubscribeMessage('sendNotification')
-  // // @UseInterceptors(WsTransactionInterceptor) // transaction이 정상적이면 commit, 아니면 rollback
-  // async handleNotification(
-  //   // @MessageBody() body: CreateChatDto,
-  //   @ConnectedSocket() client: Socket,
-  //   // @WsQueryRunner() qr: QueryRunner,
-  // ) {
-  //   const payload = client.data.user;
-  //   await this.notificationService.sendNotification(payload.sub,'약속 시간 2시간전 입니다.');
-  // }
+
 }

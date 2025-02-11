@@ -95,9 +95,11 @@ export class UserController {
   })
   @UseInterceptors(TransactionInterceptor)
   async disconnectCouple(
-    @UserId() userId: number,
+    // @UserId() userId: number,
+    @Body() createCoupleDto: CreateCoupleDto,
+
     @QueryRunner() qr: QR, // 트랜잭션 미적용을 감지하기 위한 데코레이터
   ) {
-    return this.userService.disConnectCouple(userId, qr);
+    return this.userService.disConnectCouple(createCoupleDto, qr);
   }
 }

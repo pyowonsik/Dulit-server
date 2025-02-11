@@ -159,9 +159,9 @@ export class UserService {
       chatRoom: newChatRoom,
     });
     await qr.manager.save(newCouple);
-    
-    this.notificationService.sendNotification(me.id, 'coupleMatched');
-    this.notificationService.sendNotification(partner.id, 'coupleMatched');
+
+    this.notificationService.matchedNotification(me.id);
+    this.notificationService.matchedNotification(partner.id);
 
     // 쿼리 최적화
     const user = await qr.manager.findOne(User, {
@@ -172,33 +172,41 @@ export class UserService {
     return user;
   }
 
-  async disConnectCouple(id: number, qr: QueryRunner) {
-    const user = await qr.manager.findOne(User, {
-      where: { id },
-      relations: ['chatRooms', 'couple'],
+  async disConnectCouple(createCoupleDto: CreateCoupleDto, qr: QueryRunner) {
+  
+    const me = await qr.manager.findOne(User, {
+      where: { socialId: createCoupleDto.myId },
+      relations: ['couple','chatRooms'],
+    });
+    const partner = await qr.manager.findOne(User, {
+      where: { socialId: createCoupleDto.partnerId },
+      relations: ['couple'],
     });
 
-    if (!user) {
-      throw new NotFoundException('존재하지 않는 유저의 ID 입니다.');
-    }
+
+   
+    if (!me || !partner)
+      throw new NotFoundException('사용자가 존재하지 않습니다.');
+    if (!me.couple || !partner.couple)
+      throw new BadRequestException('매칭이 되지 않은 사용자입니다.');
 
     // 1. 유저가 속한 chatRoom - chat 삭제
-    if (user.chatRooms.length > 0) {
+    if (me.chatRooms.length > 0) {
       // 채팅방 - 채팅 사이 자식 관계 지우기
 
       await qr.manager.delete(Chat, {
-        chatRoom: user.chatRooms[0],
+        chatRoom: me.chatRooms[0],
       });
 
-      await qr.manager.delete(ChatRoom, user.chatRooms[0].id);
+      await qr.manager.delete(ChatRoom, me.chatRooms[0].id);
     }
 
     // 2. 유저가 속한 couple - plan , post 삭제
-    if (user.couple) {
+    if (me.couple) {
       // couple - plan , post 사이 자식 관계 지우기
 
       const couple = await qr.manager.findOne(Couple, {
-        where: { id: user.couple.id },
+        where: { id: me.couple.id },
         relations: ['users'],
       });
 
@@ -213,16 +221,19 @@ export class UserService {
           }),
         );
         await qr.manager.delete(Plan, {
-          couple: user.couple,
+          couple: me.couple,
         });
         await qr.manager.delete(Post, {
-          couple: user.couple,
+          couple: me.couple,
         });
 
         await qr.manager.delete(Couple, couple.id);
       }
     }
 
-    return id;
+    this.notificationService.sendNotification(me.id, '커플 연결이 해제되었습니다.');
+    this.notificationService.sendNotification(partner.id, '커플 연결이 해제되었습니다.');
+
+    return me.id;
   }
 }

@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { CommonService } from './common.service';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 @Controller('common')
 @ApiTags('common')
@@ -25,6 +25,21 @@ export class CommonController {
   @ApiOperation({
     summary: '파일 선업로드',
     description: '파일 선업로드',
+  })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        files: {
+          type: 'array',
+          items: {
+            type: 'string',
+            format: 'binary',
+          },
+        },
+      },
+    },
   })
   @UseInterceptors(
     FilesInterceptor('files', 10, {

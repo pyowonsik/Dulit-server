@@ -14,7 +14,7 @@ export class TaskService {
   ) {}
 
   // 약속 시간이 두 시간 이내인 경우 알림
-  // @Cron('*/5 * * * * *') 
+  // @Cron('*/5 * * * * *')
   async handleCron() {
     const plans = await this.planRepository.find({
       relations: ['author', 'couple', 'couple.users'],
@@ -28,12 +28,9 @@ export class TaskService {
       // console.log(plan);
       // 약속 시간이 두 시간 이내인 경우 알림
       if (hoursDiff <= 2 && hoursDiff > 0) {
-        // console.log(hoursDiff);
         const users = plan.couple?.users || [];
-        // console.log(users);
         users.forEach((user) => {
-          this.notificationService.sendNotification(user.id, 'coupleMatched');
-
+          this.notificationService.sendNotification(user.id, '약속 시간까지 2시간 남았습니다!');
         });
       }
     }
