@@ -13,7 +13,7 @@ import { UserModule } from './user/user.module';
 import { User } from './user/entity/user.entity';
 import { BearerTokenMiddleWare } from './auth/middleware/bearer-token.middlewear';
 import { JwtModule } from '@nestjs/jwt';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from './auth/guard/auth.guard';
 import { ChatModule } from './chat/chat.module';
 import { Chat } from './chat/entity/chat.entity';
@@ -31,6 +31,8 @@ import { NotificationModule } from './notification/notification.module';
 import { CommentModel } from './post/comment/entity/comment.entity';
 import { PostUserLike } from './post/comment/entity/post-user-like.entity';
 import { RBACGuard } from './auth/guard/rbac.guard';
+import { ForbiddenExceptionFilter } from './common/filter/forbidden.filter';
+import { QueryFailedExceptionFilter } from './common/filter/query-failed.filter';
 
 @Module({
   imports: [
@@ -101,6 +103,14 @@ import { RBACGuard } from './auth/guard/rbac.guard';
     {
       provide: APP_GUARD,
       useClass: AuthGuard,
+    },
+    // {
+    //   provide: APP_FILTER,
+    //   useClass: ForbiddenExceptionFilter,
+    // },
+    {
+      provide: APP_FILTER,
+      useClass: QueryFailedExceptionFilter,
     },
     {
       provide: APP_GUARD,

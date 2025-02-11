@@ -10,6 +10,7 @@ import {
   ParseIntPipe,
   UseInterceptors,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { PlanService } from './plan.service';
 import { CreatePlanDto } from './dto/create-plan.dto';
@@ -20,6 +21,8 @@ import { QueryRunner } from 'src/common/decorator/query-runner.decorator';
 import { QueryRunner as QR } from 'typeorm';
 import { IsPlanMineOrAdminGuard } from './guard/is-plan-couple-or-admin.guard';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { GetPlanDto } from './dto/get-plan.dto';
+import { UserId } from 'src/user/decorator/user-id.decorator';
 
 @Controller('plan')
 @ApiTags('plan')
@@ -47,8 +50,8 @@ export class PlanController {
     summary: '전체 약속 조회',
     description: '전체 약속 조회',
   })
-  async findAll() {
-    return this.planService.findAll();
+  async findAll(@Query() dto: GetPlanDto, @UserId() userId: number) {
+    return this.planService.findAll(userId,dto);
   }
 
   @Get(':planId')

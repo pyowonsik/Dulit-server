@@ -27,11 +27,11 @@ export class Post extends BaseTable {
   description: string;
 
   // PostgreSQL의 text[] 배열 타입으로 설정
-  @Column('text', { array: true })
+  @Column('text', { array: true ,nullable :true})
   @Transform(({ value }) =>
     value.map((filePath) => `http://localhost:3000/${filePath}`),
   )
-  filePaths: string[];
+  filePaths: string[] | null;
 
   // User , Couple
   @ManyToOne(() => User, (user) => user.posts)

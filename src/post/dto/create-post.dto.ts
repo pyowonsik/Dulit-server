@@ -1,9 +1,10 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   ArrayNotEmpty,
   IsArray,
   IsNotEmpty,
   IsNumber,
+  IsOptional,
   IsString,
 } from 'class-validator';
 
@@ -23,14 +24,13 @@ export class CreatePostDto {
     example: '1000일 맞이 여행 다녀왔습니다. ~~~~',
   })
   description: string;
-
+  
+  @IsOptional() // 필수값 아님
   @IsArray()
-  @ArrayNotEmpty()
-  @ApiProperty({
-    description: 'POST FILE PATHS',
-    example: '[aPhoto.jpg,bPhoto.jpg]',
-  })
   @IsString({ each: true })
-  filePaths: string[];
-
+  @ApiPropertyOptional({
+    description: 'POST FILE PATHS (선택값)',
+    example: ['aPhoto.jpg', 'bPhoto.jpg'],
+  })
+  filePaths?: string[];
 }

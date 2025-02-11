@@ -10,6 +10,7 @@ import {
   Request,
   UseInterceptors,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { PostService } from './post.service';
 import { CreatePostDto } from './dto/create-post.dto';
@@ -26,6 +27,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { Plan } from 'src/plan/entities/plan.entity';
+import { GetPostDto } from './dto/get-post-dto';
 
 @Controller('post')
 @ApiTags('post')
@@ -53,8 +55,8 @@ export class PostController {
     summary: '게시글 전체 조회',
     description: '게시글 전체 조회',
   })
-  async findAll() {
-    return this.postService.findAll();
+  async findAll(@Query() dto: GetPostDto) {
+    return this.postService.findAll(dto);
   }
 
   @Get(':postId')

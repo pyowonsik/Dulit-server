@@ -6,6 +6,8 @@ import { Couple } from 'src/user/entity/couple.entity';
 import { Plan } from './entities/plan.entity';
 import { User } from 'src/user/entity/user.entity';
 import { In, QueryRunner, Repository } from 'typeorm';
+import { GetPlanDto } from './dto/get-plan.dto';
+import { CommonService } from 'src/common/common.service';
 
 @Injectable()
 export class PlanService {
@@ -16,6 +18,7 @@ export class PlanService {
     private readonly planRepository: Repository<Plan>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    private readonly commonService: CommonService,
   ) {}
   async create(id: number, createPlanDto: CreatePlanDto, qr: QueryRunner) {
     // createDto : topic , location , time
@@ -53,12 +56,44 @@ export class PlanService {
     return plan;
   }
 
-  async findAll() {
-    const plans = await this.planRepository.find();
-    // const plans = this.planRepository
-    // .createQueryBuilder('plan')
-    // .getMany();
-    return plans;
+  async findAll(userId: number, dto: GetPlanDto) {
+    const { topic } = dto;
+
+    const user = await this.userRepository
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.couple', 'couple')
+      .where(`user.id = :userId`, { userId })
+      .getOne();
+    
+    // createQueryBuilder사용시 id값 비교.
+
+    const qb = this.planRepository
+      .createQueryBuilder('plan')
+      .leftJoinAndSelect('plan.couple', 'couple')
+      .where(`plan.couple = :coupleId`, { coupleId: user.couple.id });
+
+
+    this.planRepository.find({
+      where : {
+        couple : user.couple
+      }
+    })
+
+    if (topic) {
+      qb.andWhere('plan.topic LIKE :topic', { topic: `%${topic}%` });
+    }
+
+    const { nextCursor } =
+      await this.commonService.applyCursorPaginationParamsToQb(qb, dto);
+
+    let [data, count] = await qb.getManyAndCount();
+
+    // 기존 반환값에 cursor를 넣어줌
+    return {
+      data,
+      nextCursor,
+      count,
+    };
   }
 
   async findOne(id: number) {
