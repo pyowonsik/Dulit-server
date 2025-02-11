@@ -30,6 +30,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { NotificationModule } from './notification/notification.module';
 import { CommentModel } from './post/comment/entity/comment.entity';
 import { PostUserLike } from './post/comment/entity/post-user-like.entity';
+import { RBACGuard } from './auth/guard/rbac.guard';
 
 @Module({
   imports: [
@@ -64,7 +65,16 @@ import { PostUserLike } from './post/comment/entity/post-user-like.entity';
         username: configService.get<string>(envVariableKeys.dbUsername),
         password: configService.get<string>(envVariableKeys.dbPassword),
         database: configService.get<string>(envVariableKeys.dbDataBase),
-        entities: [User, Chat, ChatRoom, Couple, Post, Plan,CommentModel,PostUserLike],
+        entities: [
+          User,
+          Chat,
+          ChatRoom,
+          Couple,
+          Post,
+          Plan,
+          CommentModel,
+          PostUserLike,
+        ],
         synchronize: true,
       }),
       inject: [ConfigService],
@@ -91,6 +101,10 @@ import { PostUserLike } from './post/comment/entity/post-user-like.entity';
     {
       provide: APP_GUARD,
       useClass: AuthGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RBACGuard,
     },
   ],
 })

@@ -20,6 +20,8 @@ import { Request } from 'express';
 import { UserId } from './decorator/user-id.decorator';
 import { Public } from 'src/auth/decorator/public.decorator';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { RBAC } from 'src/auth/decorator/rbac.decorator';
+import { Role } from './entity/user.entity';
 
 @Controller('user')
 @ApiTags('user')
@@ -32,6 +34,7 @@ export class UserController {
     summary: '유저 생성',
     description: '유저 생성',
   })
+  @RBAC(Role.admin)
   create(@Body() createUserDto: CreateUserDto) {
     return this.userService.create(createUserDto);
   }
@@ -55,19 +58,21 @@ export class UserController {
   }
 
   // @Patch(':id')
+  // @RBAC(Role.admin)
   // update(
   //   @Param('id', ParseIntPipe) id: number,
   //   @Body() updateUserDto: UpdateUserDto,
   // ) {
   //   return this.userService.update(id, updateUserDto);
   // }
-
+  
   @Delete(':id')
   @ApiOperation({
     summary: '유저 삭제',
     description: '유저 삭제',
   })
   @UseInterceptors(TransactionInterceptor)
+  @RBAC(Role.admin)
   remove(
     @Param('id', ParseIntPipe) id: number,
     @QueryRunner() qr: QR, // 트랜잭션 미적용을 감지하기 위한 데코레이터

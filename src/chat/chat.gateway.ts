@@ -38,7 +38,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       const payload = await this.authService.parserBearerToken(rawToken, false);
 
       if (payload) {
-        console.log('ChatRoom Connection!!!');
+        // console.log('ChatRoom Connection!!!');
         client.data.user = payload;
         this.chatService.registerClient(payload.sub, client);
         await this.chatService.joinUserRooms(payload, client);

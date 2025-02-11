@@ -20,7 +20,7 @@ export class NotificationGateway
   ) {}
 
   handleDisconnect(client: Socket) {
-    console.log('Notification Disconnect!!!');
+    // console.log('Notification Disconnect!!!');
     const user = client.data.user;
 
     if (user) {
