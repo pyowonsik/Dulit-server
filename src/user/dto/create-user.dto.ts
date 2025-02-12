@@ -25,7 +25,7 @@ export class CreateUserDto {
   name: string;
 
   @IsEnum(SocialProvider, {
-    message: 'provider must be one of KAKAO, APP`LE, NAVER',
+    message: 'provider must be one of KAKAO, APPLE, NAVER , UNKNWON',
   })
   @ApiProperty({
     description: '유저 socialProvider',

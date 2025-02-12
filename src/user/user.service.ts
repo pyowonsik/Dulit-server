@@ -1,5 +1,7 @@
 import {
   BadRequestException,
+  forwardRef,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -19,6 +21,7 @@ import { CommentModel } from 'src/post/comment/entity/comment.entity';
 import { NotificationGateway } from 'src/notification/notification.gateway';
 import { NotificationService } from 'src/notification/notification.service';
 import { Anniversary } from 'src/anniversary/entity/anniversary.entity';
+import { AuthService } from 'src/auth/auth.service';
 
 @Injectable()
 export class UserService {
@@ -31,6 +34,8 @@ export class UserService {
     private readonly coupleRepository: Repository<Couple>,
     private readonly configService: ConfigService,
     private readonly notificationService: NotificationService,
+    @Inject(forwardRef(() => AuthService))
+    private readonly authService: AuthService,
   ) {}
 
   async create(createUserDto: CreateUserDto) {
@@ -47,7 +52,11 @@ export class UserService {
       });
     }
 
-    return user;
+    return {
+      accessToken: await this.authService.issueToken(user, false),
+      refreshToken: await this.authService.issueToken(user, true),
+      user,
+    };
   }
 
   async findAll() {

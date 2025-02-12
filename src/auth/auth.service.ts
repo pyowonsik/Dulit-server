@@ -24,7 +24,6 @@ export class AuthService {
   ) {}
 
   async kakaoLogin(req) {
-    
     const kakaoUser = req.user.info;
 
     const user = await this.userService.create({
@@ -36,10 +35,7 @@ export class AuthService {
 
     // JWT 토큰 생성
     // midleware나 guard에서 토큰이 유효한지 검증
-    return {
-      accessToken: await this.issueToken(user, false),
-      refreshToken: await this.issueToken(user, true),
-    };
+    return user;
   }
 
   // appleLogin()
@@ -57,17 +53,14 @@ export class AuthService {
 
     // JWT 토큰 생성
     // midleware나 guard에서 토큰이 유효한지 검증
-    return {
-      accessToken: await this.issueToken(user, false),
-      refreshToken: await this.issueToken(user, true),
-    };
+    return user;
   }
 
-  async socialIdLogin(socialId:string){
+  async socialIdLogin(socialId: string) {
     const user = await this.userRepository.findOne({
-      where : {
-        socialId
-      }
+      where: {
+        socialId,
+      },
     });
 
     if (!user) {
@@ -75,9 +68,9 @@ export class AuthService {
     }
 
     return {
-      accessToken : await this.issueToken(user, false),
-      refreshToken : await this.issueToken(user, true),
-    }
+      accessToken: await this.issueToken(user, false),
+      refreshToken: await this.issueToken(user, true),
+    };
   }
 
   // ${Bearer token} -> Bearer 토큰 분리해서 검증후 payload 반환
