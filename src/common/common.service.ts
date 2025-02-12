@@ -1,9 +1,22 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { SelectQueryBuilder } from 'typeorm';
 import { CursorPaginationDto } from './dto/cursor-pagination.dto';
+import { PagePaginationDto } from './dto/page-pagination.dto';
 
 @Injectable()
 export class CommonService {
+  applyPagePaginationParamsToQb<T>(
+    qb: SelectQueryBuilder<T>,
+    dto: PagePaginationDto,
+  ) {
+    const { take, page } = dto;
+    const skip = (page - 1) * take;
+
+
+    // 3,2  -> (4,5,6) , 1페이지(1,2,3) 스킵
+    qb.take(take);
+    qb.skip(skip);
+  }
   async applyCursorPaginationParamsToQb<T>(
     qb: SelectQueryBuilder<T>,
     dto: CursorPaginationDto,

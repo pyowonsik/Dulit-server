@@ -6,6 +6,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/user/entity/user.entity';
 import { Post } from '../entity/post.entity';
 import { Repository } from 'typeorm/repository/Repository';
+import { getCommentDto } from './dto/get-comment.dto';
+import { CommonService } from 'src/common/common.service';
 
 @Injectable()
 export class CommentService {
@@ -16,6 +18,7 @@ export class CommentService {
     private readonly postRepository: Repository<Post>,
     @InjectRepository(CommentModel)
     private readonly commentRepository: Repository<CommentModel>,
+    private readonly commonService: CommonService,
   ) {}
 
   async create(
@@ -57,13 +60,38 @@ export class CommentService {
     return comment;
   }
 
-  async findAll(postId: number) {
-    const comments = await this.commentRepository.find();
+  async findAll(dto: getCommentDto, postId: number) {
+    const post = await this.postRepository.findOne({
+      where: { id: postId },
+      relations: ['comments'],
+    });
+
+    if (!post) {
+      throw new NotFoundException('존재하지 않는 POST의 ID 입니다.');
+    }
+
+    const qb = this.commentRepository
+      .createQueryBuilder('comment')
+      .where('comment.postId = :postId', { postId })
+      .select();
+
+    this.commonService.applyPagePaginationParamsToQb(qb, dto);
+
+    const comments = await qb.getMany();
 
     return comments;
   }
 
-  async findOne(id: number) {
+  async findOne(postId: number, id: number) {
+    const post = await this.postRepository.findOne({
+      where: { id: postId },
+      relations: ['comments'],
+    });
+
+    if (!post) {
+      throw new NotFoundException('존재하지 않는 POST의 ID 입니다.');
+    }
+
     const comment = await this.commentRepository.findOne({
       where: {
         id,
@@ -82,7 +110,16 @@ export class CommentService {
   //   return `This action updates a #${id} comment`;
   // }
 
-  async remove(id: number) {
+  async remove(postId: number, id: number) {
+    const post = await this.postRepository.findOne({
+      where: { id: postId },
+      relations: ['comments'],
+    });
+
+    if (!post) {
+      throw new NotFoundException('존재하지 않는 POST의 ID 입니다.');
+    }
+
     const comment = await this.commentRepository.findOne({
       where: {
         id,
