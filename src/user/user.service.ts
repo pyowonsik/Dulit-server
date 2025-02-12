@@ -34,7 +34,7 @@ export class UserService {
     private readonly coupleRepository: Repository<Couple>,
     private readonly configService: ConfigService,
     private readonly notificationService: NotificationService,
-    @Inject(forwardRef(() => AuthService))
+    @Inject(forwardRef(() => AuthService)) // 순환 종속성 문제 해결을 위한 지연 주입
     private readonly authService: AuthService,
   ) {}
 
