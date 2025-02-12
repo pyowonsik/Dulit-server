@@ -78,7 +78,7 @@ import { Anniversary } from './anniversary/entity/anniversary.entity';
           Plan,
           CommentModel,
           PostUserLike,
-          Anniversary
+          Anniversary,
         ],
         synchronize: true,
       }),
@@ -108,10 +108,10 @@ import { Anniversary } from './anniversary/entity/anniversary.entity';
       provide: APP_GUARD,
       useClass: AuthGuard,
     },
-    // {
-    //   provide: APP_FILTER,
-    //   useClass: ForbiddenExceptionFilter,
-    // },
+    {
+      provide: APP_FILTER,
+      useClass: ForbiddenExceptionFilter,
+    },
     {
       provide: APP_FILTER,
       useClass: QueryFailedExceptionFilter,

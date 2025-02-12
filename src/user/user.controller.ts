@@ -8,6 +8,7 @@ import {
   Delete,
   ParseIntPipe,
   UseInterceptors,
+  Request,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -16,7 +17,6 @@ import { TransactionInterceptor } from 'src/common/interceptor/transaction.inter
 import { QueryRunner as QR } from 'typeorm';
 import { QueryRunner } from 'src/common/decorator/query-runner.decorator';
 import { CreateCoupleDto } from './dto/create-couple.dto';
-import { Request } from 'express';
 import { UserId } from './decorator/user-id.decorator';
 import { Public } from 'src/auth/decorator/public.decorator';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
@@ -44,6 +44,7 @@ export class UserController {
     summary: '유저 조회',
     description: '유저 조회',
   })
+  @RBAC(Role.admin)
   findAll() {
     return this.userService.findAll();
   }
@@ -57,6 +58,7 @@ export class UserController {
     return this.userService.findOne(id);
   }
 
+  // 유저 정보 업데이트 필요 여부 확인후 진행.
   // @Patch(':id')
   // @RBAC(Role.admin)
   // update(
@@ -65,46 +67,93 @@ export class UserController {
   // ) {
   //   return this.userService.update(id, updateUserDto);
   // }
-  
-  @Delete(':id')
+
+  @Delete('admin/:id')
   @ApiOperation({
-    summary: '유저 삭제',
-    description: '유저 삭제',
+    summary: '관리자 유저 삭제',
+    description: '관리자 유저 삭제',
   })
   @UseInterceptors(TransactionInterceptor)
   @RBAC(Role.admin)
-  remove(
-    @Param('id', ParseIntPipe) id: number,
-    @QueryRunner() qr: QR, // 트랜잭션 미적용을 감지하기 위한 데코레이터
-  ) {
+  adminRemove(@Param('id', ParseIntPipe) id: number, @QueryRunner() qr: QR) {
     return this.userService.remove(id, qr);
   }
 
-  @Post('/connect')
+  @Delete('')
   @ApiOperation({
-    summary: '유저 커플 연결',
-    description: '유저 커플 연결',
+    summary: '본인 회원 탈퇴',
+    description: '본인 회원 탈퇴',
   })
   @UseInterceptors(TransactionInterceptor)
-  async connectCouple(
+  @RBAC(Role.user)
+  remove(@UserId() myId: number, @QueryRunner() qr: QR) {
+    return this.userService.remove(myId, qr);
+  }
+
+  @Post('/admin/connect')
+  @ApiOperation({
+    summary: '어드민 커플 연결',
+    description: '어드민 커플 연결',
+  })
+  @UseInterceptors(TransactionInterceptor)
+  @RBAC(Role.admin)
+  async adminConnectCouple(
     @Body() createCoupleDto: CreateCoupleDto,
-    @QueryRunner() qr: QR, // 트랜잭션 미적용을 감지하기 위한 데코레이터
+    @QueryRunner() qr: QR,
   ) {
     return this.userService.connectCouple(createCoupleDto, qr);
   }
 
-  @Post('/disconnect')
+  @Post('/connect/:partnerId')
   @ApiOperation({
-    summary: '유저 커플 연결 해제',
-    description: '유저 커플 연결 해제',
+    summary: '본인 커플 연결',
+    description: '본인 커플 연결',
   })
   @UseInterceptors(TransactionInterceptor)
-  async disconnectCouple(
-    // @UserId() userId: number,
-    @Body() createCoupleDto: CreateCoupleDto,
-
-    @QueryRunner() qr: QR, // 트랜잭션 미적용을 감지하기 위한 데코레이터
+  @RBAC(Role.user)
+  async connectCouple(
+    @Request() req: any,
+    @Param('partnerId', ParseIntPipe) partnerId: number,
+    @QueryRunner() qr: QR,
   ) {
+    const createCoupleDto: CreateCoupleDto = {
+      myId: `${req.user.socialId}`,
+      partnerId: `${partnerId}`,
+    };
+
+    return this.userService.connectCouple(createCoupleDto, qr);
+  }
+
+  @Post('/admin/disconnect')
+  @ApiOperation({
+    summary: '어드민 커플 해제',
+    description: '어드민 커플 해제',
+  })
+  @RBAC(Role.admin)
+  @UseInterceptors(TransactionInterceptor)
+  async adminDisconnectCouple(
+    @Body() createCoupleDto: CreateCoupleDto,
+    @QueryRunner() qr: QR,
+  ) {
+    return this.userService.disConnectCouple(createCoupleDto, qr);
+  }
+
+  @Post('/disconnect/:partnerId')
+  @ApiOperation({
+    summary: '유저 커플 해제',
+    description: '유저 커플 해제',
+  })
+  @RBAC(Role.user)
+  @UseInterceptors(TransactionInterceptor)
+  async disconnectCouple(
+    @Request() req: any,
+    @Param('partnerId', ParseIntPipe) partnerId: number,
+    @QueryRunner() qr: QR,
+  ) {
+    const createCoupleDto: CreateCoupleDto = {
+      myId: `${req.user.socialId}`,
+      partnerId: `${partnerId}`,
+    };
     return this.userService.disConnectCouple(createCoupleDto, qr);
   }
 }
