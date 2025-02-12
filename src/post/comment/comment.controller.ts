@@ -16,7 +16,7 @@ import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 import { IsCommentMineOrAdminGuard } from './guard/is-comment-mine-or-admin.guard';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { getCommentDto } from './dto/get-comment.dto';
+import { GetCommentDto } from './dto/get-comment.dto';
 
 @Controller('post/:postId/comment')
 @ApiTags('comment')
@@ -46,7 +46,7 @@ export class CommentController {
   })
   findAll(
     @Param('postId', ParseIntPipe) postId: number,
-    @Query() dto: getCommentDto,
+    @Query() dto: GetCommentDto,
   ) {
     return this.commentService.findAll(dto, postId);
   }

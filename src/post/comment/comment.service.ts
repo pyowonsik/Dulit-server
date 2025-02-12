@@ -6,7 +6,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/user/entity/user.entity';
 import { Post } from '../entity/post.entity';
 import { Repository } from 'typeorm/repository/Repository';
-import { getCommentDto } from './dto/get-comment.dto';
+import { GetCommentDto } from './dto/get-comment.dto';
 import { CommonService } from 'src/common/common.service';
 
 @Injectable()
@@ -60,7 +60,7 @@ export class CommentService {
     return comment;
   }
 
-  async findAll(dto: getCommentDto, postId: number) {
+  async findAll(dto: GetCommentDto, postId: number) {
     const post = await this.postRepository.findOne({
       where: { id: postId },
       relations: ['comments'],

@@ -1,8 +1,8 @@
 import { BaseTable } from 'src/common/entity/base-table.entity';
 import { Couple } from 'src/user/entity/couple.entity';
-import { User } from 'src/user/entity/user.entity';
 import {
   Column,
+  CreateDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
@@ -10,24 +10,17 @@ import {
 } from 'typeorm';
 
 @Entity()
-export class Plan extends BaseTable {
+export class Anniversary extends BaseTable {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column()
-  topic: string;
-
-  @Column()
-  location: string;
+  title: string;
 
   @Column({ type: 'date' })
-  time: Date;
+  date: Date;
 
-  @ManyToOne(() => Couple, (couple) => couple.plans)
+  @ManyToOne(() => Couple, (couple) => couple.anniversaries)
   @JoinColumn()
   couple: Couple;
-
-  @ManyToOne(() => User, (user) => user.plans)
-  @JoinColumn()
-  author: User;
 }

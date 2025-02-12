@@ -33,6 +33,8 @@ import { PostUserLike } from './post/comment/entity/post-user-like.entity';
 import { RBACGuard } from './auth/guard/rbac.guard';
 import { ForbiddenExceptionFilter } from './common/filter/forbidden.filter';
 import { QueryFailedExceptionFilter } from './common/filter/query-failed.filter';
+import { AnniversaryModule } from './anniversary/anniversary.module';
+import { Anniversary } from './anniversary/entity/anniversary.entity';
 
 @Module({
   imports: [
@@ -76,6 +78,7 @@ import { QueryFailedExceptionFilter } from './common/filter/query-failed.filter'
           Plan,
           CommentModel,
           PostUserLike,
+          Anniversary
         ],
         synchronize: true,
       }),
@@ -97,6 +100,7 @@ import { QueryFailedExceptionFilter } from './common/filter/query-failed.filter'
     CommonModule,
     PlanModule,
     NotificationModule,
+    AnniversaryModule,
   ],
   controllers: [],
   providers: [

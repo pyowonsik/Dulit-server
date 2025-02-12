@@ -7,7 +7,7 @@ export class GetPlanDto extends CursorPaginationDto {
   @IsOptional()
   @ApiProperty({
     description: '약속 주제',
-    example: '까치산역 데이트트',
+    example: '까치산역 데이트',
   })
   topic?: string;
 }

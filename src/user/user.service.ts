@@ -18,6 +18,7 @@ import { Post } from 'src/post/entity/post.entity';
 import { CommentModel } from 'src/post/comment/entity/comment.entity';
 import { NotificationGateway } from 'src/notification/notification.gateway';
 import { NotificationService } from 'src/notification/notification.service';
+import { Anniversary } from 'src/anniversary/entity/anniversary.entity';
 
 @Injectable()
 export class UserService {
@@ -123,6 +124,10 @@ export class UserService {
           couple: user.couple,
         });
 
+        await qr.manager.delete(Anniversary, {
+          couple: user.couple,
+        });
+
         await qr.manager.delete(Couple, couple.id);
       }
     }
@@ -173,18 +178,15 @@ export class UserService {
   }
 
   async disConnectCouple(createCoupleDto: CreateCoupleDto, qr: QueryRunner) {
-  
     const me = await qr.manager.findOne(User, {
       where: { socialId: createCoupleDto.myId },
-      relations: ['couple','chatRooms'],
+      relations: ['couple', 'chatRooms'],
     });
     const partner = await qr.manager.findOne(User, {
       where: { socialId: createCoupleDto.partnerId },
       relations: ['couple'],
     });
 
-
-   
     if (!me || !partner)
       throw new NotFoundException('사용자가 존재하지 않습니다.');
     if (!me.couple || !partner.couple)
@@ -227,12 +229,22 @@ export class UserService {
           couple: me.couple,
         });
 
+        await qr.manager.delete(Anniversary, {
+          couple: me.couple,
+        });
+
         await qr.manager.delete(Couple, couple.id);
       }
     }
 
-    this.notificationService.sendNotification(me.id, '커플 연결이 해제되었습니다.');
-    this.notificationService.sendNotification(partner.id, '커플 연결이 해제되었습니다.');
+    this.notificationService.sendNotification(
+      me.id,
+      '커플 연결이 해제되었습니다.',
+    );
+    this.notificationService.sendNotification(
+      partner.id,
+      '커플 연결이 해제되었습니다.',
+    );
 
     return me.id;
   }

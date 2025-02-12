@@ -8,10 +8,11 @@ import { Couple } from './entity/couple.entity';
 import { Chat } from 'src/chat/entity/chat.entity';
 import { Post } from 'src/post/entity/post.entity';
 import { NotificationModule } from 'src/notification/notification.module';
+import { Anniversary } from 'src/anniversary/entity/anniversary.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, ChatRoom, Couple, Post, Chat]),
+    TypeOrmModule.forFeature([User, ChatRoom, Couple, Post, Chat,Anniversary]),
     NotificationModule,
   ],
   controllers: [UserController],

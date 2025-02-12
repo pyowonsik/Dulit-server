@@ -23,7 +23,7 @@ export class CreatePlanDto {
   @IsDate()
   @ApiProperty({
     description: '약속 시간',
-    example: '오후 1시',
+    example: '2025-02-07T06:30:05.016Z',
   })
   time: Date;
 
