@@ -54,6 +54,7 @@ export class UserController {
     summary: '유저 단건 조회',
     description: '유저 단건 조회',
   })
+  @RBAC(Role.admin)
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.userService.findOne(id);
   }
@@ -68,49 +69,34 @@ export class UserController {
   //   return this.userService.update(id, updateUserDto);
   // }
 
-  @Delete('admin/:id')
+  @Delete(':id')
   @ApiOperation({
     summary: '관리자 유저 삭제',
     description: '관리자 유저 삭제',
   })
   @UseInterceptors(TransactionInterceptor)
   @RBAC(Role.admin)
-  adminRemove(@Param('id', ParseIntPipe) id: number, @QueryRunner() qr: QR) {
+  remove(@Param('id', ParseIntPipe) id: number, @QueryRunner() qr: QR) {
     return this.userService.remove(id, qr);
   }
 
-  @Delete('')
+  @Delete('me')
   @ApiOperation({
-    summary: '본인 회원 탈퇴',
-    description: '본인 회원 탈퇴',
+    summary: '회원 탈퇴',
+    description: '회원 탈퇴',
   })
   @UseInterceptors(TransactionInterceptor)
   @RBAC(Role.user)
-  remove(@UserId() myId: number, @QueryRunner() qr: QR) {
+  removeMe(@UserId() myId: number, @QueryRunner() qr: QR) {
     return this.userService.remove(myId, qr);
-  }
-
-  @Post('/admin/connect')
-  @ApiOperation({
-    summary: '어드민 커플 연결',
-    description: '어드민 커플 연결',
-  })
-  @UseInterceptors(TransactionInterceptor)
-  @RBAC(Role.admin)
-  async adminConnectCouple(
-    @Body() createCoupleDto: CreateCoupleDto,
-    @QueryRunner() qr: QR,
-  ) {
-    return this.userService.connectCouple(createCoupleDto, qr);
   }
 
   @Post('/connect/:partnerId')
   @ApiOperation({
-    summary: '본인 커플 연결',
-    description: '본인 커플 연결',
+    summary: '커플 연결',
+    description: '커플 연결',
   })
   @UseInterceptors(TransactionInterceptor)
-  @RBAC(Role.user)
   async connectCouple(
     @Request() req: any,
     @Param('partnerId', ParseIntPipe) partnerId: number,
@@ -124,26 +110,11 @@ export class UserController {
     return this.userService.connectCouple(createCoupleDto, qr);
   }
 
-  @Post('/admin/disconnect')
-  @ApiOperation({
-    summary: '어드민 커플 해제',
-    description: '어드민 커플 해제',
-  })
-  @RBAC(Role.admin)
-  @UseInterceptors(TransactionInterceptor)
-  async adminDisconnectCouple(
-    @Body() createCoupleDto: CreateCoupleDto,
-    @QueryRunner() qr: QR,
-  ) {
-    return this.userService.disConnectCouple(createCoupleDto, qr);
-  }
-
   @Post('/disconnect/:partnerId')
   @ApiOperation({
-    summary: '유저 커플 해제',
-    description: '유저 커플 해제',
+    summary: '커플 해제',
+    description: '커플 해제',
   })
-  @RBAC(Role.user)
   @UseInterceptors(TransactionInterceptor)
   async disconnectCouple(
     @Request() req: any,

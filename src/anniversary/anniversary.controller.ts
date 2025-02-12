@@ -17,6 +17,8 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { GetAnniversaryDto } from './dto/get-anniverasry.dto';
 // import { IsAnniversaryCoupleOrAdmin } from './guard/is-anniversary-couple-or-admin.guard';
 
+// coupleId req로 찾기
+
 @Controller('/couple/:coupleId/anniversary')
 @ApiTags('anniversary')
 @ApiBearerAuth()
@@ -65,6 +67,4 @@ export class AnniversaryController {
   ) {
     return this.anniversaryService.remove(coupleId, id);
   }
-
-  
 }

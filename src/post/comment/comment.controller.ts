@@ -35,7 +35,6 @@ export class CommentController {
     @Body() createCommentDto: CreateCommentDto,
   ) {
     const userId = req.user.sub;
-    console.log('post');
     return this.commentService.create(createCommentDto, userId, postId);
   }
 
@@ -58,7 +57,8 @@ export class CommentController {
   })
   findOne(
     @Param('postId', ParseIntPipe) postId: number,
-    @Param('commentId', ParseIntPipe) id: number) {
+    @Param('commentId', ParseIntPipe) id: number,
+  ) {
     return this.commentService.findOne(postId, id);
   }
 
@@ -79,7 +79,8 @@ export class CommentController {
   @UseGuards(IsCommentMineOrAdminGuard)
   remove(
     @Param('postId', ParseIntPipe) postId: number,
-    @Param('commentId', ParseIntPipe) id: number) {
+    @Param('commentId', ParseIntPipe) id: number,
+  ) {
     return this.commentService.remove(postId, id);
   }
 }
