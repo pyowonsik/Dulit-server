@@ -15,11 +15,12 @@ import { CreateAnniversaryDto } from './dto/create-anniversary.dto';
 import { UpdateAnniversaryDto } from './dto/update-anniversary.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { GetAnniversaryDto } from './dto/get-anniverasry.dto';
+import { UserId } from 'src/user/decorator/user-id.decorator';
+import { IsAnniversaryCoupleOrAdmin } from './guard/is-anniversary-couple-or-admin.guard';
 // import { IsAnniversaryCoupleOrAdmin } from './guard/is-anniversary-couple-or-admin.guard';
 
-// coupleId req로 찾기
 
-@Controller('/couple/:coupleId/anniversary')
+@Controller('/couple/anniversary')
 @ApiTags('anniversary')
 @ApiBearerAuth()
 export class AnniversaryController {
@@ -27,44 +28,41 @@ export class AnniversaryController {
 
   @Post()
   create(
-    @Param('coupleId', ParseIntPipe) coupleId: number,
+    @UserId() userId: number,
     @Body() createAnniversaryDto: CreateAnniversaryDto,
   ) {
-    return this.anniversaryService.create(coupleId, createAnniversaryDto);
+    return this.anniversaryService.create(userId, createAnniversaryDto);
   }
 
   @Get()
-  findAll(
-    @Param('coupleId', ParseIntPipe) coupleId: number,
-    @Query() dto: GetAnniversaryDto,
-  ) {
-    return this.anniversaryService.findAll(dto, coupleId);
+  findAll(@UserId() userId: number, @Query() dto: GetAnniversaryDto) {
+    return this.anniversaryService.findAll(userId, dto);
   }
 
   @Get(':anniversaryId')
   findOne(
-    @Param('coupleId', ParseIntPipe) coupleId: number,
+ @UserId() userId: number, 
     @Param('anniversaryId', ParseIntPipe) id: number,
   ) {
-    return this.anniversaryService.findOne(coupleId, id);
+    return this.anniversaryService.findOne(userId, id);
   }
 
   @Patch(':anniversaryId')
-  // @UseGuards(IsAnniversaryCoupleOrAdmin)
+  @UseGuards(IsAnniversaryCoupleOrAdmin)
   update(
-    @Param('coupleId', ParseIntPipe) coupleId: number,
+    @UserId() userId: number, 
     @Param('anniversaryId', ParseIntPipe) id: number,
     @Body() updateAnniversaryDto: UpdateAnniversaryDto,
   ) {
-    return this.anniversaryService.update(coupleId, id, updateAnniversaryDto);
+    return this.anniversaryService.update(userId, id, updateAnniversaryDto);
   }
 
   @Delete(':anniversaryId')
-  // @UseGuards(IsAnniversaryCoupleOrAdmin)
+  @UseGuards(IsAnniversaryCoupleOrAdmin)
   remove(
-    @Param('coupleId', ParseIntPipe) coupleId: number,
+    @UserId() userId: number, 
     @Param('anniversaryId', ParseIntPipe) id: number,
   ) {
-    return this.anniversaryService.remove(coupleId, id);
+    return this.anniversaryService.remove(userId, id);
   }
 }

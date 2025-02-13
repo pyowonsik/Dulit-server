@@ -9,12 +9,12 @@ export class BaseTable {
   @ApiHideProperty()
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ select: false })
   @Exclude()
   @ApiHideProperty()
   updatedAt: Date;
 
-  @VersionColumn()
+  @VersionColumn({ select: false })
   @Exclude()
   @ApiHideProperty()
   version: number;

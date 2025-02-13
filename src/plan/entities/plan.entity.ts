@@ -20,7 +20,7 @@ export class Plan extends BaseTable {
   @Column()
   location: string;
 
-  @Column({ type: 'date' })
+  @Column()
   time: Date;
 
   @ManyToOne(() => Couple, (couple) => couple.plans)

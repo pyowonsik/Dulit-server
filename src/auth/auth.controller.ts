@@ -66,17 +66,7 @@ export class AuthController {
       accessToken: await this.authService.issueToken(req.user, false),
     };
   }
-
-  @Get('/me')
-  @ApiOperation({
-    summary: '내 유저 정보 조회',
-    description: '내 유저 정보 조회',
-  })
-  @ApiBearerAuth()
-  async getMe(@Request() req: any) {
-    return this.authService.getMe(req.user.sub);
-  }
-
+  
   // socialId 로그인 후, postMan env accessToken에 넣기
   // -> social login을 직접 호출할수 없어서 생성한 test endpoint
   @Post('social/login/:socialId')

@@ -69,7 +69,7 @@ export class PlanController {
     description: '약속 수정',
   })
   @UseInterceptors(TransactionInterceptor)
-  // @UseGuards(IsPlanMineOrAdminGuard)
+  @UseGuards(IsPlanMineOrAdminGuard)
   async update(
     @Param('planId', ParseIntPipe) id: number,
     @Body() updatePlanDto: UpdatePlanDto,
@@ -83,7 +83,7 @@ export class PlanController {
     summary: '약속 삭제',
     description: '약속 삭제',
   })
-  // @UseGuards(IsPlanMineOrAdminGuard)
+  @UseGuards(IsPlanMineOrAdminGuard)
   async remove(@Param('planId', ParseIntPipe) id: number) {
     return this.planService.remove(id);
   }

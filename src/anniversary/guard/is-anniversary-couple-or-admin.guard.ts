@@ -29,22 +29,20 @@ export class IsAnniversaryCoupleOrAdmin implements CanActivate {
     //  * Admin일 경우 그냥 패스
     //  */
     if (user.role === Role.admin) {
-      console.log('admin');
       return true;
     }
-    const coupleId = req.params.coupleId;
+    const userId = user.sub;
     const anniversaryId = req.params.anniversaryId;
 
     if (!anniversaryId) {
       throw new BadRequestException('COMMENT ID가 파라미터로 제공 돼야합니다.');
     }
 
-    // const isOk = await this.anniversaryService.isAnniversaryCouple(
-    //   user.id,
-    //   coupleId,
-    //   anniversaryId,
-    // );
+    const isOk = await this.anniversaryService.isAnniversaryCouple(
+      userId,
+      anniversaryId,
+    );
 
-    // return isOk;
+    return isOk;
   }
 }

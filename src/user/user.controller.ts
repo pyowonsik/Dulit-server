@@ -49,6 +49,17 @@ export class UserController {
     return this.userService.findAll();
   }
 
+  @Get('me')
+  @ApiOperation({
+    summary: '내 유저 정보 조회',
+    description: '내 유저 정보 조회',
+  })
+  @RBAC(Role.user)
+  async getMe(@Request() req: any) {
+    console.log(req.user.sub);
+    return this.userService.findOne(req.user.sub);
+  }
+
   @Get(':id')
   @ApiOperation({
     summary: '유저 단건 조회',
@@ -69,17 +80,6 @@ export class UserController {
   //   return this.userService.update(id, updateUserDto);
   // }
 
-  @Delete(':id')
-  @ApiOperation({
-    summary: '관리자 유저 삭제',
-    description: '관리자 유저 삭제',
-  })
-  @UseInterceptors(TransactionInterceptor)
-  @RBAC(Role.admin)
-  remove(@Param('id', ParseIntPipe) id: number, @QueryRunner() qr: QR) {
-    return this.userService.remove(id, qr);
-  }
-
   @Delete('me')
   @ApiOperation({
     summary: '회원 탈퇴',
@@ -89,6 +89,17 @@ export class UserController {
   @RBAC(Role.user)
   removeMe(@UserId() myId: number, @QueryRunner() qr: QR) {
     return this.userService.remove(myId, qr);
+  }
+  
+  @Delete(':id')
+  @ApiOperation({
+    summary: '관리자 유저 삭제',
+    description: '관리자 유저 삭제',
+  })
+  @UseInterceptors(TransactionInterceptor)
+  @RBAC(Role.admin)
+  remove(@Param('id', ParseIntPipe) id: number, @QueryRunner() qr: QR) {
+    return this.userService.remove(id, qr);
   }
 
   @Post('/connect/:partnerId')

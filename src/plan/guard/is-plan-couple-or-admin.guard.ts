@@ -30,13 +30,14 @@ export class IsPlanMineOrAdminGuard implements CanActivate {
       return true;
     }
 
+    const userId = user.sub;
     const planId = req.params.planId;
 
     if (!planId) {
       throw new BadRequestException('PLAN ID가 파라미터로 제공 돼야합니다.');
     }
 
-    const isOk = await this.planService.isPlanMine(user.id, parseInt(planId));
+    const isOk = await this.planService.isPlanCouple(userId, parseInt(planId));
 
     if (!isOk) {
       throw new ForbiddenException('권한이 없습니다.');

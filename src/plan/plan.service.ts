@@ -64,7 +64,7 @@ export class PlanService {
       .leftJoinAndSelect('user.couple', 'couple')
       .where(`user.id = :userId`, { userId })
       .getOne();
-    
+
     // createQueryBuilder사용시 id값 비교.
 
     const qb = this.planRepository
@@ -72,12 +72,11 @@ export class PlanService {
       .leftJoinAndSelect('plan.couple', 'couple')
       .where(`plan.couple = :coupleId`, { coupleId: user.couple.id });
 
-
     this.planRepository.find({
-      where : {
-        couple : user.couple
-      }
-    })
+      where: {
+        couple: user.couple,
+      },
+    });
 
     if (topic) {
       qb.andWhere('plan.topic LIKE :topic', { topic: `%${topic}%` });
@@ -158,35 +157,25 @@ export class PlanService {
     return id;
   }
 
-  async isPlanMine(userId: number, planId: number) {
-    // const user = await this.userRepository.findOne({
-    //   where: {
-    //     id: userId,
-    //   },
-    //   relations: ['couple'],
-    // });
+  async isPlanCouple(userId: number, planId: number) {
+    const couple = await this.coupleRepository
+      .createQueryBuilder('couple')
+      .leftJoin('couple.users', 'user')
+      .where('user.id = :userId', { userId })
+      .getOne();
 
-    // const isOk =  await this.planRepository.exists({
-    //   where: {
-    //     id: planId,
-    //     couple: user.couple,
-    //   },
-    //   relations: {
-    //     author: true,
-    //     couple: true,
-    //   },
-    // });
+  
 
-    return this.planRepository.exists({
-      where: {
-        id: planId,
-        author: {
-          id: userId,
-        },
-      },
-      relations: {
-        author: true,
-      },
-    });
+    if (!couple) {
+      return false; // 사용자가 커플에 속하지 않음
+    }
+
+    const exists = await this.planRepository
+      .createQueryBuilder('plan')
+      .where('plan.id = :planId', { planId })
+      .andWhere('plan.coupleId = :coupleId', { coupleId: couple.id })
+      .getExists();
+      
+    return exists;
   }
 }
