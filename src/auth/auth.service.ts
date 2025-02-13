@@ -56,6 +56,9 @@ export class AuthService {
     return user;
   }
 
+  // unknownLogin() {}
+
+
   async socialIdLogin(socialId: string) {
     const user = await this.userRepository.findOne({
       where: {

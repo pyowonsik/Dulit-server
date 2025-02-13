@@ -22,6 +22,7 @@ import { NotificationGateway } from 'src/notification/notification.gateway';
 import { NotificationService } from 'src/notification/notification.service';
 import { Anniversary } from 'src/anniversary/entity/anniversary.entity';
 import { AuthService } from 'src/auth/auth.service';
+import { Calendar } from 'src/calendar/entities/calendar.entity';
 
 @Injectable()
 export class UserService {
@@ -137,6 +138,10 @@ export class UserService {
           couple: user.couple,
         });
 
+        await qr.manager.delete(Calendar, {
+          couple: user.couple,
+        });
+
         await qr.manager.delete(Couple, couple.id);
       }
     }
@@ -239,6 +244,10 @@ export class UserService {
         });
 
         await qr.manager.delete(Anniversary, {
+          couple: me.couple,
+        });
+
+        await qr.manager.delete(Calendar, {
           couple: me.couple,
         });
 

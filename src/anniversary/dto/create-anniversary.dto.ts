@@ -20,7 +20,7 @@ export class CreateAnniversaryDto {
   @IsDate()
   @ApiProperty({
     description: '기념일',
-    example: '2025-02-07T06:30:05.016Z',
+    example: '2025-02-07',
   })
   date: Date;
 }

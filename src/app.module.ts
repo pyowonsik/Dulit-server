@@ -35,6 +35,8 @@ import { ForbiddenExceptionFilter } from './common/filter/forbidden.filter';
 import { QueryFailedExceptionFilter } from './common/filter/query-failed.filter';
 import { AnniversaryModule } from './anniversary/anniversary.module';
 import { Anniversary } from './anniversary/entity/anniversary.entity';
+import { CalendarModule } from './calendar/calendar.module';
+import { Calendar } from './calendar/entities/calendar.entity';
 
 @Module({
   imports: [
@@ -79,6 +81,7 @@ import { Anniversary } from './anniversary/entity/anniversary.entity';
           CommentModel,
           PostUserLike,
           Anniversary,
+          Calendar
         ],
         synchronize: true,
       }),
@@ -101,6 +104,7 @@ import { Anniversary } from './anniversary/entity/anniversary.entity';
     PlanModule,
     NotificationModule,
     AnniversaryModule,
+    CalendarModule,
   ],
   controllers: [],
   providers: [

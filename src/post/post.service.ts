@@ -58,7 +58,7 @@ export class PostService {
     if (createPostDto.filePaths) {
       // movie 생성시, temp폴더의 movieFile을 movie폴더로 이동 시킨다.
       const tempFolder = join('public', 'temp');
-      const filesFolder = join('public', 'files');
+      const filesFolder = join('public', 'files/post');
 
       if (!existsSync(filesFolder)) {
         mkdirSync(filesFolder, { recursive: true });
@@ -150,7 +150,7 @@ export class PostService {
     if (updatePostDto.filePaths) {
       // movie 생성시, temp폴더의 movieFile을 movie폴더로 이동 시킨다.
       const tempFolder = join('public', 'temp');
-      const filesFolder = join('public', 'files');
+      const filesFolder = join('public', 'files/post');
 
       // 1. public/files의 post.filePaths 삭제
       post.filePaths.forEach((file) => {

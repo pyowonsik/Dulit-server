@@ -5,6 +5,7 @@ import { ChatRoom } from 'src/chat/entity/chat-room.entity';
 import { Plan } from 'src/plan/entities/plan.entity';
 import { Post } from 'src/post/entity/post.entity';
 import { Anniversary } from 'src/anniversary/entity/anniversary.entity';
+import { Calendar } from 'src/calendar/entities/calendar.entity';
 
 @Entity()
 export class Couple extends BaseTable {
@@ -26,5 +27,8 @@ export class Couple extends BaseTable {
   // 디데이 , 달력
   @OneToMany(() => Anniversary, (anniversary) => anniversary.couple)
   anniversaries: Anniversary[];
+  
+  @OneToMany(() => Calendar, (calendar) => calendar.couple)
+  calendars: Calendar[];
 }
 

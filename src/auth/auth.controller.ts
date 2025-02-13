@@ -27,13 +27,13 @@ export class AuthController {
   // kakao 로그인
   @Get('kakao')
   @Public()
-  @ApiExcludeEndpoint() // Swagger에서 이 엔드포인트 숨김
+  @ApiExcludeEndpoint() 
   @UseGuards(AuthGuard('kakao'))
   async kakaoLogin() {}
 
   @Get('kakao/callback')
   @Public()
-  @ApiExcludeEndpoint() // Swagger에서 이 엔드포인트 숨김
+  @ApiExcludeEndpoint() 
   @UseGuards(AuthGuard('kakao'))
   async kakaoLoginCallback(@Request() req) {
     return this.authService.kakaoLogin(req);
@@ -42,13 +42,13 @@ export class AuthController {
   // naver 로그인
   @Get('naver')
   @Public()
-  @ApiExcludeEndpoint() // Swagger에서 이 엔드포인트 숨김
+  @ApiExcludeEndpoint() 
   @UseGuards(AuthGuard('naver'))
   async naverLogin() {}
 
   @Get('naver/callback')
   @Public()
-  @ApiExcludeEndpoint() // Swagger에서 이 엔드포인트 숨김
+  @ApiExcludeEndpoint() 
   @UseGuards(AuthGuard('naver'))
   async naverAuthCallback(@Request() req) {
     return this.authService.naverLogin(req);
@@ -79,4 +79,8 @@ export class AuthController {
   async socialIdLogin(@Param('socialId') socialId: string) {
     return this.authService.socialIdLogin(socialId);
   }
+
+
+
+  
 }
