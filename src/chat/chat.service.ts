@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Socket } from 'socket.io';
 import { ChatRoom } from './entity/chat-room.entity';
@@ -32,9 +32,14 @@ export class ChatService {
   async joinUserRooms(user: { sub: number }, client: Socket) {
     const chatRooms = await this.chatRoomRepository
       .createQueryBuilder('chatRoom')
-      .innerJoin('chatRoom.users', 'user') // chatRoom과 users 테이블을 조인
+      .innerJoinAndSelect('chatRoom.users', 'user') // chatRoom과 users 테이블을 조인
       .where('user.id = :userId', { userId: user.sub }) // user.id로 필터링
       .getMany();
+
+    if (chatRooms.length === 0) {
+      client.emit('error', { message: '커플이 매칭 되지 않은 사용자입니다.' });
+      return;
+    }
 
     // socket Connect -> client(socket) chatRooms의 id 값으로 join
     chatRooms.forEach((room) => {
