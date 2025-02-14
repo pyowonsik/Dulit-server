@@ -96,55 +96,12 @@ export class UserService {
     }
 
     // 1. 유저가 속한 chatRoom - chat 삭제
-    if (user.chatRooms.length > 0) {
-      // 채팅방 - 채팅 사이 자식 관계 지우기
+    await this.deleteChatRoomsAndChats(user, qr);
 
-      await qr.manager.delete(Chat, {
-        chatRoom: user.chatRooms[0],
-      });
-
-      await qr.manager.delete(ChatRoom, user.chatRooms[0].id);
-    }
 
     // 2. 유저가 속한 couple - plan , post 삭제
-    if (user.couple) {
-      // couple - plan , post 사이 자식 관계 지우기
+    await this.deleteCoupleAndRelatedData(user, qr);
 
-      const couple = await qr.manager.findOne(Couple, {
-        where: { id: user.couple.id },
-        relations: ['users'],
-      });
-
-      if (couple?.users) {
-        await Promise.all(
-          couple.users.map(async (user) => {
-            await qr.manager.update(User, user.id, { couple: null });
-            // 커플간 post가 지워지는 거면 , 커플에 속한 user들 comments가 지워져야함
-            await qr.manager.delete(CommentModel, {
-              author: user,
-            });
-          }),
-        );
-
-        await qr.manager.delete(Plan, {
-          couple: user.couple,
-        });
-
-        await qr.manager.delete(Post, {
-          couple: user.couple,
-        });
-
-        await qr.manager.delete(Anniversary, {
-          couple: user.couple,
-        });
-
-        await qr.manager.delete(Calendar, {
-          couple: user.couple,
-        });
-
-        await qr.manager.delete(Couple, couple.id);
-      }
-    }
 
     // 3. 유저 삭제
     await qr.manager.delete(User, id);
@@ -207,53 +164,12 @@ export class UserService {
       throw new BadRequestException('매칭이 되지 않은 사용자입니다.');
 
     // 1. 유저가 속한 chatRoom - chat 삭제
-    if (me.chatRooms.length > 0) {
-      // 채팅방 - 채팅 사이 자식 관계 지우기
-
-      await qr.manager.delete(Chat, {
-        chatRoom: me.chatRooms[0],
-      });
-
-      await qr.manager.delete(ChatRoom, me.chatRooms[0].id);
-    }
+    await this.deleteChatRoomsAndChats(me, qr);
+  
 
     // 2. 유저가 속한 couple - plan , post 삭제
-    if (me.couple) {
-      // couple - plan , post 사이 자식 관계 지우기
-
-      const couple = await qr.manager.findOne(Couple, {
-        where: { id: me.couple.id },
-        relations: ['users'],
-      });
-
-      if (couple?.users) {
-        await Promise.all(
-          couple.users.map(async (user) => {
-            await qr.manager.update(User, user.id, { couple: null });
-            // 커플간 post가 지워지는 거면 , 커플에 속한 user들 comments가 지워져야함
-            await qr.manager.delete(CommentModel, {
-              author: user,
-            });
-          }),
-        );
-        await qr.manager.delete(Plan, {
-          couple: me.couple,
-        });
-        await qr.manager.delete(Post, {
-          couple: me.couple,
-        });
-
-        await qr.manager.delete(Anniversary, {
-          couple: me.couple,
-        });
-
-        await qr.manager.delete(Calendar, {
-          couple: me.couple,
-        });
-
-        await qr.manager.delete(Couple, couple.id);
-      }
-    }
+    await this.deleteCoupleAndRelatedData(me, qr);
+   
 
     this.notificationService.sendNotification(
       me.id,
@@ -265,5 +181,39 @@ export class UserService {
     );
 
     return me.id;
+  }
+
+
+  async deleteChatRoomsAndChats(user: User, qr: QueryRunner) {
+    if (user.chatRooms.length > 0) {
+      await qr.manager.delete(Chat, {
+        chatRoom: user.chatRooms[0],
+      });
+      await qr.manager.delete(ChatRoom, user.chatRooms[0].id);
+    }
+  }
+  
+  async deleteCoupleAndRelatedData(user: User, qr: QueryRunner) {
+    if (user.couple) {
+      const couple = await qr.manager.findOne(Couple, {
+        where: { id: user.couple.id },
+        relations: ['users'],
+      });
+  
+      if (couple?.users) {
+        await Promise.all(
+          couple.users.map(async (user) => {
+            await qr.manager.update(User, user.id, { couple: null });
+            await qr.manager.delete(CommentModel, { author: user });
+          }),
+        );
+  
+        await qr.manager.delete(Plan, { couple: user.couple });
+        await qr.manager.delete(Post, { couple: user.couple });
+        await qr.manager.delete(Anniversary, { couple: user.couple });
+        await qr.manager.delete(Calendar, { couple: user.couple });
+        await qr.manager.delete(Couple, couple.id);
+      }
+    }
   }
 }

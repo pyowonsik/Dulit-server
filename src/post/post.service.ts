@@ -97,9 +97,7 @@ export class PostService {
   async findAll(dto: GetPostDto) {
     const { title } = dto;
 
-    const qb = this.postRepository
-      .createQueryBuilder('post')
-      .leftJoinAndSelect('post.comments', 'comments');
+    const qb = await this.getPosts();
 
     if (title) {
       qb.where('post.title LIKE :title', { title: `%${title}%` });
@@ -184,8 +182,8 @@ export class PostService {
     return newPost;
   }
 
-  async remove(id: number,qr : QueryRunner) {
-    const post = await qr.manager.findOne(Post,{
+  async remove(id: number, qr: QueryRunner) {
+    const post = await qr.manager.findOne(Post, {
       where: {
         id,
       },
@@ -196,11 +194,11 @@ export class PostService {
       throw new NotFoundException('존재하지 않는 POST의 ID 입니다.');
     }
 
-    await qr.manager.delete(CommentModel,{
+    await qr.manager.delete(CommentModel, {
       post,
     });
 
-    await qr.manager.delete(Post,post.id);
+    await qr.manager.delete(Post, post.id);
 
     return id;
   }
@@ -220,9 +218,16 @@ export class PostService {
   }
 
   /* istanbul ignore next */
-  async getLikedRecord(postId: number, userId: number,qr : QueryRunner) {
+  async getPosts() {
+    return this.postRepository
+      .createQueryBuilder('post')
+      .leftJoinAndSelect('post.comments', 'comments');
+  }
+
+  /* istanbul ignore next */
+  async getLikedRecord(postId: number, userId: number, qr: QueryRunner) {
     return await qr.manager
-      .createQueryBuilder(PostUserLike,'pul')
+      .createQueryBuilder(PostUserLike, 'pul')
       .leftJoinAndSelect('pul.post', 'post')
       .leftJoinAndSelect('pul.user', 'user')
       .where('post.id = :postId', { postId })
@@ -230,8 +235,13 @@ export class PostService {
       .getOne();
   }
 
-  async togglePostLike(postId: number, userId: number, isLike: boolean,qr : QueryRunner) {
-    const post = await qr.manager.findOne(Post,{
+  async togglePostLike(
+    postId: number,
+    userId: number,
+    isLike: boolean,
+    qr: QueryRunner,
+  ) {
+    const post = await qr.manager.findOne(Post, {
       where: {
         id: postId,
       },
@@ -241,7 +251,7 @@ export class PostService {
       throw new NotFoundException('존재하지 않는 POST의 ID 입니다.');
     }
 
-    const user = await qr.manager.findOne(User,{
+    const user = await qr.manager.findOne(User, {
       where: {
         id: userId,
       },
@@ -251,15 +261,16 @@ export class PostService {
       throw new NotFoundException('존재하지 않는 USER의 ID 입니다.');
     }
 
-    const likeRecord = await this.getLikedRecord(postId, userId,qr);
+    const likeRecord = await this.getLikedRecord(postId, userId, qr);
 
     if (likeRecord) {
       if (isLike === likeRecord.isLike) {
         // 좋아요에서 좋아요 누르면 삭제
-        await qr.manager.delete(PostUserLike,{ post, user });
+        await qr.manager.delete(PostUserLike, { post, user });
       } else {
         // 좋아요에서 싫어요 누르면 해당 post,user 싫어요
-        await qr.manager.update(PostUserLike,
+        await qr.manager.update(
+          PostUserLike,
           {
             post,
             user,
@@ -269,14 +280,14 @@ export class PostService {
       }
     } else {
       // likeRecord 없다면 해당 movie,user의 postUserLike 좋아요
-      await qr.manager.save(PostUserLike,{
+      await qr.manager.save(PostUserLike, {
         post,
         user,
         isLike,
       });
     }
 
-    const result = await this.getLikedRecord(postId, userId,qr);
+    const result = await this.getLikedRecord(postId, userId, qr);
 
     return {
       isLike: result && result.isLike,

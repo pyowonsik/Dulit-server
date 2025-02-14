@@ -60,6 +60,14 @@ export class CommentService {
     return comment;
   }
 
+  /* istanbul ignore next */
+  async getComments(postId: number) {
+    return this.commentRepository
+      .createQueryBuilder('comment')
+      .where('comment.postId = :postId', { postId })
+      .select();
+  }
+
   async findAll(dto: GetCommentDto, postId: number) {
     const post = await this.postRepository.findOne({
       where: { id: postId },
@@ -70,10 +78,7 @@ export class CommentService {
       throw new NotFoundException('존재하지 않는 POST의 ID 입니다.');
     }
 
-    const qb = this.commentRepository
-      .createQueryBuilder('comment')
-      .where('comment.postId = :postId', { postId })
-      .select();
+    const qb = await this.getComments(postId);
 
     this.commonService.applyPagePaginationParamsToQb(qb, dto);
 
