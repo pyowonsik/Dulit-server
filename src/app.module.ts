@@ -37,6 +37,8 @@ import { AnniversaryModule } from './anniversary/anniversary.module';
 import { Anniversary } from './anniversary/entity/anniversary.entity';
 import { CalendarModule } from './calendar/calendar.module';
 import { Calendar } from './calendar/entities/calendar.entity';
+import { WinstonModule } from 'nest-winston';
+import * as winston from 'winston';
 
 @Module({
   imports: [
@@ -81,7 +83,7 @@ import { Calendar } from './calendar/entities/calendar.entity';
           CommentModel,
           PostUserLike,
           Anniversary,
-          Calendar
+          Calendar,
         ],
         synchronize: true,
       }),
@@ -95,6 +97,38 @@ import { Calendar } from './calendar/entities/calendar.entity';
     }),
     // Cron 작업 설정
     ScheduleModule.forRoot(),
+    // Winston Logger 설정
+    WinstonModule.forRoot({
+      level: 'debug',
+      transports: [
+        new winston.transports.Console({
+          format: winston.format.combine(
+            winston.format.colorize({
+              all: true,
+            }),
+            winston.format.timestamp(),
+            winston.format.printf(
+              (info) =>
+                `${info.timestamp} [${info.context}] ${info.level} ${info.message}`,
+            ),
+          ),
+        }),
+        new winston.transports.File({
+          dirname: join(process.cwd(), 'logs'),
+          filename: 'logs.log',
+          format: winston.format.combine(
+            // winston.format.colorize({
+            //   all: true,
+            // }),
+            winston.format.timestamp(),
+            winston.format.printf(
+              (info) =>
+                `${info.timestamp} [${info.context}] ${info.level} ${info.message}`,
+            ),
+          ),
+        }),
+      ],
+    }),
     AuthModule,
     UserModule,
     JwtModule.register({}),
