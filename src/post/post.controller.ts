@@ -88,9 +88,13 @@ export class PostController {
     summary: '게시글 삭제',
     description: '게시글 삭제',
   })
+  @UseInterceptors(TransactionInterceptor)
   @UseGuards(IsPostMineOrAdminGuard)
-  async remove(@Param('postId', ParseIntPipe) id: number) {
-    return this.postService.remove(id);
+  async remove(
+    @Param('postId', ParseIntPipe) id: number,
+    @QueryRunner() qr: QR,
+  ) {
+    return this.postService.remove(id,qr);
   }
 
   @Post(':postId/like')
@@ -98,11 +102,13 @@ export class PostController {
     summary: '게시글 좋아요',
     description: '게시글 좋아요',
   })
+  @UseInterceptors(TransactionInterceptor)
   createPostLike(
     @Param('postId', ParseIntPipe) postId: number,
     @UserId() userId: number,
+    @QueryRunner() qr: QR,
   ) {
-    return this.postService.togglePostLike(postId, userId, true);
+    return this.postService.togglePostLike(postId, userId, true,qr);
   }
 
   @Post(':postId/dislike')
@@ -110,10 +116,12 @@ export class PostController {
     summary: '게시글 싫어요',
     description: '게시글 싫어요',
   })
+  @UseInterceptors(TransactionInterceptor)
   createPostDisLike(
     @Param('postId', ParseIntPipe) postId: number,
     @UserId() userId: number,
+    @QueryRunner() qr: QR,
   ) {
-    return this.postService.togglePostLike(postId, userId, false);
+    return this.postService.togglePostLike(postId, userId, false,qr);
   }
 }

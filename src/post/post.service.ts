@@ -184,8 +184,8 @@ export class PostService {
     return newPost;
   }
 
-  async remove(id: number) {
-    const post = await this.postRepository.findOne({
+  async remove(id: number,qr : QueryRunner) {
+    const post = await qr.manager.findOne(Post,{
       where: {
         id,
       },
@@ -196,11 +196,11 @@ export class PostService {
       throw new NotFoundException('존재하지 않는 POST의 ID 입니다.');
     }
 
-    await this.commentRepository.delete({
+    await qr.manager.delete(CommentModel,{
       post,
     });
 
-    await this.postRepository.delete(post.id);
+    await qr.manager.delete(Post,post.id);
 
     return id;
   }
@@ -220,9 +220,9 @@ export class PostService {
   }
 
   /* istanbul ignore next */
-  async getLikedRecord(postId: number, userId: number) {
-    return await this.postUserLikeRepository
-      .createQueryBuilder('pul')
+  async getLikedRecord(postId: number, userId: number,qr : QueryRunner) {
+    return await qr.manager
+      .createQueryBuilder(PostUserLike,'pul')
       .leftJoinAndSelect('pul.post', 'post')
       .leftJoinAndSelect('pul.user', 'user')
       .where('post.id = :postId', { postId })
@@ -230,8 +230,8 @@ export class PostService {
       .getOne();
   }
 
-  async togglePostLike(postId: number, userId: number, isLike: boolean) {
-    const post = await this.postRepository.findOne({
+  async togglePostLike(postId: number, userId: number, isLike: boolean,qr : QueryRunner) {
+    const post = await qr.manager.findOne(Post,{
       where: {
         id: postId,
       },
@@ -241,7 +241,7 @@ export class PostService {
       throw new NotFoundException('존재하지 않는 POST의 ID 입니다.');
     }
 
-    const user = await this.userRepository.findOne({
+    const user = await qr.manager.findOne(User,{
       where: {
         id: userId,
       },
@@ -251,15 +251,15 @@ export class PostService {
       throw new NotFoundException('존재하지 않는 USER의 ID 입니다.');
     }
 
-    const likeRecord = await this.getLikedRecord(postId, userId);
+    const likeRecord = await this.getLikedRecord(postId, userId,qr);
 
     if (likeRecord) {
       if (isLike === likeRecord.isLike) {
         // 좋아요에서 좋아요 누르면 삭제
-        await this.postUserLikeRepository.delete({ post, user });
+        await qr.manager.delete(PostUserLike,{ post, user });
       } else {
         // 좋아요에서 싫어요 누르면 해당 post,user 싫어요
-        await this.postUserLikeRepository.update(
+        await qr.manager.update(PostUserLike,
           {
             post,
             user,
@@ -269,14 +269,14 @@ export class PostService {
       }
     } else {
       // likeRecord 없다면 해당 movie,user의 postUserLike 좋아요
-      await this.postUserLikeRepository.save({
+      await qr.manager.save(PostUserLike,{
         post,
         user,
         isLike,
       });
     }
 
-    const result = await this.getLikedRecord(postId, userId);
+    const result = await this.getLikedRecord(postId, userId,qr);
 
     return {
       isLike: result && result.isLike,

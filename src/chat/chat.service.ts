@@ -74,7 +74,6 @@ export class ChatService {
     const client = this.connectedClients.get(user.id);
 
     // chat이 비어있을때 roomCreated 처리 가능
-
     // chatRooms.id의 'newMessage'스트림으로 client(socket)으로 메세지 emit
     client
       .to(chatRoom.id.toString())
@@ -82,44 +81,4 @@ export class ChatService {
 
     return message;
   }
-
-  // async getOrCreateChatRoom(user: sUser, qr: QueryRunner, room?: number) {
-  //   if (user.role === Role.admin) {
-  //     if (!room) {
-  //       throw new WsException('어드민은 room 값을 필수로 제공해야합니다.');
-  //     }
-
-  //     return qr.manager.findOne(ChatRoom, {
-  //       where: { id: room },
-  //       relations: ['users'],
-  //     });
-  //   }
-
-  //   let chatRoom = await qr.manager
-  //     .createQueryBuilder(ChatRoom, 'chatRoom')
-  //     .innerJoin('chatRoom.users', 'user')
-  //     .where('user.id = :userId', { userId: user.id })
-  //     .getOne();
-
-  //   if (!chatRoom) {
-  //     const adminUser = await qr.manager.findOne(User, {
-  //       where: { role: Role.admin },
-  //     });
-
-  //     chatRoom = await this.chatRoomRepository.save({
-  //       users: [user, adminUser],
-  //     });
-
-  //     [user.id, adminUser.id].forEach((userId) => {
-  //       const client = this.connectedClients.get(userId);
-
-  //       if (client) {
-  //         client.emit('roomCreated', chatRoom.id);
-  //         client.join(chatRoom.id.toString());
-  //       }
-  //     });
-  //   }
-
-  //   return chatRoom;
-  // }
 }

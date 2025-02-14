@@ -56,7 +56,7 @@ export class UserController {
   })
   @RBAC(Role.user)
   async getMe(@Request() req: any) {
-    console.log(req.user.sub);
+    // console.log(req.user.sub);
     return this.userService.findOne(req.user.sub);
   }
 

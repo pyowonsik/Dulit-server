@@ -164,8 +164,6 @@ export class PlanService {
       .where('user.id = :userId', { userId })
       .getOne();
 
-  
-
     if (!couple) {
       return false; // 사용자가 커플에 속하지 않음
     }
