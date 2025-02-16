@@ -90,7 +90,7 @@ export class UserController {
   removeMe(@UserId() myId: number, @QueryRunner() qr: QR) {
     return this.userService.remove(myId, qr);
   }
-  
+
   @Delete(':id')
   @ApiOperation({
     summary: '관리자 유저 삭제',

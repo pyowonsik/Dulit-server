@@ -12,6 +12,7 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { envVariableKeys } from 'src/common/const/env.const';
 import { UserService } from 'src/user/user.service';
+import axios from 'axios';
 
 @Injectable()
 export class AuthService {
@@ -23,19 +24,31 @@ export class AuthService {
     private readonly userRepository: Repository<User>,
   ) {}
 
-  async kakaoLogin(req) {
-    const kakaoUser = req.user.info;
+  async kakaoLogin(kakaoAccessToken: string) {
+    const kakaoUser = await this.getKakaoUserInfo(kakaoAccessToken);
+
+    // const kakaoUser = req.user.info;
+    // console.log(kakaoUser);
 
     const user = await this.userService.create({
-      socialId: kakaoUser.socialId,
-      email: kakaoUser.email,
-      name: kakaoUser.name,
+      socialId: kakaoUser.id,
+      email: kakaoUser.kakao_account.email,
+      name: kakaoUser.kakao_account.name,
       socialProvider: SocialProvider.kakao,
     });
 
+    // console.log(user);
     // JWT 토큰 생성
     // midleware나 guard에서 토큰이 유효한지 검증
     return user;
+  }
+
+  private async getKakaoUserInfo(accessToken: string) {
+    const response = await axios.get('https://kapi.kakao.com/v2/user/me', {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+
+    return response.data;
   }
 
   // appleLogin()
@@ -57,7 +70,6 @@ export class AuthService {
   }
 
   // unknownLogin() {}
-
 
   async socialIdLogin(socialId: string) {
     const user = await this.userRepository.findOne({
