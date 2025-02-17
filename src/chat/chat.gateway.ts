@@ -15,7 +15,12 @@ import { QueryRunner } from 'typeorm';
 import { WsQueryRunner } from 'src/common/decorator/ws-query-runner.decorator';
 import { CreateChatDto } from './create-chat.dto';
 
-@WebSocketGateway()
+@WebSocketGateway({
+  namespace: '/chat',
+  // cors: {
+  //   origin: 'http://localhost:3000', // 허용할 출처
+  // },
+})
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   constructor(
     private readonly authService: AuthService,
@@ -23,7 +28,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   ) {}
 
   handleDisconnect(client: Socket) {
-    console.log('ChatRoom Disconnect!!!');
+    // console.log('ChatRoom Disconnect!!!');
     const user = client.data.user;
 
     if (user) {
@@ -33,12 +38,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   async handleConnection(client: Socket) {
     try {
-      const rawToken = client.handshake.headers.authorization;
+      const rawToken = client.handshake.query.token as string;
 
       const payload = await this.authService.parserBearerToken(rawToken, false);
 
       if (payload) {
-        console.log('ChatRoom Connection!!!');
         client.data.user = payload;
         this.chatService.registerClient(payload.sub, client);
         await this.chatService.joinUserRooms(payload, client);

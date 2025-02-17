@@ -22,13 +22,15 @@ export class NotificationService {
     const client = this.connectedClients.get(userId);
 
     if (client) {
+      // console.log('커플이 연결 되었습니다');
+      // console.log(userId);
       client.emit('matchedNotification', '커플이 연결 되었습니다.');
     } else {
       console.log(`User ${userId} not connected`);
     }
   }
-  
-  async sendNotification(userId: number, message : string) {
+
+  async sendNotification(userId: number, message: string) {
     const client = this.connectedClients.get(userId);
 
     if (client) {

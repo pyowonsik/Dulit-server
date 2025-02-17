@@ -7,6 +7,12 @@ import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  // CORS 설정 - localhost:3000에서 오는 요청만 허용
+  app.enableCors({
+    origin: 'http://localhost:3000',
+  });
+  //
+
   // swagger doc 셋팅
   const config = new DocumentBuilder()
     .setTitle('Dulit')

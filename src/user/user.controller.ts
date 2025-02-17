@@ -80,6 +80,16 @@ export class UserController {
   //   return this.userService.update(id, updateUserDto);
   // }
 
+  @Get('/partner/:partnerId')
+  @ApiOperation({
+    summary: '상대방 유저 조회',
+    description: '상대방 유저 조회',
+  })
+  @RBAC(Role.user)
+  findPartnerById(@Param('partnerId', ParseIntPipe) partnerId: number) {
+    return this.userService.findPartnerById(partnerId);
+  }
+
   @Delete('me')
   @ApiOperation({
     summary: '회원 탈퇴',
@@ -117,7 +127,6 @@ export class UserController {
       myId: `${req.user.socialId}`,
       partnerId: `${partnerId}`,
     };
-
     return this.userService.connectCouple(createCoupleDto, qr);
   }
 

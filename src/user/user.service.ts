@@ -78,6 +78,21 @@ export class UserService {
     return user;
   }
 
+  async findPartnerById(partnerId: number) {
+    const user = await this.userRepository.findOne({
+      where: {
+        socialId: partnerId.toString(),
+      },
+      select: ['name', 'email', 'socialId'],
+    });
+
+    if (!user) {
+      throw new NotFoundException('존재하지 않는 유저의 ID 입니다.');
+    }
+
+    return user;
+  }
+
   // 로직상 유저 정보 변경로직은 필요없는 것으로 판단.
   // 관계 수정 필요시, 해당 모듈에서 직접 수정
   // update(id: number, updateUserDto: UpdateUserDto) {
@@ -98,10 +113,8 @@ export class UserService {
     // 1. 유저가 속한 chatRoom - chat 삭제
     await this.deleteChatRoomsAndChats(user, qr);
 
-
     // 2. 유저가 속한 couple - plan , post 삭제
     await this.deleteCoupleAndRelatedData(user, qr);
-
 
     // 3. 유저 삭제
     await qr.manager.delete(User, id);
@@ -140,12 +153,12 @@ export class UserService {
     this.notificationService.matchedNotification(partner.id);
 
     // 쿼리 최적화
-    const user = await qr.manager.findOne(User, {
-      where: { socialId: createCoupleDto.myId },
-      relations: ['couple', 'chatRooms'],
-    });
+    // const user = await qr.manager.findOne(User, {
+    //   where: { socialId: createCoupleDto.myId },
+    //   relations: ['couple', 'chatRooms'],
+    // });
 
-    return user;
+    return true;
   }
 
   async disConnectCouple(createCoupleDto: CreateCoupleDto, qr: QueryRunner) {
@@ -165,11 +178,9 @@ export class UserService {
 
     // 1. 유저가 속한 chatRoom - chat 삭제
     await this.deleteChatRoomsAndChats(me, qr);
-  
 
     // 2. 유저가 속한 couple - plan , post 삭제
     await this.deleteCoupleAndRelatedData(me, qr);
-   
 
     this.notificationService.sendNotification(
       me.id,
@@ -183,7 +194,6 @@ export class UserService {
     return me.id;
   }
 
-
   async deleteChatRoomsAndChats(user: User, qr: QueryRunner) {
     if (user.chatRooms.length > 0) {
       await qr.manager.delete(Chat, {
@@ -192,14 +202,14 @@ export class UserService {
       await qr.manager.delete(ChatRoom, user.chatRooms[0].id);
     }
   }
-  
+
   async deleteCoupleAndRelatedData(user: User, qr: QueryRunner) {
     if (user.couple) {
       const couple = await qr.manager.findOne(Couple, {
         where: { id: user.couple.id },
         relations: ['users'],
       });
-  
+
       if (couple?.users) {
         await Promise.all(
           couple.users.map(async (user) => {
@@ -207,7 +217,7 @@ export class UserService {
             await qr.manager.delete(CommentModel, { author: user });
           }),
         );
-  
+
         await qr.manager.delete(Plan, { couple: user.couple });
         await qr.manager.delete(Post, { couple: user.couple });
         await qr.manager.delete(Anniversary, { couple: user.couple });

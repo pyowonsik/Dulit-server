@@ -73,9 +73,8 @@ export class User extends BaseTable {
   @OneToMany(() => CommentModel, (comment) => comment.author)
   comments: CommentModel[];
 
-  @OneToMany(() => PostUserLike,(pul) => pul.user)
-  likedPosts : PostUserLike[];
-  
+  @OneToMany(() => PostUserLike, (pul) => pul.user)
+  likedPosts: PostUserLike[];
 }
 
 // @JoinColumn() : OneToOne , ManyToOne -> tableId
