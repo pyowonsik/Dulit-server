@@ -57,7 +57,13 @@ export class CommentService {
     });
     await this.commentRepository.save(comment);
 
-    return comment;
+    const newComment = await this.commentRepository.findOne({
+      where: {
+        id: comment.id,
+      },
+    });
+
+    return newComment;
   }
 
   /* istanbul ignore next */

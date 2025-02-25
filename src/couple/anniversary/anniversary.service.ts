@@ -18,8 +18,12 @@ export class AnniversaryService {
     private readonly commonService: CommonService,
   ) {}
 
-  async create(userId: number, createAnniversaryDto: CreateAnniversaryDto,qr: QueryRunner) {
-    const couple = await qr.manager.findOne(Couple,{
+  async create(
+    userId: number,
+    createAnniversaryDto: CreateAnniversaryDto,
+    qr: QueryRunner,
+  ) {
+    const couple = await qr.manager.findOne(Couple, {
       where: {
         users: {
           id: In([userId]),
@@ -33,13 +37,20 @@ export class AnniversaryService {
       throw new NotFoundException('존재하지 않는 COUPLE의 ID 입니다.');
     }
 
-    const anniversary = await qr.manager.create(Anniversary,{
+    const anniversary = await qr.manager.create(Anniversary, {
       ...createAnniversaryDto,
       couple,
     });
 
-    await qr.manager.save(Anniversary,anniversary);
-    return anniversary;
+    await qr.manager.save(Anniversary, anniversary);
+
+    const newAnniversary = await qr.manager.findOne(Anniversary, {
+      where: {
+        id: anniversary.id,
+      },
+    });
+
+    return newAnniversary;
   }
 
   async findAll(userId: number, dto: GetAnniversaryDto) {
@@ -102,9 +113,8 @@ export class AnniversaryService {
     id: number,
     updateAnniversaryDto: UpdateAnniversaryDto,
     qr: QueryRunner,
-
   ) {
-    const couple = await qr.manager.findOne(Couple,{
+    const couple = await qr.manager.findOne(Couple, {
       where: {
         users: {
           id: In([userId]),
@@ -117,7 +127,7 @@ export class AnniversaryService {
       throw new NotFoundException('존재하지 않는 COUPLE의 ID 입니다.');
     }
 
-    const anniversary = await qr.manager.findOne(Anniversary,{
+    const anniversary = await qr.manager.findOne(Anniversary, {
       where: {
         id,
       },
@@ -127,12 +137,13 @@ export class AnniversaryService {
       throw new NotFoundException('존재하지 않는 ANNIVERSARY의 ID 입니다.');
     }
 
-    await qr.manager.update(Anniversary,
+    await qr.manager.update(
+      Anniversary,
       { id: anniversary.id },
       updateAnniversaryDto,
     );
 
-    const newAnniversary = await qr.manager.findOne(Anniversary,{
+    const newAnniversary = await qr.manager.findOne(Anniversary, {
       where: {
         id,
       },
@@ -176,7 +187,6 @@ export class AnniversaryService {
       .where('user.id = :userId', { userId })
       .getOne();
 
-
     if (!couple) {
       return false; // 사용자가 커플에 속하지 않음
     }
@@ -186,7 +196,7 @@ export class AnniversaryService {
       .where('anniversary.id = :anniversaryId', { anniversaryId })
       .andWhere('anniversary.coupleId = :coupleId', { coupleId: couple.id })
       .getExists();
-      
+
     return exists;
   }
 }

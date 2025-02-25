@@ -48,7 +48,13 @@ export class PlanService {
 
     await qr.manager.save(Plan, plan);
 
-    return plan;
+    const newPlan = await qr.manager.findOne(Plan, {
+      where: {
+        id: plan.id,
+      },
+    });
+
+    return newPlan;
   }
 
   async findAll(userId: number, dto: GetPlanDto) {

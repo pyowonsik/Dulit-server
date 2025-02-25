@@ -91,7 +91,13 @@ export class PostService {
 
     await qr.manager.save(Post, post);
 
-    return post;
+    const newPost = qr.manager.findOne(Post, {
+      where: {
+        id: post.id,
+      },
+    });
+
+    return newPost;
   }
 
   async findAll(dto: GetPostDto) {
@@ -146,6 +152,9 @@ export class PostService {
     }
 
     if (updatePostDto.filePaths) {
+      if (!post.filePaths) {
+        throw new BadRequestException('파일 선업로드 후 요청해주세요.');
+      }
       // movie 생성시, temp폴더의 movieFile을 movie폴더로 이동 시킨다.
       const tempFolder = join('public', 'temp');
       const filesFolder = join('public', 'files/post');

@@ -83,7 +83,13 @@ export class CalendarService {
 
     await qr.manager.save(Calendar, calendar);
 
-    return calendar;
+    const newCalendar = await qr.manager.findOne(Calendar, {
+      where: {
+        id: calendar.id,
+      },
+    });
+
+    return newCalendar;
   }
 
   async findAll(userId: number, getCalendarDto: GetCalendarDto) {
@@ -169,6 +175,10 @@ export class CalendarService {
     }
 
     if (updateCalendarDto.filePaths) {
+      if (!calendar.filePaths) {
+        throw new BadRequestException('파일 선업로드 후 요청해주세요.');
+      }
+
       // movie 생성시, temp폴더의 movieFile을 movie폴더로 이동 시킨다.
       const tempFolder = join('public', 'temp');
       const filesFolder = join('public', 'files/calendar');
