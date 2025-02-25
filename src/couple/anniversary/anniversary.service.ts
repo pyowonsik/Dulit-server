@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateAnniversaryDto } from './dto/create-anniversary.dto';
 import { UpdateAnniversaryDto } from './dto/update-anniversary.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Not, Repository } from 'typeorm';
+import { In, Not, QueryRunner, Repository } from 'typeorm';
 import { CommonService } from 'src/common/common.service';
 import { Anniversary } from './entity/anniversary.entity';
 import { GetAnniversaryDto } from './dto/get-anniversary.dto';
@@ -18,8 +18,8 @@ export class AnniversaryService {
     private readonly commonService: CommonService,
   ) {}
 
-  async create(userId: number, createAnniversaryDto: CreateAnniversaryDto) {
-    const couple = await this.coupleRepository.findOne({
+  async create(userId: number, createAnniversaryDto: CreateAnniversaryDto,qr: QueryRunner) {
+    const couple = await qr.manager.findOne(Couple,{
       where: {
         users: {
           id: In([userId]),
@@ -33,12 +33,12 @@ export class AnniversaryService {
       throw new NotFoundException('존재하지 않는 COUPLE의 ID 입니다.');
     }
 
-    const anniversary = await this.anniversaryRepository.create({
+    const anniversary = await qr.manager.create(Anniversary,{
       ...createAnniversaryDto,
       couple,
     });
 
-    await this.anniversaryRepository.save(anniversary);
+    await qr.manager.save(Anniversary,anniversary);
     return anniversary;
   }
 
@@ -101,8 +101,10 @@ export class AnniversaryService {
     userId: number,
     id: number,
     updateAnniversaryDto: UpdateAnniversaryDto,
+    qr: QueryRunner,
+
   ) {
-    const couple = await this.coupleRepository.findOne({
+    const couple = await qr.manager.findOne(Couple,{
       where: {
         users: {
           id: In([userId]),
@@ -115,7 +117,7 @@ export class AnniversaryService {
       throw new NotFoundException('존재하지 않는 COUPLE의 ID 입니다.');
     }
 
-    const anniversary = await this.anniversaryRepository.findOne({
+    const anniversary = await qr.manager.findOne(Anniversary,{
       where: {
         id,
       },
@@ -125,12 +127,12 @@ export class AnniversaryService {
       throw new NotFoundException('존재하지 않는 ANNIVERSARY의 ID 입니다.');
     }
 
-    await this.anniversaryRepository.update(
+    await qr.manager.update(Anniversary,
       { id: anniversary.id },
       updateAnniversaryDto,
     );
 
-    const newAnniversary = await this.anniversaryRepository.findOne({
+    const newAnniversary = await qr.manager.findOne(Anniversary,{
       where: {
         id,
       },

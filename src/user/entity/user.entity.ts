@@ -69,10 +69,7 @@ export class User extends BaseTable {
 
   @OneToMany(() => Post, (post) => post.author)
   posts: Post[];
-
-  @OneToMany(() => Plan, (plan) => plan.couple)
-  plans: Plan[];
-
+  
   @OneToMany(() => CommentModel, (comment) => comment.author)
   comments: CommentModel[];
 

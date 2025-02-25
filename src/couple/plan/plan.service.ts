@@ -33,21 +33,16 @@ export class PlanService {
           id: In([id]),
         },
       },
+
+      relations: ['plans'],
     });
 
     if (!couple) {
       throw new NotFoundException('존재하지 않는 COUPLE의 ID 입니다.');
     }
 
-    const author = await qr.manager.findOne(User, { where: { id } });
-
-    if (!author) {
-      throw new NotFoundException('존재하지 않는 USER의 ID 입니다.');
-    }
-
     const plan = await qr.manager.create(Plan, {
       ...createPlanDto,
-      author,
       couple,
     });
 
@@ -95,7 +90,20 @@ export class PlanService {
     };
   }
 
-  async findOne(id: number) {
+  async findOne(userId: number, id: number) {
+    const couple = await this.coupleRepository.findOne({
+      where: {
+        users: {
+          id: In([userId]),
+        },
+      },
+
+      relations: ['plans'],
+    });
+
+    if (!couple) {
+      throw new NotFoundException('존재하지 않는 COUPLE의 ID 입니다.');
+    }
     const plan = await this.planRepository.findOne({
       where: {
         id,
@@ -109,7 +117,12 @@ export class PlanService {
     return plan;
   }
 
-  async update(id: number, updatePlanDto: UpdatePlanDto, qr: QueryRunner) {
+  async update(
+    userId: number,
+    id: number,
+    updatePlanDto: UpdatePlanDto,
+    qr: QueryRunner,
+  ) {
     // updateDto : topic? , location? , time?
     // topic : 발산역 데이트
     // location : 서울특별시 강서구 공항대로 지하267 (마곡동 727-1496)
@@ -124,7 +137,20 @@ export class PlanService {
     //   .where('user.id = :userId', { userId: 1 })
     //   .getOne();
 
-    const plan = qr.manager.findOne(Plan, {
+    const couple = await this.coupleRepository.findOne({
+      where: {
+        users: {
+          id: In([userId]),
+        },
+      },
+
+      relations: ['plans'],
+    });
+    if (!couple) {
+      throw new NotFoundException('존재하지 않는 COUPLE의 ID 입니다.');
+    }
+
+    const plan = await qr.manager.findOne(Plan, {
       where: {
         id,
       },
@@ -141,7 +167,20 @@ export class PlanService {
     return newPlan;
   }
 
-  async remove(id: number) {
+  async remove(userId: number, id: number) {
+    const couple = await this.coupleRepository.findOne({
+      where: {
+        users: {
+          id: In([userId]),
+        },
+      },
+
+      relations: ['plans'],
+    });
+    if (!couple) {
+      throw new NotFoundException('존재하지 않는 COUPLE의의 ID 입니다.');
+    }
+
     const plan = await this.planRepository.findOne({
       where: {
         id,
@@ -173,7 +212,7 @@ export class PlanService {
       .where('plan.id = :planId', { planId })
       .andWhere('plan.coupleId = :coupleId', { coupleId: couple.id })
       .getExists();
-      
+
     return exists;
   }
 }

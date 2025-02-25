@@ -19,7 +19,7 @@ import { TransactionInterceptor } from 'src/common/interceptor/transaction.inter
 import { UpdatePostDto } from 'src/post/dto/update-post.dto';
 import { QueryRunner } from 'src/common/decorator/query-runner.decorator';
 import { QueryRunner as QR } from 'typeorm';
-import { IsPlanMineOrAdminGuard } from './guard/is-plan-couple-or-admin.guard';
+import { IsPlanCoupleOrAdminGuard } from './guard/is-plan-couple-or-admin.guard';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { GetPlanDto } from './dto/get-plan.dto';
 import { UserId } from 'src/user/decorator/user-id.decorator';
@@ -49,7 +49,7 @@ export class PlanController {
     summary: '전체 약속 조회',
     description: '전체 약속 조회',
   })
-  async findAll(@Query() dto: GetPlanDto, @UserId() userId: number) {
+  async findAll(@UserId() userId: number, @Query() dto: GetPlanDto) {
     return this.planService.findAll(userId, dto);
   }
 
@@ -58,8 +58,11 @@ export class PlanController {
     summary: '약속 단건 조회',
     description: '약속 단건 조회',
   })
-  async findOne(@Param('planId', ParseIntPipe) id: number) {
-    return this.planService.findOne(id);
+  async findOne(
+    @UserId() userId: number,
+    @Param('planId', ParseIntPipe) id: number,
+  ) {
+    return this.planService.findOne(userId, id);
   }
 
   @Patch(':planId')
@@ -68,13 +71,15 @@ export class PlanController {
     description: '약속 수정',
   })
   @UseInterceptors(TransactionInterceptor)
-  @UseGuards(IsPlanMineOrAdminGuard)
+  @UseGuards(IsPlanCoupleOrAdminGuard)
   async update(
+    @UserId() userId: number,
+
     @Param('planId', ParseIntPipe) id: number,
     @Body() updatePlanDto: UpdatePlanDto,
     @QueryRunner() qr: QR, // 트랜잭션 미적용을 감지하기 위한 데코레이터
   ) {
-    return this.planService.update(id, updatePlanDto, qr);
+    return this.planService.update(userId, id, updatePlanDto, qr);
   }
 
   @Delete(':planId')
@@ -82,8 +87,12 @@ export class PlanController {
     summary: '약속 삭제',
     description: '약속 삭제',
   })
-  @UseGuards(IsPlanMineOrAdminGuard)
-  async remove(@Param('planId', ParseIntPipe) id: number) {
-    return this.planService.remove(id);
+  @UseGuards(IsPlanCoupleOrAdminGuard)
+  async remove(
+    @UserId() userId: number,
+
+    @Param('planId', ParseIntPipe) id: number,
+  ) {
+    return this.planService.remove(userId,id);
   }
 }

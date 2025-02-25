@@ -27,7 +27,7 @@ export class Plan extends BaseTable {
   @JoinColumn()
   couple: Couple;
 
-  @ManyToOne(() => User, (user) => user.plans)
-  @JoinColumn()
-  author: User;
+  // @ManyToOne(() => User, (user) => user.plans)
+  // @JoinColumn()
+  // author: User;
 }
