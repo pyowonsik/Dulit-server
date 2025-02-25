@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { User } from './entity/user.entity';
+import { SocialProvider, User } from './entity/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { QueryRunner, Repository } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
@@ -23,6 +23,8 @@ import { CreateCoupleDto } from 'src/couple/dto/create-couple.dto';
 import { Plan } from 'src/couple/plan/entities/plan.entity';
 import { Anniversary } from 'src/couple/anniversary/entity/anniversary.entity';
 import { Calendar } from 'src/couple/calendar/entities/calendar.entity';
+import { envVariableKeys } from 'src/common/const/env.const';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
@@ -40,8 +42,39 @@ export class UserService {
   ) {}
 
   async create(createUserDto: CreateUserDto) {
-    
+    const { email, password } = createUserDto;
 
+    const user = await this.userRepository.findOne({
+      where: {
+        email,
+      },
+    });
+
+    if (user) {
+      throw new BadRequestException('이미 가입한 이메일 입니다.');
+    }
+
+    // 환경변수(.env) HASH_ROUNDS 값 저장
+    const hashRounds = this.configService.get<number>(
+      envVariableKeys.hashRounds,
+    );
+
+    // password 암호화
+    const hash = await bcrypt.hash(password, hashRounds);
+
+    await this.userRepository.save({
+      ...createUserDto,
+      password: hash,
+    });
+
+    return await this.userRepository.findOne({
+      where: {
+        email,
+      },
+    });
+  }
+
+  async socialJoinAndLogin(createUserDto: CreateUserDto) {
     let user = await this.userRepository.findOne({
       where: { socialId: createUserDto.socialId },
     });
@@ -61,7 +94,6 @@ export class UserService {
       user,
     };
   }
-
   async findAll() {
     return await this.userRepository.find();
   }

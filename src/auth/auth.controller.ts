@@ -18,11 +18,30 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
+import { RegisterDto } from './dto/register-dto';
+import { Authorization } from './decorator/authorization.decorator';
 
 @Controller('auth')
 @ApiTags('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
+
+  @Public()
+  @Post('register')
+  @ApiBasicAuth()
+  registerUser(@Authorization() token : string, @Body() registerDto: RegisterDto) {
+    return this.authService.register(token, registerDto);
+  }
+
+  @Public()
+  @Post('login')
+  @ApiBasicAuth()
+  loginUser(
+    @Authorization() token: string,
+  ) {
+    return this.authService.login(token);
+  }
+
 
   // kakao 로그인
   @Get('kakao')
@@ -38,19 +57,6 @@ export class AuthController {
   // 프론트엔드에서 accessToken을 보내줄경우 accessToken으로 getKakaoUserInfo() 조회해서 카카오 유저 정보 반환
   async kakaoLoginCallback(@Body('kakaoAccessToken') kakaoAccessToken: string) {
     return this.authService.kakaoLogin(kakaoAccessToken);
-  }
-
-  // socialId 로그인 후, postMan env accessToken에 넣기
-  // -> social login을 직접 호출할수 없어서 생성한 test endpoint
-  @Post('social/login/:socialId')
-  @ApiOperation({
-    summary: 'access 토큰 발급을 위한 socialId로 로그인',
-    description: 'access 토큰 발급을 위한 socialId로 로그인',
-  })
-  @ApiBasicAuth()
-  @Public()
-  async socialIdLogin(@Param('socialId') socialId: string) {
-    return this.authService.socialIdLogin(socialId);
   }
 
   @Post('token/access')

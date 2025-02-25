@@ -29,15 +29,6 @@ import { Role } from './entity/user.entity';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Post()
-  @ApiOperation({
-    summary: '유저 생성',
-    description: '유저 생성',
-  })
-  // @RBAC(Role.admin)
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.userService.create(createUserDto);
-  }
 
   @Get()
   @ApiOperation({

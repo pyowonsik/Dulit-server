@@ -14,6 +14,8 @@ import { envVariableKeys } from 'src/common/const/env.const';
 import { UserService } from 'src/user/user.service';
 import axios from 'axios';
 import { RegisterDto } from './dto/register-dto';
+import { v4 as uuidv4 } from 'uuid';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
@@ -25,12 +27,39 @@ export class AuthService {
     private readonly userRepository: Repository<User>,
   ) {}
 
+  async register(rawToken: string, registerDto: RegisterDto) {
+    // @Headers에서 넘어온 rawToken(Basic $token)에서 email,password 추출
+    const { email, password } = this.parserBasicToken(rawToken);
+    const socialId = uuidv4();
+
+    return this.userService.create({
+      ...registerDto,
+      email,
+      password,
+      socialId,
+      socialProvider: SocialProvider.common,
+    });
+  }
+
+  async login(rawToken: string) {
+    // @Headers에서 넘어온 rawToken(Basic $token)에서 email,password 추출
+    const { email, password } = this.parserBasicToken(rawToken);
+
+    // user 인증
+    const user = await this.authenticate(email, password);
+
+    // 로그인 정보가 인증이 되면(로그인 성공시) accessToken,refreshToken 발급
+    return {
+      accessToken: await this.issueToken(user, false),
+      refreshToken: await this.issueToken(user, true),
+    };
+  }
 
   // 카카오 로그인
   async kakaoLogin(kakaoAccessToken: string) {
     const kakaoUser = await this.getKakaoUserInfo(kakaoAccessToken);
 
-    const user = await this.userService.create({
+    return await this.userService.socialJoinAndLogin({
       socialId: kakaoUser.id,
       email: kakaoUser.kakao_account.email,
       name: kakaoUser.kakao_account.name,
@@ -40,7 +69,7 @@ export class AuthService {
     // console.log(user);
     // JWT 토큰 생성
     // midleware나 guard에서 토큰이 유효한지 검증
-    return user;
+    // return user;
   }
 
   private async getKakaoUserInfo(accessToken: string) {
@@ -49,24 +78,6 @@ export class AuthService {
     });
 
     return response.data;
-  }
-  //
-
-  async socialIdLogin(socialId: string) {
-    const user = await this.userRepository.findOne({
-      where: {
-        socialId,
-      },
-    });
-
-    if (!user) {
-      throw new NotFoundException('존재하지 않는 USER의 ID 입니다.');
-    }
-
-    return {
-      accessToken: await this.issueToken(user, false),
-      refreshToken: await this.issueToken(user, true),
-    };
   }
 
   parserBasicToken(rawToken: string) {
@@ -135,6 +146,28 @@ export class AuthService {
     } catch {
       throw new UnauthorizedException('토큰이 만료 되었습니다.');
     }
+  }
+
+  async authenticate(email: string, password: string) {
+    // email 인증
+    const user = await this.userRepository.findOne({
+      where: {
+        email,
+      },
+    });
+
+    if (!user) {
+      throw new BadRequestException('잘못된 로그인 정보입니다.');
+    }
+
+    // 비밀번호 인증
+    const passOk = bcrypt.compare(password, user.password);
+
+    if (!passOk) {
+      throw new BadRequestException('잘못된 로그인 정보입니다.');
+    }
+
+    return user;
   }
 
   // user 정보를 통해 accessToken , refreshToken 발급

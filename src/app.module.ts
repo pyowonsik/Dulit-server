@@ -169,10 +169,14 @@ export class AppModule implements NestModule {
     consumer
       .apply(BearerTokenMiddleWare)
       .exclude(
-        // {
-        //   path: 'auth/register',
-        //   method: RequestMethod.POST,
-        // },
+        {
+          path: 'auth/register',
+          method: RequestMethod.POST,
+        },
+        {
+          path: 'auth/login',
+          method: RequestMethod.POST,
+        },
         {
           path: 'auth/kakao',
           method: RequestMethod.GET,

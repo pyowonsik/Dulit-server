@@ -25,7 +25,7 @@ export enum SocialProvider {
   kakao = 'kakao',
   apple = 'apple',
   naver = 'naver',
-  normal = 'normal',
+  common = 'common',
 }
 
 @Entity()
@@ -41,12 +41,15 @@ export class User extends BaseTable {
 
   @Column({
     enum: SocialProvider,
-    default: SocialProvider.normal,
+    default: SocialProvider.common,
   })
   socialProvider: SocialProvider;
 
   @Column()
   name: string;
+
+  @Column()
+  password: string;
 
   @Column({
     enum: Role,
