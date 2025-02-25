@@ -7,7 +7,6 @@ import {
 import { CreateCalendarDto } from './dto/create-calendar.dto';
 import { UpdateCalendarDto } from './dto/update-calendar.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Couple } from 'src/user/entity/couple.entity';
 import { In, QueryRunner, Repository } from 'typeorm';
 import { Calendar } from './entities/calendar.entity';
 import { CommonService } from 'src/common/common.service';
@@ -15,6 +14,7 @@ import { join } from 'path';
 import { existsSync, mkdirSync, unlinkSync } from 'fs';
 import { rename } from 'fs/promises';
 import { GetCalendarDto } from './dto/get-calendar.dto';
+import { Couple } from 'src/couple/entity/couple.entity';
 
 @Injectable()
 export class CalendarService {

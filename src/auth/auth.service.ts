@@ -13,6 +13,7 @@ import { ConfigService } from '@nestjs/config';
 import { envVariableKeys } from 'src/common/const/env.const';
 import { UserService } from 'src/user/user.service';
 import axios from 'axios';
+import { RegisterDto } from './dto/register-dto';
 
 @Injectable()
 export class AuthService {
@@ -24,11 +25,10 @@ export class AuthService {
     private readonly userRepository: Repository<User>,
   ) {}
 
+
+  // 카카오 로그인
   async kakaoLogin(kakaoAccessToken: string) {
     const kakaoUser = await this.getKakaoUserInfo(kakaoAccessToken);
-
-    // const kakaoUser = req.user.info;
-    // console.log(kakaoUser);
 
     const user = await this.userService.create({
       socialId: kakaoUser.id,
@@ -50,26 +50,7 @@ export class AuthService {
 
     return response.data;
   }
-
-  // appleLogin()
-
-  // naverLogin()
-  async naverLogin(req) {
-    const naverUser = req.user.info;
-
-    const user = await this.userService.create({
-      socialId: naverUser.socialId,
-      email: naverUser.email,
-      name: naverUser.name,
-      socialProvider: SocialProvider.naver,
-    });
-
-    // JWT 토큰 생성
-    // midleware나 guard에서 토큰이 유효한지 검증
-    return user;
-  }
-
-  // unknownLogin() {}
+  //
 
   async socialIdLogin(socialId: string) {
     const user = await this.userRepository.findOne({
@@ -86,6 +67,35 @@ export class AuthService {
       accessToken: await this.issueToken(user, false),
       refreshToken: await this.issueToken(user, true),
     };
+  }
+
+  parserBasicToken(rawToken: string) {
+    // ['Basic','$token']
+    const basicSplit = rawToken.split(' ');
+
+    if (basicSplit.length != 2) {
+      throw new BadRequestException('잘못된 형식의 토큰입니다.');
+    }
+
+    const [basic, token] = basicSplit;
+
+    if (basic.toLocaleLowerCase() !== 'basic') {
+      throw new BadRequestException('잘못된 형식의 토큰입니다.');
+    }
+
+    // 추출한 토큰을 base64 디코딩 'email:password'
+    const decoded = Buffer.from(token, 'base64').toString('utf-8');
+
+    // email:password 를  ':' 기준으로 split
+    const tokenSplit = decoded.split(':');
+
+    // [email,password]
+    if (tokenSplit.length != 2) {
+      throw new BadRequestException('잘못된 형식의 토큰입니다.');
+    }
+
+    const [email, password] = tokenSplit;
+    return { email, password };
   }
 
   // ${Bearer token} -> Bearer 토큰 분리해서 검증후 payload 반환
@@ -167,4 +177,24 @@ export class AuthService {
 
     return user;
   }
+
+  // * 추후 구현 * //
+  // appleLogin()
+  // naverLogin()
+  // async naverLogin(req) {
+  //   const naverUser = req.user.info;
+
+  //   const user = await this.userService.create({
+  //     socialId: naverUser.socialId,
+  //     email: naverUser.email,
+  //     name: naverUser.name,
+  //     socialProvider: SocialProvider.naver,
+  //   });
+
+  //   // JWT 토큰 생성
+  //   // midleware나 guard에서 토큰이 유효한지 검증
+  //   return user;
+  // }
+
+  // unknownLogin() {}
 }

@@ -10,7 +10,6 @@ import { UpdatePostDto } from './dto/update-post.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, QueryRunner, Repository } from 'typeorm';
 import { User } from 'src/user/entity/user.entity';
-import { Couple } from 'src/user/entity/couple.entity';
 import { Post } from './entity/post.entity';
 import { join } from 'path';
 import { rename } from 'fs/promises';
@@ -20,6 +19,7 @@ import { console } from 'inspector';
 import { PostUserLike } from './comment/entity/post-user-like.entity';
 import { GetPostDto } from './dto/get-post-dto';
 import { CommonService } from 'src/common/common.service';
+import { Couple } from 'src/couple/entity/couple.entity';
 
 @Injectable()
 export class PostService {

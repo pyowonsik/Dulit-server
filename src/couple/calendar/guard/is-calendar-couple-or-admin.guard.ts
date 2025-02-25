@@ -7,7 +7,6 @@ import {
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Couple } from 'src/user/entity/couple.entity';
 import { Repository } from 'typeorm';
 import { Role } from 'src/user/entity/user.entity';
 import { CalendarService } from '../calendar.service';

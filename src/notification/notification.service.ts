@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Socket } from 'socket.io';
-import { Couple } from 'src/user/entity/couple.entity';
 import { In, Repository } from 'typeorm';
 
 @Injectable()

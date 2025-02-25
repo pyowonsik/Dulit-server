@@ -3,11 +3,11 @@ import { SocialProvider } from '../entity/user.entity';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateUserDto {
-  @IsString()  
+  @IsString()
   @ApiProperty({
-      description: '유저 고유 socialId',
-      example: '123456',
-    })
+    description: '유저 고유 socialId',
+    example: '123456',
+  })
   socialId: string;
 
   @IsString()
@@ -17,6 +17,7 @@ export class CreateUserDto {
   })
   email: string;
 
+
   @IsString()
   @ApiProperty({
     description: '유저 이름',
@@ -25,7 +26,7 @@ export class CreateUserDto {
   name: string;
 
   @IsEnum(SocialProvider, {
-    message: 'provider must be one of KAKAO, APPLE, NAVER , UNKNWON',
+    message: 'provider must be one of KAKAO, APPLE, NAVER , NORMAL',
   })
   @ApiProperty({
     description: '유저 socialProvider',

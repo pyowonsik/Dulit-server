@@ -26,7 +26,6 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { Plan } from 'src/plan/entities/plan.entity';
 import { GetPostDto } from './dto/get-post-dto';
 
 @Controller('post')

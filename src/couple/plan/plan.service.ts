@@ -2,12 +2,12 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreatePlanDto } from './dto/create-plan.dto';
 import { UpdatePlanDto } from './dto/update-plan.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Couple } from 'src/user/entity/couple.entity';
 import { Plan } from './entities/plan.entity';
 import { User } from 'src/user/entity/user.entity';
 import { In, QueryRunner, Repository } from 'typeorm';
 import { GetPlanDto } from './dto/get-plan.dto';
 import { CommonService } from 'src/common/common.service';
+import { Couple } from 'src/couple/entity/couple.entity';
 
 @Injectable()
 export class PlanService {

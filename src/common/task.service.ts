@@ -2,8 +2,8 @@ import { Inject, Injectable, LoggerService } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
+import { Plan } from 'src/couple/plan/entities/plan.entity';
 import { NotificationService } from 'src/notification/notification.service';
-import { Plan } from 'src/plan/entities/plan.entity';
 import { In, Repository } from 'typeorm';
 
 @Injectable()

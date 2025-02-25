@@ -8,9 +8,9 @@ import { join } from 'path';
 import { diskStorage } from 'multer';
 import { Post } from 'src/post/entity/post.entity';
 import { TaskService } from './task.service';
-import { Plan } from 'src/plan/entities/plan.entity';
 import { NotificationModule } from 'src/notification/notification.module';
-import { Couple } from 'src/user/entity/couple.entity';
+import { Couple } from 'src/couple/entity/couple.entity';
+import { Plan } from 'src/couple/plan/entities/plan.entity';
 
 @Module({
   imports: [

@@ -24,7 +24,7 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { GetPlanDto } from './dto/get-plan.dto';
 import { UserId } from 'src/user/decorator/user-id.decorator';
 
-@Controller('plan')
+@Controller('/couple/plan')
 @ApiTags('plan')
 @ApiBearerAuth()
 export class PlanController {
@@ -37,11 +37,10 @@ export class PlanController {
   })
   @UseInterceptors(TransactionInterceptor)
   async create(
-    @Request() req: any,
+    @UserId() userId: number,
     @QueryRunner() qr: QR, // 트랜잭션 미적용을 감지하기 위한 데코레이터
     @Body() createPlanDto: CreatePlanDto,
   ) {
-    const userId = req.user.sub;
     return this.planService.create(userId, createPlanDto, qr);
   }
 
