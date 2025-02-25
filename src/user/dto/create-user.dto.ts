@@ -16,6 +16,13 @@ export class CreateUserDto {
     example: 'test@test.com',
   })
   email: string;
+  
+  @IsString()
+  @ApiProperty({
+    description: '유저 email',
+    example: 'test@test.com',
+  })
+  password?: string;
 
 
   @IsString()
