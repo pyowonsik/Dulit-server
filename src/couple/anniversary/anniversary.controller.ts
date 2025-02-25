@@ -9,6 +9,7 @@ import {
   ParseIntPipe,
   Query,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { AnniversaryService } from './anniversary.service';
 import { CreateAnniversaryDto } from './dto/create-anniversary.dto';
@@ -17,6 +18,9 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { UserId } from 'src/user/decorator/user-id.decorator';
 import { IsAnniversaryCoupleOrAdmin } from './guard/is-anniversary-couple-or-admin.guard';
 import { GetAnniversaryDto } from './dto/get-anniversary.dto';
+import { TransactionInterceptor } from 'src/common/interceptor/transaction.interceptor';
+import { QueryRunner } from 'src/common/decorator/query-runner.decorator';
+import { QueryRunner as QR } from 'typeorm';
 
 @Controller('/couple/anniversary')
 @ApiTags('anniversary')
@@ -29,11 +33,14 @@ export class AnniversaryController {
     summary: '기념일 작성',
     description: '기념일 작성',
   })
+  @UseInterceptors(TransactionInterceptor)
   create(
     @UserId() userId: number,
+    @QueryRunner() qr: QR, // 트랜잭션 미적용을 감지하기 위한 데코레이터
+
     @Body() createAnniversaryDto: CreateAnniversaryDto,
   ) {
-    return this.anniversaryService.create(userId, createAnniversaryDto);
+    return this.anniversaryService.create(userId, createAnniversaryDto, qr);
   }
 
   @Get()
@@ -62,13 +69,15 @@ export class AnniversaryController {
     summary: '기념일 수정',
     description: '기념일 수정',
   })
+  @UseInterceptors(TransactionInterceptor)
   @UseGuards(IsAnniversaryCoupleOrAdmin)
   update(
     @UserId() userId: number,
     @Param('anniversaryId', ParseIntPipe) id: number,
     @Body() updateAnniversaryDto: UpdateAnniversaryDto,
+    @QueryRunner() qr: QR, // 트랜잭션 미적용을 감지하기 위한 데코레이터
   ) {
-    return this.anniversaryService.update(userId, id, updateAnniversaryDto);
+    return this.anniversaryService.update(userId, id, updateAnniversaryDto,qr);
   }
 
   @Delete(':anniversaryId')

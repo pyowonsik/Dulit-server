@@ -11,7 +11,7 @@ import { Role } from 'src/user/entity/user.entity';
 import { PlanService } from '../plan.service';
 
 @Injectable()
-export class IsPlanMineOrAdminGuard implements CanActivate {
+export class IsPlanCoupleOrAdminGuard implements CanActivate {
   constructor(private readonly planService: PlanService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
