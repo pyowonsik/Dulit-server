@@ -148,14 +148,14 @@ import { PlanModule } from './couple/plan/plan.module';
       provide: APP_GUARD,
       useClass: AuthGuard,
     },
-    // {
-    //   provide: APP_FILTER,
-    //   useClass: ForbiddenExceptionFilter,
-    // },
-    // {
-    //   provide: APP_FILTER,
-    //   useClass: QueryFailedExceptionFilter,
-    // },
+    {
+      provide: APP_FILTER,
+      useClass: ForbiddenExceptionFilter,
+    },
+    {
+      provide: APP_FILTER,
+      useClass: QueryFailedExceptionFilter,
+    },
     {
       provide: APP_GUARD,
       useClass: RBACGuard,
