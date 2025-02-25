@@ -11,11 +11,11 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Couple } from './couple.entity';
-import { Plan } from 'src/plan/entities/plan.entity';
 import { Post } from 'src/post/entity/post.entity';
 import { CommentModel } from 'src/post/comment/entity/comment.entity';
 import { PostUserLike } from 'src/post/comment/entity/post-user-like.entity';
+import { Couple } from 'src/couple/entity/couple.entity';
+import { Plan } from 'src/couple/plan/entities/plan.entity';
 export enum Role {
   admin,
   user,
@@ -25,7 +25,7 @@ export enum SocialProvider {
   kakao = 'kakao',
   apple = 'apple',
   naver = 'naver',
-  unknown = 'unknwon',
+  normal = 'normal',
 }
 
 @Entity()
@@ -41,7 +41,7 @@ export class User extends BaseTable {
 
   @Column({
     enum: SocialProvider,
-    default: SocialProvider.unknown,
+    default: SocialProvider.normal,
   })
   socialProvider: SocialProvider;
 

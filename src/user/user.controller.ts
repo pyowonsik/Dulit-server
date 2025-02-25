@@ -16,7 +16,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { TransactionInterceptor } from 'src/common/interceptor/transaction.interceptor';
 import { QueryRunner as QR } from 'typeorm';
 import { QueryRunner } from 'src/common/decorator/query-runner.decorator';
-import { CreateCoupleDto } from './dto/create-couple.dto';
+// import { CreateCoupleDto } from './dto/create-couple.dto';
 import { UserId } from './decorator/user-id.decorator';
 import { Public } from 'src/auth/decorator/public.decorator';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
@@ -34,7 +34,7 @@ export class UserController {
     summary: '유저 생성',
     description: '유저 생성',
   })
-  @RBAC(Role.admin)
+  // @RBAC(Role.admin)
   create(@Body() createUserDto: CreateUserDto) {
     return this.userService.create(createUserDto);
   }
@@ -85,7 +85,6 @@ export class UserController {
     summary: '상대방 유저 조회',
     description: '상대방 유저 조회',
   })
-  @RBAC(Role.user)
   findPartnerById(@Param('partnerId', ParseIntPipe) partnerId: number) {
     return this.userService.findPartnerById(partnerId);
   }
@@ -96,7 +95,6 @@ export class UserController {
     description: '회원 탈퇴',
   })
   @UseInterceptors(TransactionInterceptor)
-  @RBAC(Role.user)
   removeMe(@UserId() myId: number, @QueryRunner() qr: QR) {
     return this.userService.remove(myId, qr);
   }
@@ -112,39 +110,4 @@ export class UserController {
     return this.userService.remove(id, qr);
   }
 
-  @Post('/connect/:partnerId')
-  @ApiOperation({
-    summary: '커플 연결',
-    description: '커플 연결',
-  })
-  @UseInterceptors(TransactionInterceptor)
-  async connectCouple(
-    @Request() req: any,
-    @Param('partnerId', ParseIntPipe) partnerId: number,
-    @QueryRunner() qr: QR,
-  ) {
-    const createCoupleDto: CreateCoupleDto = {
-      myId: `${req.user.socialId}`,
-      partnerId: `${partnerId}`,
-    };
-    return this.userService.connectCouple(createCoupleDto, qr);
-  }
-
-  @Post('/disconnect/:partnerId')
-  @ApiOperation({
-    summary: '커플 해제',
-    description: '커플 해제',
-  })
-  @UseInterceptors(TransactionInterceptor)
-  async disconnectCouple(
-    @Request() req: any,
-    @Param('partnerId', ParseIntPipe) partnerId: number,
-    @QueryRunner() qr: QR,
-  ) {
-    const createCoupleDto: CreateCoupleDto = {
-      myId: `${req.user.socialId}`,
-      partnerId: `${partnerId}`,
-    };
-    return this.userService.disConnectCouple(createCoupleDto, qr);
-  }
 }

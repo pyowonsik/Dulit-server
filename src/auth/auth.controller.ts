@@ -9,7 +9,6 @@ import {
   Param,
   Body,
 } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { Public } from './decorator/public.decorator';
 import {
@@ -41,21 +40,17 @@ export class AuthController {
     return this.authService.kakaoLogin(kakaoAccessToken);
   }
 
-  // Bearer iosndionqwoidnasdonsandoin
-
-  // naver 로그인
-  @Get('naver')
+  // socialId 로그인 후, postMan env accessToken에 넣기
+  // -> social login을 직접 호출할수 없어서 생성한 test endpoint
+  @Post('social/login/:socialId')
+  @ApiOperation({
+    summary: 'access 토큰 발급을 위한 socialId로 로그인',
+    description: 'access 토큰 발급을 위한 socialId로 로그인',
+  })
+  @ApiBasicAuth()
   @Public()
-  @ApiExcludeEndpoint()
-  @UseGuards(AuthGuard('naver'))
-  async naverLogin() {}
-
-  @Get('naver/callback')
-  @Public()
-  @ApiExcludeEndpoint()
-  @UseGuards(AuthGuard('naver'))
-  async naverAuthCallback(@Request() req) {
-    return this.authService.naverLogin(req);
+  async socialIdLogin(@Param('socialId') socialId: string) {
+    return this.authService.socialIdLogin(socialId);
   }
 
   @Post('token/access')
@@ -72,16 +67,19 @@ export class AuthController {
     };
   }
 
-  // socialId 로그인 후, postMan env accessToken에 넣기
-  // -> social login을 직접 호출할수 없어서 생성한 test endpoint
-  @Post('social/login/:socialId')
-  @ApiOperation({
-    summary: 'access 토큰 발급을 위한 socialId로 로그인',
-    description: 'access 토큰 발급을 위한 socialId로 로그인',
-  })
-  @ApiBasicAuth()
-  @Public()
-  async socialIdLogin(@Param('socialId') socialId: string) {
-    return this.authService.socialIdLogin(socialId);
-  }
+  // * 추후 구현 * //
+  // // naver 로그인
+  // @Get('naver')
+  // @Public()
+  // @ApiExcludeEndpoint()
+  // @UseGuards(AuthGuard('naver'))
+  // async naverLogin() {}
+
+  // @Get('naver/callback')
+  // @Public()
+  // @ApiExcludeEndpoint()
+  // @UseGuards(AuthGuard('naver'))
+  // async naverAuthCallback(@Request() req) {
+  //   return this.authService.naverLogin(req);
+  // }
 }

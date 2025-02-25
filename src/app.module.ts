@@ -18,14 +18,11 @@ import { AuthGuard } from './auth/guard/auth.guard';
 import { ChatModule } from './chat/chat.module';
 import { Chat } from './chat/entity/chat.entity';
 import { ChatRoom } from './chat/entity/chat-room.entity';
-import { Couple } from './user/entity/couple.entity';
 import { PostModule } from './post/post.module';
 import { Post } from './post/entity/post.entity';
 import { CommonModule } from './common/common.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
-import { PlanModule } from './plan/plan.module';
-import { Plan } from './plan/entities/plan.entity';
 import { ScheduleModule } from '@nestjs/schedule';
 import { NotificationModule } from './notification/notification.module';
 import { CommentModel } from './post/comment/entity/comment.entity';
@@ -33,12 +30,16 @@ import { PostUserLike } from './post/comment/entity/post-user-like.entity';
 import { RBACGuard } from './auth/guard/rbac.guard';
 import { ForbiddenExceptionFilter } from './common/filter/forbidden.filter';
 import { QueryFailedExceptionFilter } from './common/filter/query-failed.filter';
-import { AnniversaryModule } from './anniversary/anniversary.module';
-import { Anniversary } from './anniversary/entity/anniversary.entity';
-import { CalendarModule } from './calendar/calendar.module';
-import { Calendar } from './calendar/entities/calendar.entity';
 import { WinstonModule } from 'nest-winston';
+import { CoupleModule } from './couple/couple.module';
 import * as winston from 'winston';
+import { Couple } from './couple/entity/couple.entity';
+import { Plan } from './couple/plan/entities/plan.entity';
+import { Anniversary } from './couple/anniversary/entity/anniversary.entity';
+import { Calendar } from './couple/calendar/entities/calendar.entity';
+import { CalendarModule } from './couple/calendar/calendar.module';
+import { AnniversaryModule } from './couple/anniversary/anniversary.module';
+import { PlanModule } from './couple/plan/plan.module';
 
 @Module({
   imports: [
@@ -139,6 +140,7 @@ import * as winston from 'winston';
     NotificationModule,
     AnniversaryModule,
     CalendarModule,
+    CoupleModule,
   ],
   controllers: [],
   providers: [
@@ -146,14 +148,14 @@ import * as winston from 'winston';
       provide: APP_GUARD,
       useClass: AuthGuard,
     },
-    {
-      provide: APP_FILTER,
-      useClass: ForbiddenExceptionFilter,
-    },
-    {
-      provide: APP_FILTER,
-      useClass: QueryFailedExceptionFilter,
-    },
+    // {
+    //   provide: APP_FILTER,
+    //   useClass: ForbiddenExceptionFilter,
+    // },
+    // {
+    //   provide: APP_FILTER,
+    //   useClass: QueryFailedExceptionFilter,
+    // },
     {
       provide: APP_GUARD,
       useClass: RBACGuard,
@@ -167,6 +169,10 @@ export class AppModule implements NestModule {
     consumer
       .apply(BearerTokenMiddleWare)
       .exclude(
+        // {
+        //   path: 'auth/register',
+        //   method: RequestMethod.POST,
+        // },
         {
           path: 'auth/kakao',
           method: RequestMethod.GET,

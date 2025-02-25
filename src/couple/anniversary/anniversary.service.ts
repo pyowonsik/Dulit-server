@@ -1,12 +1,12 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateAnniversaryDto } from './dto/create-anniversary.dto';
 import { UpdateAnniversaryDto } from './dto/update-anniversary.dto';
-import { Couple } from 'src/user/entity/couple.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Not, Repository } from 'typeorm';
 import { CommonService } from 'src/common/common.service';
 import { Anniversary } from './entity/anniversary.entity';
 import { GetAnniversaryDto } from './dto/get-anniversary.dto';
+import { Couple } from 'src/couple/entity/couple.entity';
 
 @Injectable()
 export class AnniversaryService {

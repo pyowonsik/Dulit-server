@@ -10,7 +10,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Chat } from './chat.entity';
-import { Couple } from 'src/user/entity/couple.entity';
+import { Couple } from 'src/couple/entity/couple.entity';
 
 @Entity()
 export class ChatRoom extends BaseTable {

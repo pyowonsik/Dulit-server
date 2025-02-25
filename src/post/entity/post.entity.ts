@@ -1,6 +1,5 @@
 import { Transform } from 'class-transformer';
 import { BaseTable } from 'src/common/entity/base-table.entity';
-import { Couple } from 'src/user/entity/couple.entity';
 import { User } from 'src/user/entity/user.entity';
 import {
   BaseEntity,
@@ -14,6 +13,7 @@ import {
 } from 'typeorm';
 import { CommentModel } from '../comment/entity/comment.entity';
 import { PostUserLike } from '../comment/entity/post-user-like.entity';
+import { Couple } from 'src/couple/entity/couple.entity';
 
 @Entity()
 export class Post extends BaseTable {

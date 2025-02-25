@@ -12,17 +12,17 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { QueryRunner, Repository } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
 import { ChatRoom } from 'src/chat/entity/chat-room.entity';
-import { Couple } from './entity/couple.entity';
-import { CreateCoupleDto } from './dto/create-couple.dto';
-import { Plan } from 'src/plan/entities/plan.entity';
 import { Chat } from 'src/chat/entity/chat.entity';
 import { Post } from 'src/post/entity/post.entity';
 import { CommentModel } from 'src/post/comment/entity/comment.entity';
 import { NotificationGateway } from 'src/notification/notification.gateway';
 import { NotificationService } from 'src/notification/notification.service';
-import { Anniversary } from 'src/anniversary/entity/anniversary.entity';
 import { AuthService } from 'src/auth/auth.service';
-import { Calendar } from 'src/calendar/entities/calendar.entity';
+import { Couple } from 'src/couple/entity/couple.entity';
+import { CreateCoupleDto } from 'src/couple/dto/create-couple.dto';
+import { Plan } from 'src/couple/plan/entities/plan.entity';
+import { Anniversary } from 'src/couple/anniversary/entity/anniversary.entity';
+import { Calendar } from 'src/couple/calendar/entities/calendar.entity';
 
 @Injectable()
 export class UserService {
@@ -40,6 +40,8 @@ export class UserService {
   ) {}
 
   async create(createUserDto: CreateUserDto) {
+    
+
     let user = await this.userRepository.findOne({
       where: { socialId: createUserDto.socialId },
     });
@@ -120,78 +122,6 @@ export class UserService {
     await qr.manager.delete(User, id);
 
     return id;
-  }
-
-  async connectCouple(createCoupleDto: CreateCoupleDto, qr: QueryRunner) {
-    const me = await qr.manager.findOne(User, {
-      where: { socialId: createCoupleDto.myId },
-      relations: ['couple'],
-    });
-    const partner = await qr.manager.findOne(User, {
-      where: { socialId: createCoupleDto.partnerId },
-      relations: ['couple'],
-    });
-
-    if (!me || !partner)
-      throw new NotFoundException('사용자가 존재하지 않습니다.');
-    if (me.couple || partner.couple)
-      throw new BadRequestException('이미 매칭된 사용자입니다.');
-
-    // 명시적 엔티티 생성 -> .save()는 객체 전체를 업데이트 하기 때문에 .create()후 .save() 권장
-    const newChatRoom = qr.manager.create(ChatRoom, {
-      users: [me, partner],
-    });
-    await qr.manager.save(newChatRoom);
-
-    const newCouple = qr.manager.create(Couple, {
-      users: [me, partner],
-      chatRoom: newChatRoom,
-    });
-    await qr.manager.save(newCouple);
-
-    this.notificationService.matchedNotification(me.id);
-    this.notificationService.matchedNotification(partner.id);
-
-    // 쿼리 최적화
-    // const user = await qr.manager.findOne(User, {
-    //   where: { socialId: createCoupleDto.myId },
-    //   relations: ['couple', 'chatRooms'],
-    // });
-
-    return true;
-  }
-
-  async disConnectCouple(createCoupleDto: CreateCoupleDto, qr: QueryRunner) {
-    const me = await qr.manager.findOne(User, {
-      where: { socialId: createCoupleDto.myId },
-      relations: ['couple', 'chatRooms'],
-    });
-    const partner = await qr.manager.findOne(User, {
-      where: { socialId: createCoupleDto.partnerId },
-      relations: ['couple'],
-    });
-
-    if (!me || !partner)
-      throw new NotFoundException('사용자가 존재하지 않습니다.');
-    if (!me.couple || !partner.couple)
-      throw new BadRequestException('매칭이 되지 않은 사용자입니다.');
-
-    // 1. 유저가 속한 chatRoom - chat 삭제
-    await this.deleteChatRoomsAndChats(me, qr);
-
-    // 2. 유저가 속한 couple - plan , post 삭제
-    await this.deleteCoupleAndRelatedData(me, qr);
-
-    this.notificationService.sendNotification(
-      me.id,
-      '커플 연결이 해제되었습니다.',
-    );
-    this.notificationService.sendNotification(
-      partner.id,
-      '커플 연결이 해제되었습니다.',
-    );
-
-    return me.id;
   }
 
   async deleteChatRoomsAndChats(user: User, qr: QueryRunner) {

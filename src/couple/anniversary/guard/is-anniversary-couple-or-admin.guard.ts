@@ -8,7 +8,6 @@ import {
 import { Observable } from 'rxjs';
 import { AnniversaryService } from '../anniversary.service';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Couple } from 'src/user/entity/couple.entity';
 import { Repository } from 'typeorm';
 import { Role } from 'src/user/entity/user.entity';
 
