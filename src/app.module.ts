@@ -11,7 +11,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { envVariableKeys } from './common/const/env.const';
 import { UserModule } from './user/user.module';
 import { User } from './user/entity/user.entity';
-import { BearerTokenMiddleWare } from './auth/middleware/bearer-token.middlewear';
+import { BearerTokenMiddleWare } from './auth/middleware/bearer-token.middleware';
 import { JwtModule } from '@nestjs/jwt';
 import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from './auth/guard/auth.guard';

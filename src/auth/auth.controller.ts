@@ -29,19 +29,19 @@ export class AuthController {
   @Public()
   @Post('register')
   @ApiBasicAuth()
-  registerUser(@Authorization() token : string, @Body() registerDto: RegisterDto) {
+  registerUser(
+    @Authorization() token: string,
+    @Body() registerDto: RegisterDto,
+  ) {
     return this.authService.register(token, registerDto);
   }
 
   @Public()
   @Post('login')
   @ApiBasicAuth()
-  loginUser(
-    @Authorization() token: string,
-  ) {
+  loginUser(@Authorization() token: string) {
     return this.authService.login(token);
   }
-
 
   // kakao 로그인
   @Get('kakao')
@@ -50,6 +50,7 @@ export class AuthController {
   // @UseGuards(AuthGuard('kakao'))
   async kakaoLogin() {}
 
+  /* istanbul ignore next */
   @Post('kakao/callback')
   @Public()
   @ApiExcludeEndpoint()
