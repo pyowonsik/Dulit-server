@@ -62,14 +62,15 @@ export class CommentController {
     return this.commentService.findOne(postId, id);
   }
 
-  // @Patch(':commentId')
-  // @UseGuards(IsPostMineOrAdminGuard)
-  // update(
-  //   @Param('id', ParseIntPipe) id: number,
-  //   @Body() updateCommentDto: UpdateCommentDto,
-  // ) {
-  //   return this.commentService.update(id, updateCommentDto);
-  // }
+  @Patch(':commentId')
+  @UseGuards(IsCommentMineOrAdminGuard)
+  update(
+    @Param('postId', ParseIntPipe) postId: number,
+    @Param('commentId', ParseIntPipe) id: number,
+    @Body() updateCommentDto: UpdateCommentDto,
+  ) {
+    return this.commentService.update(postId, id, updateCommentDto);
+  }
 
   @Delete(':commentId')
   @ApiOperation({
