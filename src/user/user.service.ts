@@ -31,12 +31,7 @@ export class UserService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    @InjectRepository(ChatRoom)
-    private readonly chatRoomRepository: Repository<ChatRoom>,
-    @InjectRepository(Couple)
-    private readonly coupleRepository: Repository<Couple>,
     private readonly configService: ConfigService,
-    private readonly notificationService: NotificationService,
     @Inject(forwardRef(() => AuthService)) // 순환 종속성 문제 해결을 위한 지연 주입
     private readonly authService: AuthService,
   ) {}
@@ -94,6 +89,7 @@ export class UserService {
       user,
     };
   }
+  
   async findAll() {
     return await this.userRepository.find();
   }
