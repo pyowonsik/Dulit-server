@@ -116,10 +116,38 @@ export class CommentService {
     return comment;
   }
 
-  // // 자기 댓글만 수정가능해야함. 추후 구현
-  // update(id: number, updateCommentDto: UpdateCommentDto) {
-  //   return `This action updates a #${id} comment`;
-  // }
+  // 자기 댓글만 수정가능해야함. 추후 구현
+  async update(postId: number, id: number, updateCommentDto: UpdateCommentDto) {
+    const post = await this.postRepository.findOne({
+      where: { id: postId },
+      relations: ['comments'],
+    });
+
+    if (!post) {
+      throw new NotFoundException('존재하지 않는 POST의 ID 입니다.');
+    }
+
+    const comment = await this.commentRepository.findOne({
+      where: {
+        id,
+      },      relations: ['post'],
+
+    });
+
+    if (!comment) {
+      throw new NotFoundException('존재하지 않는 COMMENT의 ID 입니다.');
+    }
+
+    await this.commentRepository.update(id, updateCommentDto);
+
+    const newComment = await this.commentRepository.findOne({
+      where: {
+        id,
+      },
+    });
+
+    return newComment;
+  }
 
   async remove(postId: number, id: number) {
     const post = await this.postRepository.findOne({
@@ -134,7 +162,8 @@ export class CommentService {
     const comment = await this.commentRepository.findOne({
       where: {
         id,
-      },
+      },      relations: ['post'],
+
     });
 
     if (!comment) {
