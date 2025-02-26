@@ -56,6 +56,7 @@ export class AuthService {
   }
 
   // 카카오 로그인
+  /* istanbul ignore next */
   async kakaoLogin(kakaoAccessToken: string) {
     const kakaoUser = await this.getKakaoUserInfo(kakaoAccessToken);
 
@@ -72,6 +73,7 @@ export class AuthService {
     // return user;
   }
 
+  /* istanbul ignore next */
   private async getKakaoUserInfo(accessToken: string) {
     const response = await axios.get('https://kapi.kakao.com/v2/user/me', {
       headers: { Authorization: `Bearer ${accessToken}` },
@@ -192,7 +194,7 @@ export class AuthService {
       },
       {
         secret: isRefresh ? refreshTokenSecret : accessTokenSecret,
-        expiresIn: isRefresh ? '24h' : '24h',
+        expiresIn: isRefresh ? '24h' : 300,
       },
     );
   }

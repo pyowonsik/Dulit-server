@@ -34,6 +34,11 @@ export class UserService {
     private readonly configService: ConfigService,
     @Inject(forwardRef(() => AuthService)) // 순환 종속성 문제 해결을 위한 지연 주입
     private readonly authService: AuthService,
+    // @InjectRepository(ChatRoom)
+    // private readonly chatRoomRepository: Repository<ChatRoom>,
+    // @InjectRepository(Couple)
+    // private readonly coupleRepository: Repository<Couple>,
+    // private readonly notificationService: NotificationService,
   ) {}
 
   async create(createUserDto: CreateUserDto) {
