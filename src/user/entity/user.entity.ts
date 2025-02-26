@@ -15,7 +15,6 @@ import { Post } from 'src/post/entity/post.entity';
 import { CommentModel } from 'src/post/comment/entity/comment.entity';
 import { PostUserLike } from 'src/post/comment/entity/post-user-like.entity';
 import { Couple } from 'src/couple/entity/couple.entity';
-import { Plan } from 'src/couple/plan/entities/plan.entity';
 export enum Role {
   admin,
   user,
