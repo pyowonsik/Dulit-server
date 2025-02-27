@@ -8,6 +8,7 @@ import { Post } from '../entity/post.entity';
 import { Repository } from 'typeorm/repository/Repository';
 import { GetCommentDto } from './dto/get-comment.dto';
 import { CommonService } from 'src/common/common.service';
+import { CommentResponseDto } from './dto/comment-response.dto';
 
 @Injectable()
 export class CommentService {
@@ -26,15 +27,9 @@ export class CommentService {
     userId: number,
     postId: number,
   ) {
-    // {
-    //   post,
-    //   author : user,
-    //   comment : createCommentDto.comment
-    // }
-
     const author = await this.userRepository.findOne({
       where: { id: userId },
-      relations: ['comments'],
+      // relations: ['comments'],
     });
 
     if (!author) {
@@ -43,27 +38,22 @@ export class CommentService {
 
     const post = await this.postRepository.findOne({
       where: { id: postId },
-      relations: ['comments'],
+      // relations: ['comments'],
     });
 
     if (!post) {
       throw new NotFoundException('존재하지 않는 POST의 ID 입니다.');
     }
 
-    const comment = await this.commentRepository.create({
+    const comment = this.commentRepository.create({
       comment: createCommentDto.comment,
       author,
       post,
     });
-    await this.commentRepository.save(comment);
 
-    const newComment = await this.commentRepository.findOne({
-      where: {
-        id: comment.id,
-      },
-    });
+    const savedComment = await this.commentRepository.save(comment); // ✅ 저장 추가
 
-    return newComment;
+    return new CommentResponseDto(savedComment);
   }
 
   /* istanbul ignore next */
@@ -130,8 +120,8 @@ export class CommentService {
     const comment = await this.commentRepository.findOne({
       where: {
         id,
-      },      relations: ['post'],
-
+      },
+      relations: ['post'],
     });
 
     if (!comment) {
@@ -140,13 +130,12 @@ export class CommentService {
 
     await this.commentRepository.update(id, updateCommentDto);
 
-    const newComment = await this.commentRepository.findOne({
-      where: {
-        id,
-      },
+    const updatedComment = await this.commentRepository.findOne({
+      where: { id },
+      relations: ['post', 'author'],
     });
 
-    return newComment;
+    return new CommentResponseDto(updatedComment);
   }
 
   async remove(postId: number, id: number) {
@@ -162,8 +151,8 @@ export class CommentService {
     const comment = await this.commentRepository.findOne({
       where: {
         id,
-      },      relations: ['post'],
-
+      },
+      relations: ['post'],
     });
 
     if (!comment) {

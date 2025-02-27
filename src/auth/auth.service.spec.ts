@@ -103,14 +103,14 @@ describe('AuthService', () => {
       });
 
       // mockUserService.create를 모킹하여 user 객체를 반환하도록 설정
-      jest.spyOn(mockUserService, 'create').mockResolvedValue(user);
+      jest.spyOn(userService, 'create').mockResolvedValue(user as User);
 
       // 실제 register 메소드 호출
       const result = await authService.register(rawToken, registerDto);
 
       // 메소드가 제대로 호출되었는지 검증
       expect(authService.parserBasicToken).toHaveBeenCalledWith(rawToken);
-      expect(mockUserService.create).toHaveBeenCalledWith({
+      expect(userService.create).toHaveBeenCalledWith({
         ...registerDto,
         email: user.email,
         password: user.password,
@@ -184,7 +184,7 @@ describe('AuthService', () => {
       const payload = { type: 'access' };
 
       jest.spyOn(jwtService, 'verifyAsync').mockResolvedValue(payload);
-      jest.spyOn(mockConfigService, 'get').mockReturnValue('secret');
+      jest.spyOn(configService, 'get').mockReturnValue('secret');
 
       const result = await authService.parserBearerToken(rawToken, false);
 
@@ -243,12 +243,12 @@ describe('AuthService', () => {
       };
 
       // 과정은 보다 결과
-      jest.spyOn(mockUserRepository, 'findOne').mockResolvedValue(user);
+      jest.spyOn(userRepository, 'findOne').mockResolvedValue(user as User);
       jest.spyOn(bcrypt, 'compare').mockImplementation((a, b) => true);
 
       const result = await authService.authenticate(email, password);
 
-      expect(mockUserRepository.findOne).toHaveBeenCalledWith({
+      expect(userRepository.findOne).toHaveBeenCalledWith({
         where: {
           email: user.email,
         },
@@ -275,7 +275,7 @@ describe('AuthService', () => {
       password: 'hashedpassword',
     };
 
-    jest.spyOn(mockUserRepository, 'findOne').mockResolvedValue(user);
+    jest.spyOn(userRepository, 'findOne').mockResolvedValue(user as User);
     jest.spyOn(bcrypt, 'compare').mockImplementation((a, b) => false);
 
     await expect(
@@ -288,7 +288,7 @@ describe('AuthService', () => {
     const token = 'token';
 
     beforeEach(() => {
-      jest.spyOn(mockConfigService, 'get').mockReturnValue('secret');
+      jest.spyOn(configService, 'get').mockReturnValue('secret');
       jest.spyOn(jwtService, 'signAsync').mockResolvedValue(token);
     });
 
@@ -320,12 +320,12 @@ describe('AuthService', () => {
         email: 'test@test.com',
       };
 
-      jest.spyOn(mockUserRepository, 'findOne').mockResolvedValue(me);
+      jest.spyOn(userRepository, 'findOne').mockResolvedValue(me as User);
 
       const result = await authService.getMe(me.id);
 
       expect(result).toEqual(me);
-      expect(mockUserRepository.findOne).toHaveBeenCalledWith({
+      expect(userRepository.findOne).toHaveBeenCalledWith({
         where: {
           id: 1,
         },
@@ -333,10 +333,10 @@ describe('AuthService', () => {
     });
     // NotFoundException
     it('should throw NotFoundException if me is not found ', async () => {
-      jest.spyOn(mockUserRepository, 'findOne').mockResolvedValue(null);
+      jest.spyOn(userRepository, 'findOne').mockResolvedValue(null);
 
       await expect(authService.getMe(999)).rejects.toThrow(NotFoundException);
-      expect(mockUserRepository.findOne).toHaveBeenCalledWith({
+      expect(userRepository.findOne).toHaveBeenCalledWith({
         where: {
           id: 999,
         },
