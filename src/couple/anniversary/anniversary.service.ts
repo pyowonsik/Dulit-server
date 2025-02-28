@@ -7,15 +7,18 @@ import { CommonService } from 'src/common/common.service';
 import { Anniversary } from './entity/anniversary.entity';
 import { GetAnniversaryDto } from './dto/get-anniversary.dto';
 import { Couple } from 'src/couple/entity/couple.entity';
+import { AnniversaryResponseDto } from './dto/anniversary-response.dto';
+import { CoupleService } from '../couple.service';
 
 @Injectable()
 export class AnniversaryService {
   constructor(
-    @InjectRepository(Couple)
-    private readonly coupleRepository: Repository<Couple>,
     @InjectRepository(Anniversary)
     private readonly anniversaryRepository: Repository<Anniversary>,
+    @InjectRepository(Couple)
+    private readonly coupleRepository: Repository<Couple>,
     private readonly commonService: CommonService,
+    private readonly coupleService: CoupleService,
   ) {}
 
   async create(
@@ -42,36 +45,21 @@ export class AnniversaryService {
       couple,
     });
 
-    await qr.manager.save(Anniversary, anniversary);
+    const savedAnniversary = await qr.manager.save(Anniversary, anniversary);
 
-    const newAnniversary = await qr.manager.findOne(Anniversary, {
-      where: {
-        id: anniversary.id,
-      },
-    });
-
-    return newAnniversary;
+    return new AnniversaryResponseDto(savedAnniversary);
   }
 
   async findAll(userId: number, dto: GetAnniversaryDto) {
-    const couple = await this.coupleRepository.findOne({
-      where: {
-        users: {
-          id: In([userId]),
-        },
-      },
-
-      relations: ['anniversaries'],
-    });
+    const couple = await this.coupleService.findCoupleRelationChild(userId, [
+      'anniversaries',
+    ]);
 
     if (!couple) {
       throw new NotFoundException('존재하지 않는 COUPLE의의 ID 입니다.');
     }
 
-    const qb = this.anniversaryRepository
-      .createQueryBuilder('anniversary')
-      .where('anniversary.coupleId = :coupleId', { coupleId: couple.id })
-      .select();
+    const qb = await this.findMyCoupleAnniversary(couple.id);
 
     this.commonService.applyPagePaginationParamsToQb(qb, dto);
 
@@ -81,15 +69,9 @@ export class AnniversaryService {
   }
 
   async findOne(userId: number, id: number) {
-    const couple = await this.coupleRepository.findOne({
-      where: {
-        users: {
-          id: In([userId]),
-        },
-      },
-
-      relations: ['anniversaries'],
-    });
+    const couple = await this.coupleService.findCoupleRelationChild(userId, [
+      'anniversaries',
+    ]);
 
     if (!couple) {
       throw new NotFoundException('존재하지 않는 COUPLE의 ID 입니다.');
@@ -123,6 +105,7 @@ export class AnniversaryService {
 
       relations: ['anniversaries'],
     });
+
     if (!couple) {
       throw new NotFoundException('존재하지 않는 COUPLE의 ID 입니다.');
     }
@@ -149,19 +132,14 @@ export class AnniversaryService {
       },
     });
 
-    return newAnniversary;
+    return new AnniversaryResponseDto(newAnniversary);
   }
 
   async remove(userId: number, id: number) {
-    const couple = await this.coupleRepository.findOne({
-      where: {
-        users: {
-          id: In([userId]),
-        },
-      },
+    const couple = await this.coupleService.findCoupleRelationChild(userId, [
+      'anniversaries',
+    ]);
 
-      relations: ['anniversaries'],
-    });
     if (!couple) {
       throw new NotFoundException('존재하지 않는 COUPLE의의 ID 입니다.');
     }
@@ -177,26 +155,45 @@ export class AnniversaryService {
     }
 
     await this.anniversaryRepository.delete(id);
+
     return id;
   }
 
   async isAnniversaryCouple(userId: number, anniversaryId: number) {
-    const couple = await this.coupleRepository
+    const couple = await this.findMyCouple(userId);
+
+    if (!couple) {
+      return false;
+    }
+
+    const exists = await this.isExistsAnniversary(anniversaryId, couple.id);
+
+    return exists;
+  }
+
+  /* istanbul ignore next */
+  async findMyCoupleAnniversary(coupleId: number) {
+    return this.anniversaryRepository
+      .createQueryBuilder('anniversary')
+      .where('anniversary.coupleId = :coupleId', { coupleId })
+      .select();
+  }
+
+  /* istanbul ignore next */
+  async findMyCouple(userId: number) {
+    return this.coupleRepository
       .createQueryBuilder('couple')
       .leftJoin('couple.users', 'user')
       .where('user.id = :userId', { userId })
       .getOne();
+  }
 
-    if (!couple) {
-      return false; // 사용자가 커플에 속하지 않음
-    }
-
-    const exists = await this.anniversaryRepository
+  /* istanbul ignore next */
+  async isExistsAnniversary(anniversaryId: number, coupleId: number) {
+    return await this.anniversaryRepository
       .createQueryBuilder('anniversary')
       .where('anniversary.id = :anniversaryId', { anniversaryId })
-      .andWhere('anniversary.coupleId = :coupleId', { coupleId: couple.id })
+      .andWhere('anniversary.coupleId = :coupleId', { coupleId })
       .getExists();
-
-    return exists;
   }
 }
