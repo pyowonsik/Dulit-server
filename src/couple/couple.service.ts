@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { NotificationService } from 'src/notification/notification.service';
 import { CreateCoupleDto } from './dto/create-couple.dto';
-import { QueryRunner } from 'typeorm';
+import { In, QueryRunner, Repository } from 'typeorm';
 import { User } from 'src/user/entity/user.entity';
 import { ChatRoom } from 'src/chat/entity/chat-room.entity';
 import { Couple } from './entity/couple.entity';
@@ -15,10 +15,15 @@ import { Post } from 'src/post/entity/post.entity';
 import { Plan } from './plan/entities/plan.entity';
 import { Anniversary } from './anniversary/entity/anniversary.entity';
 import { Calendar } from './calendar/entities/calendar.entity';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class CoupleService {
-  constructor(private readonly notificationService: NotificationService) {}
+  constructor(
+    private readonly notificationService: NotificationService,
+    @InjectRepository(Couple)
+    private readonly coupleRepository: Repository<Couple>,
+  ) {}
   async connectCouple(createCoupleDto: CreateCoupleDto, qr: QueryRunner) {
     const me = await qr.manager.findOne(User, {
       where: { socialId: createCoupleDto.myId },
@@ -130,5 +135,18 @@ export class CoupleService {
         await qr.manager.delete(Couple, couple.id);
       }
     }
+  }
+
+  async findCoupleRelationChild(userId: number, relations: string[] = []) {
+    const couple = await this.coupleRepository.findOne({
+      where: { users: { id: In([userId]) } },
+      relations,
+    });
+
+    if (!couple) {
+      throw new NotFoundException('존재하지 않는 COUPLE의 ID 입니다.');
+    }
+
+    return couple;
   }
 }
