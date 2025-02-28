@@ -4,11 +4,12 @@ import { UpdatePlanDto } from './dto/update-plan.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Plan } from './entities/plan.entity';
 import { User } from 'src/user/entity/user.entity';
-import { QueryRunner, Repository } from 'typeorm';
+import { In, QueryRunner, Repository } from 'typeorm';
 import { GetPlanDto } from './dto/get-plan.dto';
 import { CommonService } from 'src/common/common.service';
 import { CoupleService } from '../couple.service';
 import { PlanResponseDto } from './dto/plan-response.dto';
+import { Couple } from '../entity/couple.entity';
 
 @Injectable()
 export class PlanService {
@@ -22,9 +23,14 @@ export class PlanService {
   ) {}
 
   async create(userId: number, createPlanDto: CreatePlanDto, qr: QueryRunner) {
-    const couple = await this.coupleService.findCoupleRelationChild(userId, [
-      'plans',
-    ]);
+    const couple = await qr.manager.findOne(Couple, {
+      where: {
+        users: {
+          id: In([userId]),
+        },
+      },
+      relations: ['plans'],
+    });
 
     if (!couple) {
       throw new NotFoundException('존재하지 않는 COUPLE의 ID 입니다.');
@@ -98,9 +104,15 @@ export class PlanService {
     updatePlanDto: UpdatePlanDto,
     qr: QueryRunner,
   ) {
-    const couple = await this.coupleService.findCoupleRelationChild(userId, [
-      'plans',
-    ]);
+    const couple = await qr.manager.findOne(Couple, {
+      where: {
+        users: {
+          id: In([userId]),
+        },
+      },
+
+      relations: ['plans'],
+    });
 
     if (!couple) {
       throw new NotFoundException('존재하지 않는 COUPLE의 ID 입니다.');

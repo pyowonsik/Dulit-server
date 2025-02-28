@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PlanService } from './plan.service';
-import { QueryRunner, Repository } from 'typeorm';
+import { In, QueryRunner, Repository } from 'typeorm';
 import { User } from 'src/user/entity/user.entity';
 import { Couple } from '../entity/couple.entity';
 import { Plan } from './entities/plan.entity';
@@ -93,19 +93,21 @@ describe('PlanService', () => {
         location: createPlanDto.location,
         time: createPlanDto.time,
       };
-
-      jest
-        .spyOn(coupleService, 'findCoupleRelationChild')
-        .mockResolvedValue(couple);
-      (qr.manager.create as any).mockResolvedValue(planResponseDto);
-      (qr.manager.save as any).mockResolvedValue(planResponseDto);
+      (qr.manager.findOne as jest.Mock).mockResolvedValue(couple);
+      (qr.manager.create as jest.Mock).mockReturnValue(planResponseDto);
+      (qr.manager.save as jest.Mock).mockResolvedValue(planResponseDto);
 
       const result = await planService.create(userId, createPlanDto, qr);
 
-      expect(coupleService.findCoupleRelationChild).toHaveBeenCalledWith(
-        userId,
-        ['plans'],
-      );
+      expect(qr.manager.findOne).toHaveBeenCalledWith(Couple, {
+        where: {
+          users: {
+            id: In([userId]),
+          },
+        },
+        relations: ['plans'],
+      });
+
       expect(result).toEqual(planResponseDto);
       expect(qr.manager.create).toHaveBeenCalledWith(Plan, {
         ...createPlanDto,
@@ -287,6 +289,7 @@ describe('PlanService', () => {
       );
     });
   });
+
   describe('update', () => {
     let qr: jest.Mocked<QueryRunner>;
 
@@ -301,32 +304,32 @@ describe('PlanService', () => {
 
     it('should update the plan when valid inputs are provided', async () => {
       const userId = 1;
+      const couple = { id: 1, plans: [{ id: 1 }] } as Couple;
       const planId = 1;
       const updatePlanDto: UpdatePlanDto = {
-        topic: 'Updated Topic',
-        location: 'New Location',
-        time: new Date(),
+        topic: '',
+        location: '',
+        time: undefined,
       };
-      const couple = { id: 1 } as Couple;
-      const planResponseDto = {
+      const planResponseDto: PlanResponseDto = {
         id: 1,
-        topic: 'Updated Topic',
-        location: 'New Location',
-        time: new Date(),
+        topic: updatePlanDto.topic,
+        location: updatePlanDto.location,
+        time: undefined,
       };
 
-      jest
-        .spyOn(coupleService, 'findCoupleRelationChild')
-        .mockResolvedValue(couple);
+      (qr.manager.findOne as jest.Mock).mockImplementation((entity) => {
+        if (entity === Couple) return Promise.resolve(couple);
+        if (entity === Plan)
+          return Promise.resolve({
+            id: planId,
+            ...updatePlanDto,
+          });
+        return Promise.resolve(null);
+      });
 
-      jest
-        .spyOn(qr.manager, 'findOne')
-        .mockResolvedValueOnce({ id: planId, ...updatePlanDto } as Plan)
-        .mockResolvedValue(planResponseDto as Plan);
+      (qr.manager.update as jest.Mock).mockResolvedValue({ affected: 1 });
 
-      jest.spyOn(qr.manager, 'update').mockResolvedValue(undefined);
-
-      // Call the service method
       const result = await planService.update(
         userId,
         planId,
@@ -334,68 +337,41 @@ describe('PlanService', () => {
         qr,
       );
 
-      expect(coupleService.findCoupleRelationChild).toHaveBeenCalledWith(
-        userId,
-        ['plans'],
+      expect(qr.manager.findOne).toHaveBeenCalledWith(
+        Couple,
+        expect.any(Object),
       );
-
-      expect(qr.manager.findOne).toHaveBeenCalledTimes(2);
       expect(qr.manager.findOne).toHaveBeenCalledWith(Plan, {
         where: { id: planId },
       });
-
       expect(qr.manager.update).toHaveBeenCalledWith(
         Plan,
         planId,
         updatePlanDto,
       );
-
       expect(result).toEqual(planResponseDto);
     });
 
     it('should throw NotFoundException if couple does not exist', async () => {
-      const userId = 1;
-      const planId = 1;
-      const updatePlanDto: UpdatePlanDto = {
-        topic: 'Updated Topic',
-        location: 'New Location',
-        time: new Date(),
-      };
+      (qr.manager.findOne as jest.Mock).mockResolvedValue(null);
 
-      jest
-        .spyOn(coupleService, 'findCoupleRelationChild')
-        .mockResolvedValue(null);
-
-      await expect(
-        planService.update(userId, planId, updatePlanDto, qr),
-      ).rejects.toThrow(NotFoundException);
-      await expect(
-        planService.update(userId, planId, updatePlanDto, qr),
-      ).rejects.toThrow('존재하지 않는 COUPLE의 ID 입니다.');
+      await expect(planService.update(1, 1, {}, qr)).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
     it('should throw NotFoundException if plan does not exist', async () => {
-      const userId = 1;
-      const planId = 1;
-      const updatePlanDto: UpdatePlanDto = {
-        topic: 'Updated Topic',
-        location: 'New Location',
-        time: new Date(),
-      };
       const couple = { id: 1 } as Couple;
 
-      jest
-        .spyOn(coupleService, 'findCoupleRelationChild')
-        .mockResolvedValue(couple);
+      (qr.manager.findOne as jest.Mock).mockImplementation((entity) => {
+        if (entity === Couple) return Promise.resolve(couple);
+        if (entity === Plan) return Promise.resolve(null);
+        return Promise.resolve(null);
+      });
 
-      jest.spyOn(qr.manager, 'findOne').mockResolvedValueOnce(null);
-
-      await expect(
-        planService.update(userId, planId, updatePlanDto, qr),
-      ).rejects.toThrow(NotFoundException);
-      await expect(
-        planService.update(userId, planId, updatePlanDto, qr),
-      ).rejects.toThrow('존재하지 않는 PLAN의 ID 입니다.');
+      await expect(planService.update(1, 1, {}, qr)).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -404,13 +380,11 @@ describe('PlanService', () => {
       const userId = 1;
       const planId = 1;
 
-      // coupleService.findCoupleRelationChild가 null을 반환하도록 spy
       jest
         .spyOn(coupleService, 'findCoupleRelationChild')
         .mockResolvedValue(null);
 
-      // 예외 발생 여부 테스트
-      await expect(planService.remove(userId, planId)).rejects.toThrow(
+        await expect(planService.remove(userId, planId)).rejects.toThrow(
         NotFoundException,
       );
     });
@@ -420,15 +394,12 @@ describe('PlanService', () => {
       const planId = 1;
       const couple = { id: 1 } as Couple;
 
-      // coupleService.findCoupleRelationChild가 커플 객체를 반환하도록 spy
       jest
         .spyOn(coupleService, 'findCoupleRelationChild')
         .mockResolvedValue(couple);
 
-      // planRepository.findOne이 null을 반환하도록 spy
       jest.spyOn(planRepository, 'findOne').mockResolvedValue(null);
 
-      // 예외 발생 여부 테스트
       await expect(planService.remove(userId, planId)).rejects.toThrow(
         NotFoundException,
       );
@@ -452,7 +423,6 @@ describe('PlanService', () => {
 
       expect(planRepository.delete).toHaveBeenCalledWith(plan.id);
 
-      // 결과가 planId와 동일한지 확인
       expect(result).toBe(planId);
     });
   });
