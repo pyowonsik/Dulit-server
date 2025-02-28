@@ -21,7 +21,9 @@
     "test:user": "jest --testPathPattern=src/user --coverage --collectCoverageFrom=src/user/**",
     "test:auth": "jest --testPathPattern=src/auth --coverage --collectCoverageFrom=src/auth/**",
     "test:post": "jest --testPathPattern=src/post --coverage --collectCoverageFrom=src/post/**",
-    "test:comment": "jest --testPathPattern=src/post/comment --coverage --collectCoverageFrom=src/post/comment/**"
+    "test:comment": "jest --testPathPattern=src/post/comment --coverage --collectCoverageFrom=src/post/comment/**",
+    "test:plan": "jest --testPathPattern=src/couple/plan --coverage --collectCoverageFrom=src/couple/plan/**"
+
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",

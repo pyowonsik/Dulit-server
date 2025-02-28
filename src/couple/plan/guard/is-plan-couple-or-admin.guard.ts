@@ -39,6 +39,7 @@ export class IsPlanCoupleOrAdminGuard implements CanActivate {
 
     const isOk = await this.planService.isPlanCouple(userId, parseInt(planId));
 
+
     if (!isOk) {
       throw new ForbiddenException('권한이 없습니다.');
     }

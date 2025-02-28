@@ -4,38 +4,27 @@ import { UpdatePlanDto } from './dto/update-plan.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Plan } from './entities/plan.entity';
 import { User } from 'src/user/entity/user.entity';
-import { In, QueryRunner, Repository } from 'typeorm';
+import { QueryRunner, Repository } from 'typeorm';
 import { GetPlanDto } from './dto/get-plan.dto';
 import { CommonService } from 'src/common/common.service';
-import { Couple } from 'src/couple/entity/couple.entity';
+import { CoupleService } from '../couple.service';
+import { PlanResponseDto } from './dto/plan-response.dto';
 
 @Injectable()
 export class PlanService {
   constructor(
-    @InjectRepository(Couple)
-    private readonly coupleRepository: Repository<Couple>,
     @InjectRepository(Plan)
     private readonly planRepository: Repository<Plan>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private readonly commonService: CommonService,
+    private readonly coupleService: CoupleService,
   ) {}
-  async create(id: number, createPlanDto: CreatePlanDto, qr: QueryRunner) {
-    // createDto : topic , location , time
-    // topic : 발산역 데이트
-    // location : 서울특별시 강서구 공항대로 지하267 (마곡동 727-1496)
-    // time : 14:00
-    // find : couple , author
 
-    const couple = await qr.manager.findOne(Couple, {
-      where: {
-        users: {
-          id: In([id]),
-        },
-      },
-
-      relations: ['plans'],
-    });
+  async create(userId: number, createPlanDto: CreatePlanDto, qr: QueryRunner) {
+    const couple = await this.coupleService.findCoupleRelationChild(userId, [
+      'plans',
+    ]);
 
     if (!couple) {
       throw new NotFoundException('존재하지 않는 COUPLE의 ID 입니다.');
@@ -46,32 +35,17 @@ export class PlanService {
       couple,
     });
 
-    await qr.manager.save(Plan, plan);
+    const savedPlan = await qr.manager.save(Plan, plan);
 
-    const newPlan = await qr.manager.findOne(Plan, {
-      where: {
-        id: plan.id,
-      },
-    });
-
-    return newPlan;
+    return new PlanResponseDto(savedPlan);
   }
 
   async findAll(userId: number, dto: GetPlanDto) {
     const { topic } = dto;
 
-    const user = await this.userRepository
-      .createQueryBuilder('user')
-      .leftJoinAndSelect('user.couple', 'couple')
-      .where(`user.id = :userId`, { userId })
-      .getOne();
+    const user = await this.findMeRelationCouple(userId);
 
-    // createQueryBuilder사용시 id값 비교.
-
-    const qb = this.planRepository
-      .createQueryBuilder('plan')
-      .leftJoinAndSelect('plan.couple', 'couple')
-      .where(`plan.couple = :coupleId`, { coupleId: user.couple.id });
+    const qb = await this.findMyCouplePlan(user.couple.id);
 
     this.planRepository.find({
       where: {
@@ -97,19 +71,14 @@ export class PlanService {
   }
 
   async findOne(userId: number, id: number) {
-    const couple = await this.coupleRepository.findOne({
-      where: {
-        users: {
-          id: In([userId]),
-        },
-      },
-
-      relations: ['plans'],
-    });
+    const couple = await this.coupleService.findCoupleRelationChild(userId, [
+      'plans',
+    ]);
 
     if (!couple) {
       throw new NotFoundException('존재하지 않는 COUPLE의 ID 입니다.');
     }
+
     const plan = await this.planRepository.findOne({
       where: {
         id,
@@ -129,29 +98,10 @@ export class PlanService {
     updatePlanDto: UpdatePlanDto,
     qr: QueryRunner,
   ) {
-    // updateDto : topic? , location? , time?
-    // topic : 발산역 데이트
-    // location : 서울특별시 강서구 공항대로 지하267 (마곡동 727-1496)
-    // time : 14:00
-    // find : couple , author
+    const couple = await this.coupleService.findCoupleRelationChild(userId, [
+      'plans',
+    ]);
 
-    // const testObj = await this.userRepository
-    //   .createQueryBuilder('user')
-    //   .leftJoinAndSelect('user.couple', 'couple')
-    //   .leftJoinAndSelect('user.posts', 'posts')
-    //   .leftJoinAndSelect('user.plans', 'plans')
-    //   .where('user.id = :userId', { userId: 1 })
-    //   .getOne();
-
-    const couple = await this.coupleRepository.findOne({
-      where: {
-        users: {
-          id: In([userId]),
-        },
-      },
-
-      relations: ['plans'],
-    });
     if (!couple) {
       throw new NotFoundException('존재하지 않는 COUPLE의 ID 입니다.');
     }
@@ -168,21 +118,16 @@ export class PlanService {
 
     await qr.manager.update(Plan, id, updatePlanDto);
 
-    const newPlan = await qr.manager.findOne(Plan, { where: { id } });
+    const savedPlan = await qr.manager.findOne(Plan, { where: { id } });
 
-    return newPlan;
+    return new PlanResponseDto(savedPlan);
   }
 
   async remove(userId: number, id: number) {
-    const couple = await this.coupleRepository.findOne({
-      where: {
-        users: {
-          id: In([userId]),
-        },
-      },
+    const couple = await this.coupleService.findCoupleRelationChild(userId, [
+      'plans',
+    ]);
 
-      relations: ['plans'],
-    });
     if (!couple) {
       throw new NotFoundException('존재하지 않는 COUPLE의의 ID 입니다.');
     }
@@ -203,22 +148,39 @@ export class PlanService {
   }
 
   async isPlanCouple(userId: number, planId: number) {
-    const couple = await this.coupleRepository
-      .createQueryBuilder('couple')
-      .leftJoin('couple.users', 'user')
-      .where('user.id = :userId', { userId })
-      .getOne();
+    const couple = await this.coupleService.findCoupleRelationChild(userId);
 
     if (!couple) {
       return false; // 사용자가 커플에 속하지 않음
     }
-
-    const exists = await this.planRepository
-      .createQueryBuilder('plan')
-      .where('plan.id = :planId', { planId })
-      .andWhere('plan.coupleId = :coupleId', { coupleId: couple.id })
-      .getExists();
+    const exists = await this.isExistsPlan(planId, couple.id);
 
     return exists;
+  }
+
+  /* istanbul ignore next */
+  async findMeRelationCouple(userId: number) {
+    return this.userRepository
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.couple', 'couple')
+      .where(`user.id = :userId`, { userId })
+      .getOne();
+  }
+
+  /* istanbul ignore next */
+  async findMyCouplePlan(coupleId: number) {
+    return this.planRepository
+      .createQueryBuilder('plan')
+      .leftJoinAndSelect('plan.couple', 'couple')
+      .where(`plan.couple = :coupleId`, { coupleId });
+  }
+
+  /* istanbul ignore next */
+  async isExistsPlan(planId: number, coupleId: number) {
+    return this.planRepository
+      .createQueryBuilder('plan')
+      .where('plan.id = :planId', { planId })
+      .andWhere('plan.coupleId = :coupleId', { coupleId })
+      .getExists();
   }
 }

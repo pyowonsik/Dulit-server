@@ -106,7 +106,6 @@ export class CommentService {
     return comment;
   }
 
-  // 자기 댓글만 수정가능해야함. 추후 구현
   async update(postId: number, id: number, updateCommentDto: UpdateCommentDto) {
     const post = await this.postRepository.findOne({
       where: { id: postId },

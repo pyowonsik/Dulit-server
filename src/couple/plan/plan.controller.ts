@@ -90,9 +90,8 @@ export class PlanController {
   @UseGuards(IsPlanCoupleOrAdminGuard)
   async remove(
     @UserId() userId: number,
-
     @Param('planId', ParseIntPipe) id: number,
   ) {
-    return this.planService.remove(userId,id);
+    return this.planService.remove(userId, id);
   }
 }
