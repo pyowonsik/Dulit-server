@@ -251,7 +251,7 @@ describe('AnniversaryService', () => {
       ).rejects.toThrow('존재하지 않는 COUPLE의 ID 입니다.');
     });
 
-    it('should throw NotFoundException if plan does not exist', async () => {
+    it('should throw NotFoundException if anniversary does not exist', async () => {
       const userId = 1;
       const couple = { id: 1 } as Couple;
 
@@ -269,7 +269,7 @@ describe('AnniversaryService', () => {
       );
     });
   });
-  
+
   describe('update', () => {
     let qr: jest.Mocked<QueryRunner>;
 
