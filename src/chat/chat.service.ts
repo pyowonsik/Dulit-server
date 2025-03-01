@@ -30,12 +30,7 @@ export class ChatService {
   }
 
   async joinUserRooms(user: { sub: number }, client: Socket) {
-    const chatRooms = await this.chatRoomRepository
-      .createQueryBuilder('chatRoom')
-      .innerJoinAndSelect('chatRoom.users', 'user') // chatRoom과 users 테이블을 조인
-      .where('user.id = :userId', { userId: user.sub }) // user.id로 필터링
-      .getMany();
-
+    const chatRooms = await this.findMyChatRoom(user.sub);
     if (chatRooms.length === 0) {
       client.emit('error', { message: '커플이 매칭 되지 않은 사용자입니다.' });
       return;
@@ -58,12 +53,7 @@ export class ChatService {
       },
     });
 
-    const chatRoom = await qr.manager
-      .createQueryBuilder(ChatRoom, 'chatRoom')
-      .leftJoinAndSelect('chatRoom.users', 'user')
-      .leftJoinAndSelect('chatRoom.chats', 'chat')
-      .where('user.id = :userId', { userId: payload.sub })
-      .getOne();
+    const chatRoom = await this.findMyChatAndChatRoom(qr, payload.sub);
 
     const msgModel = await qr.manager.save(Chat, {
       author: user,
@@ -80,5 +70,24 @@ export class ChatService {
       .emit('sendMessage', plainToClass(Chat, msgModel));
 
     return message;
+  }
+
+  /* istanbul ignore next */
+  async findMyChatRoom(userId: number) {
+    return await this.chatRoomRepository
+      .createQueryBuilder('chatRoom')
+      .innerJoinAndSelect('chatRoom.users', 'user') // chatRoom과 users 테이블을 조인
+      .where('user.id = :userId', { userId }) // user.id로 필터링
+      .getMany();
+  }
+
+  /* istanbul ignore next */
+  async findMyChatAndChatRoom(qr: QueryRunner, userId: number) {
+    return await qr.manager
+      .createQueryBuilder(ChatRoom, 'chatRoom')
+      .leftJoinAndSelect('chatRoom.users', 'user')
+      .leftJoinAndSelect('chatRoom.chats', 'chat')
+      .where('user.id = :userId', { userId })
+      .getOne();
   }
 }
