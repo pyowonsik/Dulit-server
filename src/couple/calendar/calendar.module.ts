@@ -5,10 +5,16 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { CommonModule } from 'src/common/common.module';
 import { Calendar } from './entities/calendar.entity';
 import { Couple } from 'src/couple/entity/couple.entity';
+import { CoupleService } from '../couple.service';
+import { NotificationModule } from 'src/notification/notification.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Couple, Calendar]), CommonModule],
+  imports: [
+    TypeOrmModule.forFeature([Couple, Calendar]),
+    CommonModule,
+    NotificationModule,
+  ],
   controllers: [CalendarController],
-  providers: [CalendarService],
+  providers: [CalendarService, CoupleService],
 })
 export class CalendarModule {}

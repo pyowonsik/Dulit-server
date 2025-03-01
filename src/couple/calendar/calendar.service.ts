@@ -9,12 +9,13 @@ import { UpdateCalendarDto } from './dto/update-calendar.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, QueryRunner, Repository } from 'typeorm';
 import { Calendar } from './entities/calendar.entity';
-import { CommonService } from 'src/common/common.service';
 import { join } from 'path';
 import { existsSync, mkdirSync, unlinkSync } from 'fs';
 import { rename } from 'fs/promises';
 import { GetCalendarDto } from './dto/get-calendar.dto';
 import { Couple } from 'src/couple/entity/couple.entity';
+import { CalendarResponseDto } from './dto/calendar-response.dto';
+import { CoupleService } from '../couple.service';
 
 @Injectable()
 export class CalendarService {
@@ -23,7 +24,7 @@ export class CalendarService {
     private readonly coupleRepository: Repository<Couple>,
     @InjectRepository(Calendar)
     private readonly calendarRepository: Repository<Calendar>,
-    private readonly commonService: CommonService,
+    private readonly coupleService: CoupleService,
   ) {}
 
   async create(
@@ -46,9 +47,9 @@ export class CalendarService {
       const tempFolder = join('public', 'temp');
       const filesFolder = join('public', 'files/calendar');
 
-      if (!existsSync(filesFolder)) {
-        mkdirSync(filesFolder, { recursive: true });
-      }
+      // if (!existsSync(filesFolder)) {
+      //   mkdirSync(filesFolder, { recursive: true });
+      // }
 
       if (
         !createCalendarDto.filePaths ||
@@ -60,14 +61,11 @@ export class CalendarService {
       try {
         await Promise.all(
           createCalendarDto.filePaths.map(async (file) => {
-            await rename(
-              join(process.cwd(), tempFolder, file),
-              join(process.cwd(), filesFolder, file),
-            );
+            await this.renameFiles(tempFolder, filesFolder, file);
           }),
         );
       } catch (error) {
-        console.error('파일 이동 중 오류 발생:', error);
+        // console.error('파일 이동 중 오류 발생:', error);
         throw new InternalServerErrorException('파일 이동에 실패했습니다.');
       }
     }
@@ -76,33 +74,21 @@ export class CalendarService {
       throw new NotFoundException('존재하지 않는 COUPLE의 ID 입니다.');
     }
 
-    const calendar = qr.manager.create(Calendar, {
+    const calendar = await qr.manager.create(Calendar, {
       ...createCalendarDto,
       couple,
     });
 
-    await qr.manager.save(Calendar, calendar);
+    const savedCalendar = await qr.manager.save(Calendar, calendar);
 
-    const newCalendar = await qr.manager.findOne(Calendar, {
-      where: {
-        id: calendar.id,
-      },
-    });
-
-    return newCalendar;
+    return new CalendarResponseDto(savedCalendar);
   }
 
   async findAll(userId: number, getCalendarDto: GetCalendarDto) {
     // 월별 페이지 네이션 적용
-    const couple = await this.coupleRepository.findOne({
-      where: {
-        users: {
-          id: In([userId]),
-        },
-      },
-
-      relations: ['calendars'],
-    });
+    const couple = await this.coupleService.findCoupleRelationChild(userId, [
+      'calendars',
+    ]);
 
     if (getCalendarDto.month) {
       const filteredCalender = couple.calendars.filter((calendar) => {
@@ -117,15 +103,9 @@ export class CalendarService {
   }
 
   async findOne(userId: number, id: number) {
-    const couple = await this.coupleRepository.findOne({
-      where: {
-        users: {
-          id: In([userId]),
-        },
-      },
-
-      relations: ['calendars'],
-    });
+    const couple = await this.coupleService.findCoupleRelationChild(userId, [
+      'calendars',
+    ]);
 
     if (!couple) {
       throw new NotFoundException('존재하지 않는 COUPLE의 ID 입니다.');
@@ -194,11 +174,7 @@ export class CalendarService {
       // 2. 파일 이동 (병렬 처리)
       await Promise.all(
         updateCalendarDto.filePaths.map(
-          async (file) =>
-            await rename(
-              join(process.cwd(), tempFolder, file),
-              join(process.cwd(), filesFolder, file),
-            ),
+          async (file) => await this.renameFiles(tempFolder, filesFolder, file),
         ),
       );
     }
@@ -212,19 +188,13 @@ export class CalendarService {
 
     const newCalendar = await qr.manager.findOne(Calendar, { where: { id } });
 
-    return newCalendar;
+    return new CalendarResponseDto(newCalendar);
   }
 
   async remove(userId: number, id: number) {
-    const couple = await this.coupleRepository.findOne({
-      where: {
-        users: {
-          id: In([userId]),
-        },
-      },
-
-      relations: ['calendars'],
-    });
+    const couple = await this.coupleService.findCoupleRelationChild(userId, [
+      'calendars',
+    ]);
     if (!couple) {
       throw new NotFoundException('존재하지 않는 COUPLE의의 ID 입니다.');
     }
@@ -244,22 +214,40 @@ export class CalendarService {
   }
 
   async isCalendarCouple(userId: number, calendarId: number) {
-    const couple = await this.coupleRepository
-      .createQueryBuilder('couple')
-      .leftJoin('couple.users', 'user')
-      .where('user.id = :userId', { userId })
-      .getOne();
+    const couple = await this.findMyCouple(userId);
 
     if (!couple) {
       return false; // 사용자가 커플에 속하지 않음
     }
 
-    const exists = await this.calendarRepository
-      .createQueryBuilder('calendar')
-      .where('calendar.id = :calendarId', { calendarId })
-      .andWhere('calendar.coupleId = :coupleId', { coupleId: couple.id })
-      .getExists();
+    const exists = await this.isExistsCalendar(calendarId, userId);
 
     return exists;
+  }
+
+  /* istanbul ignore next */
+  async renameFiles(tempFolder: string, filesFolder: string, file: string) {
+    return await rename(
+      join(process.cwd(), tempFolder, file),
+      join(process.cwd(), filesFolder, file),
+    );
+  }
+
+  /* istanbul ignore next */
+  async findMyCouple(userId: number) {
+    return this.coupleRepository
+      .createQueryBuilder('couple')
+      .leftJoin('couple.users', 'user')
+      .where('user.id = :userId', { userId })
+      .getOne();
+  }
+
+  /* istanbul ignore next */
+  async isExistsCalendar(calendarId: number, coupleId: number) {
+    return await this.calendarRepository
+      .createQueryBuilder('calendar')
+      .where('calendar.id = :calendarId', { calendarId })
+      .andWhere('calendar.coupleId = :coupleId', { coupleId })
+      .getExists();
   }
 }

@@ -24,6 +24,7 @@
     "test:comment": "jest --testPathPattern=src/post/comment --coverage --collectCoverageFrom=src/post/comment/**",
     "test:plan": "jest --testPathPattern=src/couple/plan --coverage --collectCoverageFrom=src/couple/plan/**",
     "test:anniversary": "jest --testPathPattern=src/couple/anniversary --coverage --collectCoverageFrom=src/couple/anniversary/**",
+    "test:calendar": "jest --testPathPattern=src/couple/calendar --coverage --collectCoverageFrom=src/couple/calendar/**",
     "test:notification": "jest --testPathPattern=src/notification --coverage --collectCoverageFrom=src/notification/**",
     "test:chat": "jest --testPathPattern=src/chat --coverage --collectCoverageFrom=src/chat/**"
   },
