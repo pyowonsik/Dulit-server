@@ -13,7 +13,7 @@ import { WsTransactionInterceptor } from 'src/common/interceptor/ws-transaction.
 import { UseInterceptors } from '@nestjs/common';
 import { QueryRunner } from 'typeorm';
 import { WsQueryRunner } from 'src/common/decorator/ws-query-runner.decorator';
-import { CreateChatDto } from './create-chat.dto';
+import { CreateChatDto } from './dto/create-chat.dto';
 
 @WebSocketGateway({
   namespace: '/chat',

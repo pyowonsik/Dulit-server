@@ -23,7 +23,8 @@
     "test:post": "jest --testPathPattern=src/post --coverage --collectCoverageFrom=src/post/**",
     "test:comment": "jest --testPathPattern=src/post/comment --coverage --collectCoverageFrom=src/post/comment/**",
     "test:plan": "jest --testPathPattern=src/couple/plan --coverage --collectCoverageFrom=src/couple/plan/**",
-    "test:anniversary": "jest --testPathPattern=src/couple/anniversary --coverage --collectCoverageFrom=src/couple/anniversary/**"
+    "test:anniversary": "jest --testPathPattern=src/couple/anniversary --coverage --collectCoverageFrom=src/couple/anniversary/**",
+    "test:notification": "jest --testPathPattern=src/notification --coverage --collectCoverageFrom=src/notification/**"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",

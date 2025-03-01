@@ -5,7 +5,7 @@ import { ChatRoom } from './entity/chat-room.entity';
 import { Chat } from './entity/chat.entity';
 import { User } from 'src/user/entity/user.entity';
 import { QueryRunner, Repository } from 'typeorm';
-import { CreateChatDto } from './create-chat.dto';
+import { CreateChatDto } from './dto/create-chat.dto';
 import { plainToClass } from 'class-transformer';
 
 @Injectable()

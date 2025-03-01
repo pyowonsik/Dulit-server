@@ -25,7 +25,7 @@ export class NotificationService {
       // console.log(userId);
       client.emit('matchedNotification', '커플이 연결 되었습니다.');
     } else {
-      console.log(`User ${userId} not connected`);
+      // console.log(`User ${userId} not connected`);
     }
   }
 
@@ -35,7 +35,7 @@ export class NotificationService {
     if (client) {
       client.emit('sendNotification', message);
     } else {
-      console.log(`User ${userId} not connected`);
+      // console.log(`User ${userId} not connected`);
     }
   }
 }

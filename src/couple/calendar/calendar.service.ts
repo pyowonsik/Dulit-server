@@ -31,7 +31,7 @@ export class CalendarService {
     createCalendarDto: CreateCalendarDto,
     qr: QueryRunner,
   ) {
-    const couple = await this.coupleRepository.findOne({
+    const couple = await qr.manager.findOne(Couple, {
       where: {
         users: {
           id: In([userId]),
@@ -150,7 +150,7 @@ export class CalendarService {
     updateCalendarDto: UpdateCalendarDto,
     qr: QueryRunner,
   ) {
-    const couple = await this.coupleRepository.findOne({
+    const couple = await qr.manager.findOne(Couple, {
       where: {
         users: {
           id: In([userId]),
