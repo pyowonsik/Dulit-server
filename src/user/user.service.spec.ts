@@ -371,12 +371,11 @@ describe('UserService', () => {
       await expect(userService.remove(1, qr)).rejects.toThrow('Mocked Error');
     });
   });
-  //
 
   // deleteChatRoomsAndChats
   describe('deleteChatRoomsAndChats', () => {
     let qr: jest.Mocked<QueryRunner>;
- 
+
     beforeEach(() => {
       qr = {
         manager: {
@@ -385,28 +384,6 @@ describe('UserService', () => {
       } as any as jest.Mocked<QueryRunner>;
     });
 
-    it('should delete chatRooms And Chats successfully', async () => {
-      // Given: Mocking user data
-
-      // When: remove method is called
-
-      // Then: Expect related functions to be called
-    });
-  });
-  //
-
-   // deleteChatRoomsAndChats
-   describe('deleteChatRoomsAndChats', () => {
-    let qr: jest.Mocked<QueryRunner>;
-  
-    beforeEach(() => {
-      qr = {
-        manager: {
-          delete: jest.fn(),
-        },
-      } as any as jest.Mocked<QueryRunner>;
-    });
-  
     it('should delete chat and chatRoom if user has chatRooms', async () => {
       const user = {
         chatRooms: [
@@ -416,30 +393,33 @@ describe('UserService', () => {
           },
         ],
       } as User;
-  
+
       // 메서드 직접 호출
       await userService.deleteChatRoomsAndChats(user, qr);
-  
+
       // qr.manager.delete가 두 번 호출되었는지 확인
       expect(qr.manager.delete).toHaveBeenCalledTimes(2);
-  
+
       // 첫 번째 호출은 Chat에 대한 삭제
       expect(qr.manager.delete).toHaveBeenCalledWith(Chat, {
         chatRoom: user.chatRooms[0],
       });
-  
+
       // 두 번째 호출은 ChatRoom에 대한 삭제
-      expect(qr.manager.delete).toHaveBeenCalledWith(ChatRoom, user.chatRooms[0].id);
+      expect(qr.manager.delete).toHaveBeenCalledWith(
+        ChatRoom,
+        user.chatRooms[0].id,
+      );
     });
-  
+
     it('should not delete chat and chatRoom if user has no chatRooms', async () => {
       const user = {
         chatRooms: [], // 채팅방이 없을 경우
       } as User;
-  
+
       // 메서드 직접 호출
       await userService.deleteChatRoomsAndChats(user, qr);
-  
+
       // delete가 호출되지 않았는지 확인
       expect(qr.manager.delete).not.toHaveBeenCalled();
     });
@@ -449,7 +429,7 @@ describe('UserService', () => {
   // deleteCoupleAndRelatedData
   describe('deleteCoupleAndRelatedData', () => {
     let qr: jest.Mocked<QueryRunner>;
-  
+
     beforeEach(() => {
       qr = {
         manager: {
@@ -458,37 +438,48 @@ describe('UserService', () => {
           delete: jest.fn(),
         },
       } as any as jest.Mocked<QueryRunner>;
-  
     });
-  
+
     it('should delete couple and related data if user has a couple', async () => {
       const user = { couple: { id: 1 } } as User;
       const couple = { id: 1, users: [{ id: 1 }, { id: 2 }] } as Couple;
-  
+
       jest.spyOn(qr.manager, 'findOne').mockResolvedValue(couple);
-  
+
       await userService.deleteCoupleAndRelatedData(user, qr);
-  
+
       expect(qr.manager.update).toHaveBeenCalledTimes(2);
       expect(qr.manager.update).toHaveBeenCalledWith(User, 1, { couple: null });
       expect(qr.manager.update).toHaveBeenCalledWith(User, 2, { couple: null });
-  
+
       expect(qr.manager.delete).toHaveBeenCalledTimes(7);
-      expect(qr.manager.delete).toHaveBeenCalledWith(CommentModel, { author: { id: 1 } });
-      expect(qr.manager.delete).toHaveBeenCalledWith(CommentModel, { author: { id: 2 } });
-      expect(qr.manager.delete).toHaveBeenCalledWith(Plan, { couple: user.couple });
-      expect(qr.manager.delete).toHaveBeenCalledWith(Post, { couple: user.couple });
-      expect(qr.manager.delete).toHaveBeenCalledWith(Anniversary, { couple: user.couple });
-      expect(qr.manager.delete).toHaveBeenCalledWith(Calendar, { couple: user.couple });
+      expect(qr.manager.delete).toHaveBeenCalledWith(CommentModel, {
+        author: { id: 1 },
+      });
+      expect(qr.manager.delete).toHaveBeenCalledWith(CommentModel, {
+        author: { id: 2 },
+      });
+      expect(qr.manager.delete).toHaveBeenCalledWith(Plan, {
+        couple: user.couple,
+      });
+      expect(qr.manager.delete).toHaveBeenCalledWith(Post, {
+        couple: user.couple,
+      });
+      expect(qr.manager.delete).toHaveBeenCalledWith(Anniversary, {
+        couple: user.couple,
+      });
+      expect(qr.manager.delete).toHaveBeenCalledWith(Calendar, {
+        couple: user.couple,
+      });
       expect(qr.manager.delete).toHaveBeenCalledWith(Couple, user.couple.id);
     });
-  
+
     it('should not delete anything if user has no couple', async () => {
       await userService.deleteCoupleAndRelatedData({} as User, qr);
-  
+
       expect(qr.manager.delete).not.toHaveBeenCalled();
       expect(qr.manager.update).not.toHaveBeenCalled();
     });
-  });  
-  // 
+  });
+  //
 });

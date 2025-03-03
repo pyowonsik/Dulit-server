@@ -24,6 +24,7 @@ export class CoupleService {
     @InjectRepository(Couple)
     private readonly coupleRepository: Repository<Couple>,
   ) {}
+
   async connectCouple(createCoupleDto: CreateCoupleDto, qr: QueryRunner) {
     const me = await qr.manager.findOne(User, {
       where: { socialId: createCoupleDto.myId },
@@ -34,16 +35,18 @@ export class CoupleService {
       relations: ['couple'],
     });
 
+    if (!me || !partner) {
+      throw new NotFoundException('사용자가 존재하지 않습니다.');
+    }
+
     if (me.socialId === partner.socialId) {
       throw new BadRequestException('상대방의 socialId를 입력하세요.');
     }
 
-    if (!me || !partner)
-      throw new NotFoundException('사용자가 존재하지 않습니다.');
-    if (me.couple || partner.couple)
+    if (me.couple || partner.couple) {
       throw new BadRequestException('이미 매칭된 사용자입니다.');
+    }
 
-    // 명시적 엔티티 생성 -> .save()는 객체 전체를 업데이트 하기 때문에 .create()후 .save() 권장
     const newChatRoom = qr.manager.create(ChatRoom, {
       users: [me, partner],
     });
@@ -58,12 +61,6 @@ export class CoupleService {
     this.notificationService.matchedNotification(me.id);
     this.notificationService.matchedNotification(partner.id);
 
-    // 쿼리 최적화
-    // const user = await qr.manager.findOne(User, {
-    //   where: { socialId: createCoupleDto.myId },
-    //   relations: ['couple', 'chatRooms'],
-    // });
-
     return true;
   }
 
@@ -77,12 +74,12 @@ export class CoupleService {
       relations: ['couple'],
     });
 
+    if (!me || !partner)
+      throw new NotFoundException('사용자가 존재하지 않습니다.');
+
     if (me.socialId === partner.socialId) {
       throw new BadRequestException('상대방의 socialId를 입력하세요.');
     }
-
-    if (!me || !partner)
-      throw new NotFoundException('사용자가 존재하지 않습니다.');
     if (!me.couple || !partner.couple)
       throw new BadRequestException('매칭이 되지 않은 사용자입니다.');
 
