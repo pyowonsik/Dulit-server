@@ -133,6 +133,7 @@ describe('PlanService', () => {
       ).rejects.toThrow(NotFoundException);
     });
   });
+
   describe('findAll', () => {
     let findMeRelationCoupleMock: jest.SpyInstance;
     let findMyCouplePlanMock: jest.SpyInstance;
@@ -384,7 +385,7 @@ describe('PlanService', () => {
         .spyOn(coupleService, 'findCoupleRelationChild')
         .mockResolvedValue(null);
 
-        await expect(planService.remove(userId, planId)).rejects.toThrow(
+      await expect(planService.remove(userId, planId)).rejects.toThrow(
         NotFoundException,
       );
     });

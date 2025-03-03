@@ -267,7 +267,7 @@ describe('CalendarService', () => {
   });
 
   describe('findOne', () => {
-    it('should return a plan when found', async () => {
+    it('should return a calender when found', async () => {
       const userId = 1;
       const couple = { id: 1 } as Couple;
       const calendarResponseDto: CalendarResponseDto = {
@@ -598,7 +598,7 @@ describe('CalendarService', () => {
       );
     });
 
-    it('should delete the plan and return the id', async () => {
+    it('should delete the calendar and return the id', async () => {
       const userId = 1;
       const calendarId = 1;
       const couple = { id: 1 } as Couple;

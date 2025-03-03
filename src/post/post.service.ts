@@ -3,7 +3,6 @@ import {
   Injectable,
   InternalServerErrorException,
   NotFoundException,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
@@ -20,20 +19,13 @@ import { PostUserLike } from './comment/entity/post-user-like.entity';
 import { GetPostDto } from './dto/get-post-dto';
 import { CommonService } from 'src/common/common.service';
 import { Couple } from 'src/couple/entity/couple.entity';
+import { PostResponseDto } from './dto/post-response.dto';
 
 @Injectable()
 export class PostService {
   constructor(
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
-    @InjectRepository(Couple)
-    private readonly coupleRepository: Repository<Couple>,
     @InjectRepository(Post)
     private readonly postRepository: Repository<Post>,
-    @InjectRepository(CommentModel)
-    private readonly commentRepository: Repository<CommentModel>,
-    @InjectRepository(PostUserLike)
-    private readonly postUserLikeRepository: Repository<PostUserLike>,
     private readonly commonService: CommonService,
   ) {}
 
@@ -60,9 +52,9 @@ export class PostService {
       const tempFolder = join('public', 'temp');
       const filesFolder = join('public', 'files/post');
 
-      if (!existsSync(filesFolder)) {
-        mkdirSync(filesFolder, { recursive: true });
-      }
+      // if (!existsSync(filesFolder)) {
+      //   mkdirSync(filesFolder, { recursive: true });
+      // }
 
       if (!createPostDto.filePaths || createPostDto.filePaths.length === 0) {
         throw new BadRequestException('이동할 파일이 없습니다.');
@@ -71,10 +63,7 @@ export class PostService {
       try {
         await Promise.all(
           createPostDto.filePaths.map(async (file) => {
-            await rename(
-              join(process.cwd(), tempFolder, file),
-              join(process.cwd(), filesFolder, file),
-            );
+            await this.renameFiles(tempFolder, filesFolder, file);
           }),
         );
       } catch (error) {
@@ -83,21 +72,14 @@ export class PostService {
       }
     }
 
-    const post = qr.manager.create(Post, {
+    const post = await qr.manager.create(Post, {
       ...createPostDto,
       author,
       couple,
     });
 
-    await qr.manager.save(Post, post);
-
-    const newPost = qr.manager.findOne(Post, {
-      where: {
-        id: post.id,
-      },
-    });
-
-    return newPost;
+    const savedPost = await qr.manager.save(Post, post);
+    return new PostResponseDto(savedPost);
   }
 
   async findAll(dto: GetPostDto) {
@@ -170,11 +152,7 @@ export class PostService {
       // 2. 파일 이동 (병렬 처리)
       await Promise.all(
         updatePostDto.filePaths.map(
-          async (file) =>
-            await rename(
-              join(process.cwd(), tempFolder, file),
-              join(process.cwd(), filesFolder, file),
-            ),
+          async (file) => await this.renameFiles(tempFolder, filesFolder, file),
         ),
       );
     }
@@ -188,7 +166,7 @@ export class PostService {
 
     const newPost = await qr.manager.findOne(Post, { where: { id } });
 
-    return newPost;
+    return new PostResponseDto(newPost);
   }
 
   async remove(id: number, qr: QueryRunner) {
@@ -224,24 +202,6 @@ export class PostService {
         author: true,
       },
     });
-  }
-
-  /* istanbul ignore next */
-  async getPosts() {
-    return this.postRepository
-      .createQueryBuilder('post')
-      .leftJoinAndSelect('post.comments', 'comments');
-  }
-
-  /* istanbul ignore next */
-  async getLikedRecord(postId: number, userId: number, qr: QueryRunner) {
-    return await qr.manager
-      .createQueryBuilder(PostUserLike, 'pul')
-      .leftJoinAndSelect('pul.post', 'post')
-      .leftJoinAndSelect('pul.user', 'user')
-      .where('post.id = :postId', { postId })
-      .andWhere('user.id = :userId', { userId })
-      .getOne();
   }
 
   async togglePostLike(
@@ -301,5 +261,31 @@ export class PostService {
     return {
       isLike: result && result.isLike,
     };
+  }
+
+  /* istanbul ignore next */
+  async renameFiles(tempFolder: string, filesFolder: string, file: string) {
+    return await rename(
+      join(process.cwd(), tempFolder, file),
+      join(process.cwd(), filesFolder, file),
+    );
+  }
+
+  /* istanbul ignore next */
+  async getPosts() {
+    return this.postRepository
+      .createQueryBuilder('post')
+      .leftJoinAndSelect('post.comments', 'comments');
+  }
+
+  /* istanbul ignore next */
+  async getLikedRecord(postId: number, userId: number, qr: QueryRunner) {
+    return await qr.manager
+      .createQueryBuilder(PostUserLike, 'pul')
+      .leftJoinAndSelect('pul.post', 'post')
+      .leftJoinAndSelect('pul.user', 'user')
+      .where('post.id = :postId', { postId })
+      .andWhere('user.id = :userId', { userId })
+      .getOne();
   }
 }

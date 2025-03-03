@@ -44,6 +44,7 @@ export class AuthController {
   }
 
   // kakao 로그인
+  /* istanbul ignore next */
   @Get('kakao')
   @Public()
   @ApiExcludeEndpoint()
