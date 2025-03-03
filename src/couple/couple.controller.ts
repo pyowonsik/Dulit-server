@@ -29,13 +29,14 @@ export class CoupleController {
   @UseInterceptors(TransactionInterceptor)
   async connectCouple(
     @Request() req: any,
-    @Param('partnerId', ParseIntPipe) partnerId: number,
+    @Param('partnerId') partnerId: string,
     @QueryRunner() qr: QR,
   ) {
     const createCoupleDto: CreateCoupleDto = {
-      myId: `${req.user.socialId}`,
-      partnerId: `${partnerId}`,
+      myId: req.user.socialId,
+      partnerId: partnerId,
     };
+
     return this.coupleService.connectCouple(createCoupleDto, qr);
   }
 
@@ -47,12 +48,12 @@ export class CoupleController {
   @UseInterceptors(TransactionInterceptor)
   async disconnectCouple(
     @Request() req: any,
-    @Param('partnerId', ParseIntPipe) partnerId: number,
+    @Param('partnerId') partnerId: string,
     @QueryRunner() qr: QR,
   ) {
     const createCoupleDto: CreateCoupleDto = {
-      myId: `${req.user.socialId}`,
-      partnerId: `${partnerId}`,
+      myId: req.user.socialId,
+      partnerId: partnerId,
     };
 
     return this.coupleService.disConnectCouple(createCoupleDto, qr);

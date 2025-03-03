@@ -21,10 +21,10 @@ describe('CoupleController', () => {
   describe('connectCouple', () => {
     it('should call coupleService.connectCouple with correct arguments', async () => {
       const req = { user: { socialId: 'mySocialId' } };
-      const partnerId = 2;
+      const partnerId = 'abcde';
       const createCoupleDto: CreateCoupleDto = {
         myId: 'mySocialId',
-        partnerId: '2',
+        partnerId: 'abcde',
       };
       const queryRunner = {} as any;
 
@@ -50,7 +50,7 @@ describe('CoupleController', () => {
       const partnerId = 2;
       const createCoupleDto: CreateCoupleDto = {
         myId: 'mySocialId',
-        partnerId: '2',
+        partnerId: 'abcde',
       };
       const queryRunner = {} as any;
 
@@ -58,7 +58,7 @@ describe('CoupleController', () => {
 
       const result = await coupleController.disconnectCouple(
         req,
-        partnerId,
+        'abcde',
         queryRunner,
       );
 
