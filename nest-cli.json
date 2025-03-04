@@ -27,6 +27,15 @@
       "compilerOptions": {
         "tsConfigPath": "apps/user/tsconfig.app.json"
       }
+    },
+    "couple": {
+      "type": "application",
+      "root": "apps/couple",
+      "entryFile": "main",
+      "sourceRoot": "apps/couple/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/couple/tsconfig.app.json"
+      }
     }
   }
 }
