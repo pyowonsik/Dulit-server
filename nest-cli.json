@@ -1,8 +1,32 @@
 {
   "$schema": "https://json.schemastore.org/nest-cli",
   "collection": "@nestjs/schematics",
-  "sourceRoot": "src",
+  "sourceRoot": "apps/user/src",
   "compilerOptions": {
-    "deleteOutDir": true
+    "deleteOutDir": true,
+    "webpack": true,
+    "tsConfigPath": "apps/user/tsconfig.app.json"
+  },
+  "monorepo": true,
+  "root": "apps/dulit",
+  "projects": {
+    "dulit": {
+      "type": "application",
+      "root": "apps/dulit",
+      "entryFile": "main",
+      "sourceRoot": "apps/dulit/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/dulit/tsconfig.app.json"
+      }
+    },
+    "user": {
+      "type": "application",
+      "root": "apps/user",
+      "entryFile": "main",
+      "sourceRoot": "apps/user/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/user/tsconfig.app.json"
+      }
+    }
   }
 }
