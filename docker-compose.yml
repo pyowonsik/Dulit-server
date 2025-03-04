@@ -34,3 +34,37 @@ services:
       timeout: 5s
       retries: 10
       start_period: 5s
+
+  couple:
+    build:
+      context: .
+      dockerfile: ./apps/couple/Dockerfile
+      target: development
+    command: pnpm run start:dev couple
+    depends_on:
+      postgres_couple:
+        condition: service_healthy
+    env_file:
+      - ./apps/couple/.env
+    ports:
+      - '3002:3000'
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+
+  postgres_couple:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    ports:
+      - '6002:5432'
+    volumes:
+      - ./postgres/couple:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
