@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Role, SocialProvider, User } from '../user/entity/user.entity';
 import { Repository } from 'typeorm';
@@ -76,44 +76,42 @@ export class AuthService {
     return { email, password };
   }
 
-  // // ${Bearer token} -> Bearer 토큰 분리해서 검증후 payload 반환
-  // async parserBearerToken(rawToken: string, isRefresh: boolean) {
-  //   // (1) Bearer 토큰 분리
-  //   const basicSplit = rawToken.split(' ');
+  // ${Bearer token} -> Bearer 토큰 분리해서 검증후 payload 반환
+  async parseBearerToken(rawToken: string, isRefresh: boolean) {
+    // (1) Bearer 토큰 분리
+    const basicSplit = rawToken.split(' ');
 
-  //   if (basicSplit.length != 2) {
-  //     throw new BadRequestException('잘못된 형식의 토큰입니다.');
-  //   }
-  //   const [bearer, token] = basicSplit;
+    if (basicSplit.length != 2) {
+      throw new BadRequestException('잘못된 형식의 토큰입니다.');
+    }
+    const [bearer, token] = basicSplit;
 
-  //   if (bearer.toLocaleLowerCase() !== 'bearer') {
-  //     throw new BadRequestException('잘못된 형식의 토큰입니다.');
-  //   }
-  //   try {
-  //     // (2) 디코딩 + 토큰 검증후 payload 반환
-  //     const payload = await this.jwtService.verifyAsync(token, {
-  //       secret: this.configService.get<string>(
-  //         isRefresh
-  //           ? envVariableKeys.refreshTokenSecret
-  //           : envVariableKeys.accessTokenSecret,
-  //       ),
-  //     });
+    if (bearer.toLocaleLowerCase() !== 'bearer') {
+      throw new BadRequestException('잘못된 형식의 토큰입니다.');
+    }
+    try {
+      // (2) 디코딩 + 토큰 검증후 payload 반환
+      const payload = await this.jwtService.verifyAsync(token, {
+        secret: this.configService.get<string>(
+          isRefresh ? 'REFRESH_TOKEN_SECRET' : 'ACCESS_TOKEN_SECRET',
+        ),
+      });
 
-  //     if (isRefresh) {
-  //       if (payload.type !== 'refresh') {
-  //         throw new BadRequestException('Refresh 토큰을 입력해주세요.');
-  //       }
-  //     } else {
-  //       if (payload.type !== 'access') {
-  //         throw new BadRequestException('Access 토큰을 입력해주세요.');
-  //       }
-  //     }
+      if (isRefresh) {
+        if (payload.type !== 'refresh') {
+          throw new BadRequestException('Refresh 토큰을 입력해주세요.');
+        }
+      } else {
+        if (payload.type !== 'access') {
+          throw new BadRequestException('Access 토큰을 입력해주세요.');
+        }
+      }
 
-  //     return payload;
-  //   } catch {
-  //     throw new UnauthorizedException('토큰이 만료 되었습니다.');
-  //   }
-  // }
+      return payload;
+    } catch {
+      throw new UnauthorizedException('토큰이 만료 되었습니다.');
+    }
+  }
 
   async authenticate(email: string, password: string) {
     // email 인증

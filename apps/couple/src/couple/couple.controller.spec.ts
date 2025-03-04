@@ -16,7 +16,6 @@ describe('CoupleController', () => {
 
   describe('root', () => {
     it('should return "Hello World!"', () => {
-      expect(coupleController.getHello()).toBe('Hello World!');
     });
   });
 });

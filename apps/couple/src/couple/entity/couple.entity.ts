@@ -10,10 +10,10 @@ export class Couple {
   id: number;
 
   @Column()
-  user1Id: number;
+  user1Id: string;
 
   @Column()
-  user2Id: number;
+  user2Id: string;
 
   @OneToMany(() => Plan, (plan) => plan.couple)
   plans: Plan[];
