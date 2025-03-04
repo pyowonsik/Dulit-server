@@ -3,9 +3,12 @@ import { CoupleController } from './couple.controller';
 import { CoupleService } from './couple.service';
 import { Couple } from './entity/couple.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { Plan } from './plan/entity/plan.entity';
+import { Anniversary } from './anniversary/entity/anniversary.entity';
+import { Calendar } from './calendar/entity/calendar.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Couple])],
+  imports: [TypeOrmModule.forFeature([Couple,Plan,Anniversary,Calendar])],
   controllers: [CoupleController],
   providers: [CoupleService],
 })
