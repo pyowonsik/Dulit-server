@@ -1,9 +1,10 @@
 import { Module } from '@nestjs/common';
 import { ChatModule } from './chat/chat.module';
-import { ClientsModule } from '@nestjs/microservices';
+import { ClientsModule, Transport } from '@nestjs/microservices';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import * as Joi from 'joi';
 import { MongooseModule } from '@nestjs/mongoose';
+import { USER_SERVICE } from '@app/common';
 
 @Module({
   imports: [
@@ -19,6 +20,22 @@ import { MongooseModule } from '@nestjs/mongoose';
         uri: configService.getOrThrow('DB_URL'),
       }),
       inject: [ConfigService],
+    }),
+    ClientsModule.registerAsync({
+      clients: [
+        {
+          name: USER_SERVICE,
+          useFactory: (configService: ConfigService) => ({
+            transport: Transport.TCP,
+            options: {
+              host: configService.getOrThrow<string>('USER_HOST'),
+              port: configService.getOrThrow<number>('USER_TCP_PORT'),
+            },
+          }),
+          inject: [ConfigService],
+        },
+      ],
+      isGlobal: true,
     }),
     ChatModule,
   ],
