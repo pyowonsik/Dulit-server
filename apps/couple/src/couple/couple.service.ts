@@ -37,11 +37,11 @@ export class CoupleService {
     }
 
     // 3) 커플 상태 체크 및 기존 데이터 확인
-    // await this.validateCoupleNotExists(me.id, partner.id);
+    await this.validateCoupleNotExists(me.socialId, partner.socialId);
 
-    // 4) 채팅방 생성 및 저장 (별도 서비스 호출 필요)
+    // 4) 채팅방 생성 및 저장
 
-    // 5) 커플 생성 및 저장 (별도 서비스 호출 필요)
+    // 5) 커플 생성 및 저장
     await this.createCouple(me.socialId, partner.socialId);
 
     // 6) 알림 생성 및 전송
@@ -76,31 +76,19 @@ export class CoupleService {
   }
 
   /** 기존 커플 존재 여부 확인 */
-  // private async validateCoupleNotExists(user1Id: string, user2Id: string) {
-  //   try {
-  //     const couple1 = await this.coupleRepository.findOne({
-  //       where: {
-  //         user1Id: user1Id.toString().toLowerCase(),
-  //       },
-  //     });
+  private async validateCoupleNotExists(user1Id: string, user2Id: string) {
+    const existingCouple = await this.coupleRepository
+      .createQueryBuilder('couple')
+      .where(
+        'couple.user1Id IN (:user1Id, :user2Id) OR couple.user2Id IN (:user1Id, :user2Id)',
+        { user1Id, user2Id },
+      )
+      .getOne();
 
-  //     const couple2 = await this.coupleRepository.findOne({
-  //       where: {
-  //         user2Id: user1Id.toString().toLowerCase(),
-  //       },
-  //     });
-
-  //     console.log('couple1:', couple1);
-  //     console.log('couple2:', couple2);
-
-  //     if (couple1 || couple2) {
-  //       throw new ConflictException('이 조합은 이미 커플로 등록되어 있습니다.');
-  //     }
-  //   } catch (error) {
-  //     console.error('Error during validateCoupleNotExists:', error);
-  //     throw error;
-  //   }
-  // }
+    if (existingCouple) {
+      throw new ConflictException('이미 커플 관계가 존재합니다.');
+    }
+  }
 
   /** 커플 정보 저장 */
   private async createCouple(user1Id: string, user2Id: string) {
