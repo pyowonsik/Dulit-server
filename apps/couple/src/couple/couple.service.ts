@@ -23,7 +23,7 @@ export class CoupleService {
     private readonly coupleRepository: Repository<Couple>, // 커플 정보 저장소 추가
   ) {}
 
-  async connectCouple(token: string, partnerSocialId: string) {
+  async connectCouple(token: string, partnerId: string) {
     // 1) 본인 정보 가져오기
     const me = await this.getUserFromToken(token);
     if (!me) {
@@ -31,18 +31,18 @@ export class CoupleService {
     }
 
     // 2) 파트너 정보 가져오기
-    const partner = await this.getUserBySocialId(partnerSocialId);
+    const partner = await this.getUserById(partnerId);
     if (!partner) {
       throw new NotFoundException('해당 파트너를 찾을 수 없습니다.');
     }
 
     // 3) 커플 상태 체크 및 기존 데이터 확인
-    await this.validateCoupleNotExists(me.socialId, partner.socialId);
+    await this.validateCoupleNotExists(me.id, partner.id);
 
     // 4) 채팅방 생성 및 저장
 
     // 5) 커플 생성 및 저장
-    await this.createCouple(me.socialId, partner.socialId);
+    await this.createCouple(me.id, partner.id);
 
     // 6) 알림 생성 및 전송
 
@@ -55,19 +55,20 @@ export class CoupleService {
     const tResp = await lastValueFrom(
       this.userService.send({ cmd: 'parse_bearer_token' }, { token }),
     );
-    if (!tResp?.data?.socialId) return null;
 
-    return await this.getUserBySocialId(tResp.data.socialId);
+    if (!tResp?.data?.sub) return null;
+
+    return await this.getUserById(tResp.data.sub);
     // } catch (error) {
     //   return null;
     // }
   }
 
   // socialId를 이용하여 유저 정보를 가져옴
-  private async getUserBySocialId(socialId: string) {
+  private async getUserById(userId: string) {
     // try {
     const uResp = await lastValueFrom(
-      this.userService.send({ cmd: 'get_user_info' }, { socialId }),
+      this.userService.send({ cmd: 'get_user_info' }, { userId }),
     );
     return uResp?.data ?? null;
     // } catch (error) {

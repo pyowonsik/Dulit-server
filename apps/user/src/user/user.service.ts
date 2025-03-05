@@ -20,9 +20,9 @@ export class UserService {
     // private readonly authService: AuthService,
   ) {}
 
-  async getUserBySocialId(userSocialId: string) {
+  async getUserById(userId: string) {
     const user = await this.userRepository.findOneBy({
-      socialId: userSocialId,
+      id: userId,
     });
 
     if (!user) {

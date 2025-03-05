@@ -7,8 +7,9 @@ import {
 } from 'typeorm';
 import { Transform } from 'class-transformer';
 import { Couple } from '../../entity/couple.entity';
+import { BaseTable } from '@app/common';
 @Entity()
-export class Calendar {
+export class Calendar extends BaseTable{
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -28,7 +29,10 @@ export class Calendar {
   )
   filePaths: string[] | null;
 
-  @ManyToOne(() => Couple, (couple) => couple.calendars)
-  @JoinColumn()
-  couple: Couple;
+  // @ManyToOne(() => Couple, (couple) => couple.calendars)
+  // @JoinColumn()
+  // couple: Couple;
+
+  @Column()
+  coupleId: string;
 }

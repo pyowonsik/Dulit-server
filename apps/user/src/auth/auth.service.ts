@@ -22,13 +22,11 @@ export class AuthService {
   async register(rawToken: string, registerDto: RegisterDto) {
     // @Headers에서 넘어온 rawToken(Basic $token)에서 email,password 추출
     const { email, password } = this.parserBasicToken(rawToken);
-    const socialId = uuidv4();
 
     return this.userService.create({
       ...registerDto,
       email,
       password,
-      socialId,
       socialProvider: SocialProvider.common,
     });
   }
@@ -137,7 +135,7 @@ export class AuthService {
 
   // user 정보를 통해 accessToken , refreshToken 발급
   async issueToken(
-    user: { id: number; role: Role; socialId: string },
+    user: { id: string; role: Role; },
     isRefresh: boolean,
   ) {
     // 환경변수(.env) ACCESS_TOKEN_SECRET,REFRESH_TOKEN_SECRET 저장
@@ -152,7 +150,6 @@ export class AuthService {
       {
         sub: user.id,
         role: user.role,
-        socialId: user.socialId,
         type: isRefresh ? 'refresh' : 'access',
       },
       {

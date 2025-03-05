@@ -21,6 +21,6 @@ export class UserController {
   @UseInterceptors(RpcInterceptor)
   getUserInfo(@Payload() data: GetUserInfoDto) {
     // console.log('USER_SERVICE : ', data);
-    return this.userService.getUserBySocialId(data.socialId);
+    return this.userService.getUserById(data.userId);
   }
 }
