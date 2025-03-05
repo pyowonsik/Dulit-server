@@ -21,7 +21,7 @@ export class RpcInterceptor implements NestInterceptor {
           data,
         };
 
-        console.log(resp);
+        // console.log(resp);
 
         return resp;
       }),
@@ -31,7 +31,7 @@ export class RpcInterceptor implements NestInterceptor {
           error: err,
         };
 
-        console.log(resp);
+        // console.log(resp);
 
         return throwError(() => new RpcException(err));
       }),
