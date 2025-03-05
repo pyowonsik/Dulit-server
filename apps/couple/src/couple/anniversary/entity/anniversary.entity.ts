@@ -7,9 +7,10 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Couple } from '../../entity/couple.entity';
+import { BaseTable } from '@app/common';
 
 @Entity()
-export class Anniversary {
+export class Anniversary extends BaseTable {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -19,7 +20,10 @@ export class Anniversary {
   @Column({ type: 'date' })
   date: Date;
 
-  @ManyToOne(() => Couple, (couple) => couple.anniversaries)
-  @JoinColumn()
-  couple: Couple;
+  // @ManyToOne(() => Couple, (couple) => couple.anniversaries)
+  // @JoinColumn()
+  // couple: Couple;
+
+  @Column()
+  coupleId: string;
 }

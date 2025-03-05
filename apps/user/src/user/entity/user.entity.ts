@@ -1,3 +1,4 @@
+import { BaseTable } from '@app/common';
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 export enum Role {
@@ -13,12 +14,12 @@ export enum SocialProvider {
 }
 
 @Entity()
-export class User {
-  @PrimaryGeneratedColumn()
-  id: number;
+export class User extends BaseTable{
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
-  @Column({ unique: true })
-  socialId: string;
+  @Column({ nullable : true })
+  socialId?: string;
 
   @Column()
   email: string;

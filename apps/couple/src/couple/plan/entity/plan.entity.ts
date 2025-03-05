@@ -1,4 +1,3 @@
-
 import {
   Column,
   Entity,
@@ -7,9 +6,10 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Couple } from '../../entity/couple.entity';
+import { BaseTable } from '@app/common';
 
 @Entity()
-export class Plan {
+export class Plan extends BaseTable {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -22,8 +22,10 @@ export class Plan {
   @Column()
   time: Date;
 
-  @ManyToOne(() => Couple, (couple) => couple.plans)
-  @JoinColumn()
-  couple: Couple;
+  // @ManyToOne(() => Couple, (couple) => couple.plans)
+  // @JoinColumn()
+  // couple: Couple;
 
+  @Column()
+  coupleId: string;
 }

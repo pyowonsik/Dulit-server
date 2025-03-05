@@ -3,12 +3,12 @@ import { SocialProvider } from '../entity/user.entity';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateUserDto {
-  @IsString()
-  @ApiProperty({
-    description: '유저 고유 socialId',
-    example: '123456',
-  })
-  socialId: string;
+  // @IsString()
+  // @ApiProperty({
+  //   description: '유저 고유 socialId',
+  //   example: '123456',
+  // })
+  // socialId: string;
 
   @IsString()
   @ApiProperty({
