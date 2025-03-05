@@ -12,7 +12,7 @@ import { Repository } from 'typeorm';
 import { CreateCoupleDto } from './dto/create-couple.dto';
 import { lastValueFrom } from 'rxjs';
 import { ClientProxy } from '@nestjs/microservices';
-import { CHAT_SERVICE, USER_SERVICE } from '@app/common';
+import { CHAT_SERVICE, NOTIFICATION_SERVICE, USER_SERVICE } from '@app/common';
 
 @Injectable()
 export class CoupleService {
@@ -21,6 +21,8 @@ export class CoupleService {
     private readonly userService: ClientProxy,
     @Inject(CHAT_SERVICE)
     private readonly chatService: ClientProxy,
+    @Inject(NOTIFICATION_SERVICE)
+    private readonly notificationService: ClientProxy,
     @InjectRepository(Couple)
     private readonly coupleRepository: Repository<Couple>, // 커플 정보 저장소 추가
   ) {}
@@ -39,13 +41,14 @@ export class CoupleService {
     const coupleId = await this.createCouple(me.id, partner.id);
 
     // 5) 채팅방 생성 및 저장
-    const chatRoom = await this.createChatRoom(me.id, partner.id, coupleId);
+    await this.createChatRoom(me.id, partner.id, coupleId);
 
     // 6) 알림 생성 및 전송
-    // NOTIFICATION SERVICE MESSAGE
+    this.createMatchedNotification(me.id);
+    this.createMatchedNotification(partner.id);
 
-    console.log(`----- [SUCCESS] - coupleId : ${coupleId} -----`);
-    console.log(chatRoom);
+    // console.log(`----- [SUCCESS] - coupleId : ${coupleId} -----`);
+    // console.log(chatRoom);
     return { success: true, message: '커플 연결이 완료되었습니다.' };
   }
 
@@ -127,5 +130,12 @@ export class CoupleService {
     }
 
     return couple.id;
+  }
+
+  private async createMatchedNotification(userId: string) {
+    await this.notificationService.emit(
+      { cmd: 'matched_notification' },
+      { userId },
+    );
   }
 }

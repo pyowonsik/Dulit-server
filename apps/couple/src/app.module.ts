@@ -7,7 +7,7 @@ import { CalendarModule } from './couple/calendar/calendar.module';
 import { AnniversaryModule } from './couple/anniversary/anniversary.module';
 import * as Joi from 'joi';
 import { ClientsModule, Transport } from '@nestjs/microservices';
-import { CHAT_SERVICE, USER_SERVICE } from '@app/common';
+import { CHAT_SERVICE, NOTIFICATION_SERVICE, USER_SERVICE } from '@app/common';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -47,6 +47,17 @@ import { CHAT_SERVICE, USER_SERVICE } from '@app/common';
             options: {
               host: configService.getOrThrow<string>('CHAT_HOST'),
               port: configService.getOrThrow<number>('CHAT_TCP_PORT'),
+            },
+          }),
+          inject: [ConfigService],
+        },
+        {
+          name: NOTIFICATION_SERVICE,
+          useFactory: (configService: ConfigService) => ({
+            transport: Transport.TCP,
+            options: {
+              host: configService.getOrThrow<string>('NOTIFICATION_HOST'),
+              port: configService.getOrThrow<number>('NOTIFICATION_TCP_PORT'),
             },
           }),
           inject: [ConfigService],
