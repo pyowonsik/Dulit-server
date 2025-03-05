@@ -38,7 +38,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       if (payload) {
         client.data.user = payload;
         this.chatService.registerClient(payload.sub, client);
-        console.log(`User ${payload.sub} connected to WebSocket`);
+        console.log(`User ${payload.sub} connected to Chat WebSocket`);
       } else {
         client.disconnect();
         console.log('Client disconnected due to missing payload');
@@ -53,7 +53,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const user = client.data.user;
     if (user) {
       this.chatService.removeClient(user.sub);
-      console.log(`User ${user.sub} disconnected from WebSocket`);
+      console.log(`User ${user.sub} disconnected from Chat WebSocket`);
     }
   }
 }
