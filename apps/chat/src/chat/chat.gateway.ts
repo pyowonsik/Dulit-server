@@ -2,6 +2,9 @@ import {
   WebSocketGateway,
   OnGatewayConnection,
   OnGatewayDisconnect,
+  SubscribeMessage,
+  MessageBody,
+  ConnectedSocket,
 } from '@nestjs/websockets';
 import { Socket } from 'socket.io';
 import { ClientProxy } from '@nestjs/microservices';
@@ -9,6 +12,7 @@ import { USER_SERVICE } from '@app/common';
 import { Inject } from '@nestjs/common';
 import { lastValueFrom } from 'rxjs';
 import { ChatService } from './chat.service';
+import { CreateChatDto } from './dto/create-chat.dto';
 
 @WebSocketGateway({
   namespace: '/chat',
@@ -38,6 +42,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       if (payload) {
         client.data.user = payload;
         this.chatService.registerClient(payload.sub, client);
+        await this.chatService.joinUserRooms(payload, client);
         console.log(`User ${payload.sub} connected to Chat WebSocket`);
       } else {
         client.disconnect();
@@ -55,5 +60,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       this.chatService.removeClient(user.sub);
       console.log(`User ${user.sub} disconnected from Chat WebSocket`);
     }
+  }
+
+  @SubscribeMessage('sendMessage')
+  async handleMessage(
+    @MessageBody() body: CreateChatDto,
+    @ConnectedSocket() client: Socket,
+  ) {
+    const payload = client.data.user;
+    await this.chatService.sendMessage(payload, body);
   }
 }
