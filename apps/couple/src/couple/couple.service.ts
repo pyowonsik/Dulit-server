@@ -9,10 +9,11 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Couple } from './entity/couple.entity';
 import { Repository } from 'typeorm';
-import { CreateCoupleDto } from './dto/create-couple.dto';
+// import { CreateCoupleDto } from './dto/create-couple.dto';
 import { lastValueFrom } from 'rxjs';
 import { ClientProxy } from '@nestjs/microservices';
 import { CHAT_SERVICE, NOTIFICATION_SERVICE, USER_SERVICE } from '@app/common';
+import { ConnectCoupleDto } from './dto/connect-couple.dto';
 
 @Injectable()
 export class CoupleService {
@@ -27,23 +28,26 @@ export class CoupleService {
     private readonly coupleRepository: Repository<Couple>, // 커플 정보 저장소 추가
   ) {}
 
-  async connectCouple(token: string, partnerId: string) {
+  async connectCouple(createCoupleDto: ConnectCoupleDto) {
+    const { partnerId, meta } = createCoupleDto;
+
     // 1) 본인 정보 가져오기
-    const me = await this.getUserFromToken(token);
+    const me = await this.getUserById(meta.user.sub);
 
     // 2) 파트너 정보 가져오기
     const partner = await this.getUserById(partnerId);
 
-    // 3) 커플 상태 체크 및 기존 데이터 확인
+    // // 3) 커플 상태 체크 및 기존 데이터 확인
     await this.validateCoupleNotExists(me.id, partner.id);
+    console.log('success');
 
-    // 4) 커플 생성 및 저장
+    // // 4) 커플 생성 및 저장
     const coupleId = await this.createCouple(me.id, partner.id);
 
-    // 5) 채팅방 생성 및 저장
+    // // 5) 채팅방 생성 및 저장
     await this.createChatRoom(me.id, partner.id, coupleId);
 
-    // 6) 알림 생성 및 전송
+    // // 6) 알림 생성 및 전송
     this.createMatchedNotification(me.id);
     this.createMatchedNotification(partner.id);
 
@@ -52,18 +56,18 @@ export class CoupleService {
     return { success: true, message: '커플 연결이 완료되었습니다.' };
   }
 
-  // 토큰을 검증하여 유저 정보를 가져옴
-  private async getUserFromToken(token: string) {
-    const resp = await lastValueFrom(
-      this.userService.send({ cmd: 'parse_bearer_token' }, { token }),
-    );
+  // // 토큰을 검증하여 유저 정보를 가져옴
+  // private async getUserFromToken(token: string) {
+  //   const resp = await lastValueFrom(
+  //     this.userService.send({ cmd: 'parse_bearer_token' }, { token }),
+  //   );
 
-    if (!resp?.data?.sub) {
-      throw new BadRequestException('유효하지 않은 토큰입니다.');
-    }
+  //   if (!resp?.data?.sub) {
+  //     throw new BadRequestException('유효하지 않은 토큰입니다.');
+  //   }
 
-    return await this.getUserById(resp.data.sub);
-  }
+  //   return await this.getUserById(resp.data.sub);
+  // }
 
   // socialId를 이용하여 유저 정보를 가져옴
   private async getUserById(userId: string) {
@@ -87,6 +91,8 @@ export class CoupleService {
         { user1Id, user2Id },
       )
       .getOne();
+
+    console.log(existingCouple);
 
     if (existingCouple) {
       throw new ConflictException('이미 커플 관계가 존재합니다.');
@@ -132,6 +138,7 @@ export class CoupleService {
     return couple.id;
   }
 
+  /** 알림 생성 및 전송 */
   private async createMatchedNotification(userId: string) {
     await this.notificationService.emit(
       { cmd: 'matched_notification' },
