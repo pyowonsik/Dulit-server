@@ -11,6 +11,7 @@ import {
   CHAT_SERVICE,
   COUPLE_SERVICE,
   NOTIFICATION_SERVICE,
+  POST_SERVICE,
   USER_SERVICE,
 } from '@app/common';
 import { AuthModule } from './auth/auth.module';
@@ -19,6 +20,7 @@ import { BearerTokenMiddleware } from './auth/middleware/bearer-token.middleware
 import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from './auth/guard/auth.guard';
 import { NotificationModule } from './notification/notification.module';
+import { PostModule } from './post/post.module';
 
 @Module({
   imports: [
@@ -78,12 +80,24 @@ import { NotificationModule } from './notification/notification.module';
         //   }),
         //   inject: [ConfigService],
         // },
+        {
+          name: POST_SERVICE,
+          useFactory: (configService: ConfigService) => ({
+            transport: Transport.TCP,
+            options: {
+              host: configService.getOrThrow<string>('POST_HOST'),
+              port: configService.getOrThrow<number>('POST_TCP_PORT'),
+            },
+          }),
+          inject: [ConfigService],
+        },
       ],
       isGlobal: true,
     }),
     AuthModule,
     CoupleModule,
     NotificationModule,
+    PostModule,
   ],
   providers: [
     {
