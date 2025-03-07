@@ -56,28 +56,28 @@ import { NotificationModule } from './notification/notification.module';
           }),
           inject: [ConfigService],
         },
-        {
-          name: NOTIFICATION_SERVICE,
-          useFactory: (configService: ConfigService) => ({
-            transport: Transport.TCP,
-            options: {
-              host: configService.getOrThrow<string>('NOTIFICATION_HOST'),
-              port: configService.getOrThrow<number>('NOTIFICATION_TCP_PORT'),
-            },
-          }),
-          inject: [ConfigService],
-        },
-        {
-          name: CHAT_SERVICE,
-          useFactory: (configService: ConfigService) => ({
-            transport: Transport.TCP,
-            options: {
-              host: configService.getOrThrow<string>('CHAT_HOST'),
-              port: configService.getOrThrow<number>('CHAT_TCP_PORT'),
-            },
-          }),
-          inject: [ConfigService],
-        },
+        // {
+        //   name: NOTIFICATION_SERVICE,
+        //   useFactory: (configService: ConfigService) => ({
+        //     transport: Transport.TCP,
+        //     options: {
+        //       host: configService.getOrThrow<string>('NOTIFICATION_HOST'),
+        //       port: configService.getOrThrow<number>('NOTIFICATION_TCP_PORT'),
+        //     },
+        //   }),
+        //   inject: [ConfigService],
+        // },
+        // {
+        //   name: CHAT_SERVICE,
+        //   useFactory: (configService: ConfigService) => ({
+        //     transport: Transport.TCP,
+        //     options: {
+        //       host: configService.getOrThrow<string>('CHAT_HOST'),
+        //       port: configService.getOrThrow<number>('CHAT_TCP_PORT'),
+        //     },
+        //   }),
+        //   inject: [ConfigService],
+        // },
       ],
       isGlobal: true,
     }),

@@ -89,6 +89,8 @@ services:
         condition: service_healthy
     env_file:
       - ./apps/chat/.env
+    ports:
+      - '3003:3000'
     volumes:
       - .:/usr/src/app
       - /usr/src/app/node_modules
@@ -121,6 +123,8 @@ services:
         condition: service_healthy
     env_file:
       - ./apps/notification/.env
+    ports:
+      - '3004:3000'
     volumes:
       - .:/usr/src/app
       - /usr/src/app/node_modules
