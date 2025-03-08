@@ -11,8 +11,8 @@ import { BaseTable } from '@app/common';
 
 @Entity()
 export class Anniversary extends BaseTable {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column()
   title: string;
