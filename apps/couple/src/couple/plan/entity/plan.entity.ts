@@ -10,8 +10,8 @@ import { BaseTable } from '@app/common';
 
 @Entity()
 export class Plan extends BaseTable {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column()
   topic: string;

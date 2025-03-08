@@ -3,8 +3,12 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsDate, IsNotEmpty, IsString, ValidateNested } from 'class-validator';
 
-export class GetAnniversaryDto {
+export class GetPlanDto {
+  @ValidateNested()
+  @IsNotEmpty()
+  meta: { user: UserPayloadDto };
+
   @IsNotEmpty()
   @IsString()
-  anniversaryId: string;
+  planId: string;
 }

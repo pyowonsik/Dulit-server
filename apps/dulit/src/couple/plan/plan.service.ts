@@ -53,11 +53,11 @@ export class PlanService {
 
     const qb = await this.findMyCouplePlan(user.couple.id);
 
-    this.planRepository.find({
-      where: {
-        couple: user.couple,
-      },
-    });
+    // this.planRepository.find({
+    //   where: {
+    //     couple: user.couple,
+    //   },
+    // });
 
     if (topic) {
       qb.andWhere('plan.topic LIKE :topic', { topic: `%${topic}%` });

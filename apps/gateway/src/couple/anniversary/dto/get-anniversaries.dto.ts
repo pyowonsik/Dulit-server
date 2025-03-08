@@ -8,12 +8,4 @@ import {
   ValidateNested,
 } from 'class-validator';
 
-export class GetAnniversariesDto extends PagePaginationDto {
-  @IsString()
-  @IsOptional()
-  @ApiProperty({
-    description: '기념일 제목',
-    example: '우리가 사귄날',
-  })
-  title?: string;
-}
+export class GetAnniversariesDto extends PagePaginationDto {}
