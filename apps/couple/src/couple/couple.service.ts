@@ -92,7 +92,7 @@ export class CoupleService {
       )
       .getOne();
 
-    console.log(existingCouple);
+    // console.log(existingCouple);
 
     if (existingCouple) {
       throw new ConflictException('이미 커플 관계가 존재합니다.');
@@ -144,5 +144,13 @@ export class CoupleService {
       { cmd: 'matched_notification' },
       { userId },
     );
+  }
+
+  async getCoupleByUserId(userId: string): Promise<string | null> {
+    const couple = await this.coupleRepository.findOne({
+      where: [{ user1Id: userId }, { user2Id: userId }],
+    });
+
+    return couple ? couple.id : null;
   }
 }
