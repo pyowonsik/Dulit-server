@@ -29,5 +29,6 @@ export class CursorPaginationDto {
     description: '가져올 데이터의 개수',
     example: 5,
   })
+  @Transform(({ value }) => (value ? parseInt(value, 10) : value))
   take: number = 10;
 }

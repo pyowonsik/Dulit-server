@@ -12,12 +12,4 @@ export class GetAnniversariesDto extends PagePaginationDto {
   @ValidateNested()
   @IsNotEmpty()
   meta: { user: UserPayloadDto };
-
-  @IsString()
-  @IsOptional()
-  @ApiProperty({
-    description: '기념일 제목',
-    example: '우리가 사귄날',
-  })
-  title?: string;
 }
