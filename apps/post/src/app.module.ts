@@ -4,6 +4,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import * as Joi from 'joi';
 import { PostModule } from './post/post.module';
 import { CommentModule } from './comment/comment.module';
+import { ClientsModule, Transport } from '@nestjs/microservices';
+import { USER_SERVICE } from '@app/common';
 
 @Module({
   imports: [
@@ -22,6 +24,22 @@ import { CommentModule } from './comment/comment.module';
         synchronize: true,
       }),
       inject: [ConfigService],
+    }),
+    ClientsModule.registerAsync({
+      clients: [
+        {
+          name: USER_SERVICE,
+          useFactory: (configService: ConfigService) => ({
+            transport: Transport.TCP,
+            options: {
+              host: configService.getOrThrow<string>('USER_HOST'),
+              port: configService.getOrThrow<number>('USER_TCP_PORT'),
+            },
+          }),
+          inject: [ConfigService],
+        },
+      ],
+      isGlobal: true,
     }),
     PostModule,
     CommentModule,

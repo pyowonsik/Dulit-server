@@ -10,8 +10,8 @@ import {
 
 @Entity()
 export class CommentModel extends BaseTable {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column()
   comment: string;
