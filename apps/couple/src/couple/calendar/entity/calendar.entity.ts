@@ -9,9 +9,9 @@ import { Transform } from 'class-transformer';
 import { Couple } from '../../entity/couple.entity';
 import { BaseTable } from '@app/common';
 @Entity()
-export class Calendar extends BaseTable{
-  @PrimaryGeneratedColumn()
-  id: number;
+export class Calendar extends BaseTable {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column()
   title: string;

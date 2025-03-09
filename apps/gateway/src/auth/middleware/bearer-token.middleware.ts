@@ -19,8 +19,6 @@ export class BearerTokenMiddleware implements NestMiddleware {
     /// 1) Raw 토큰 가져오기
     const token = this.getRawToken(req);
 
-    console.log()
-
     if (!token) {
       next();
       return;
@@ -29,9 +27,8 @@ export class BearerTokenMiddleware implements NestMiddleware {
     /// 2) User Auth에 토큰 던지기
     const payload = await this.verifyToken(token);
 
-    /// 3) req.user payload 붙여서 Guard로 넘김 , 실질적인 검증은 Guard 에서 . 
+    /// 3) req.user payload 붙여서 Guard로 넘김 , 실질적인 검증은 Guard 에서 .
     req.user = payload;
-
 
     next();
   }
@@ -42,7 +39,7 @@ export class BearerTokenMiddleware implements NestMiddleware {
     return authHeader;
   }
 
-  // bearer token 분리 후 검증 하는 로직을 message 패턴으로 실행 
+  // bearer token 분리 후 검증 하는 로직을 message 패턴으로 실행
   async verifyToken(token: string) {
     const result = await lastValueFrom(
       this.userMicroservice.send(
