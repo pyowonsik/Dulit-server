@@ -139,8 +139,10 @@ export class CalendarService {
       throw new NotFoundException('존재하지 않는 CALENDAR의 ID 입니다.');
     }
 
+    console.log(calendar);
+
     if (filePaths) {
-      if (!calendar.filePaths) {
+      if (!filePaths) {
         throw new BadRequestException('파일 선업로드 후 요청해주세요.');
       }
 
@@ -149,7 +151,7 @@ export class CalendarService {
       const filesFolder = join('public', 'files/calendar');
 
       // 1. public/files의 post.filePaths 삭제
-      calendar.filePaths.forEach((file) => {
+      filePaths.forEach((file) => {
         const filePath = join(filesFolder, file);
         if (existsSync(filePath)) {
           unlinkSync(filePath);

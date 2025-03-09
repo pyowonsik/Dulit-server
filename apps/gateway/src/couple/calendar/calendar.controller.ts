@@ -103,6 +103,7 @@ export class CalendarController {
     @UploadedFiles()
     files: Array<Express.Multer.File>,
   ) {
+    console.log(files);
     const fileNames = files.map((file) => file.filename);
 
     return {
