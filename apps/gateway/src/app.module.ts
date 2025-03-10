@@ -94,7 +94,6 @@ import { PostModule } from './post/post.module';
       ],
       isGlobal: true,
     }),
-
     AuthModule,
     CoupleModule,
     NotificationModule,

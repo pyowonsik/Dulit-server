@@ -12,8 +12,8 @@ import {
 } from 'typeorm';
 @Entity()
 export class Post extends BaseTable {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column()
   title: string;

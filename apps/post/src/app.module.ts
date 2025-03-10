@@ -4,6 +4,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import * as Joi from 'joi';
 import { PostModule } from './post/post.module';
 import { CommentModule } from './comment/comment.module';
+import { ClientsModule, Transport } from '@nestjs/microservices';
+import { USER_SERVICE } from '@app/common';
 
 @Module({
   imports: [

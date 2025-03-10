@@ -139,7 +139,7 @@ export class CalendarService {
       throw new NotFoundException('존재하지 않는 CALENDAR의 ID 입니다.');
     }
 
-    console.log(calendar);
+    // console.log(calendar);
 
     if (filePaths) {
       if (!filePaths) {
