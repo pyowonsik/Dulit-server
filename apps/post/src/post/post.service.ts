@@ -83,6 +83,7 @@ export class PostService {
   }
 
   async getPosts(getPostsDto: GetPostsDto) {
+
     const { title } = getPostsDto;
 
     const qb = this.postRepository.createQueryBuilder('post').select();
@@ -142,7 +143,7 @@ export class PostService {
 
       // movie 생성시, temp폴더의 movieFile을 movie폴더로 이동 시킨다.
       const tempFolder = join('public', 'temp');
-      const filesFolder = join('public', 'files/post]');
+      const filesFolder = join('public', 'files/post');
 
       // 1. public/files의 post.filePaths 삭제
       filePaths.forEach((file) => {

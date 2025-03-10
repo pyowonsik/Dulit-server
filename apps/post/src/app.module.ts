@@ -25,22 +25,6 @@ import { USER_SERVICE } from '@app/common';
       }),
       inject: [ConfigService],
     }),
-    ClientsModule.registerAsync({
-      clients: [
-        {
-          name: USER_SERVICE,
-          useFactory: (configService: ConfigService) => ({
-            transport: Transport.TCP,
-            options: {
-              host: configService.getOrThrow<string>('USER_HOST'),
-              port: configService.getOrThrow<number>('USER_TCP_PORT'),
-            },
-          }),
-          inject: [ConfigService],
-        },
-      ],
-      isGlobal: true,
-    }),
     PostModule,
     CommentModule,
   ],

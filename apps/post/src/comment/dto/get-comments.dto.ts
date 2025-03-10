@@ -1,16 +1,12 @@
-import {
-  CursorPaginationDto,
-  PagePaginationDto,
-  UserPayloadDto,
-} from '@app/common/dto';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  IsInt,
-  IsNotEmpty,
-  IsNumber,
-  IsOptional,
-  IsString,
-  ValidateNested,
-} from 'class-validator';
+import { PagePaginationDto, UserPayloadDto } from '@app/common/dto';
+import { IsNotEmpty, IsString, ValidateNested } from 'class-validator';
 
-export class GetPostsDto extends PagePaginationDto {}
+export class GetCommentsDto extends PagePaginationDto {
+  @ValidateNested()
+  @IsNotEmpty()
+  meta: { user: UserPayloadDto };
+
+  @IsNotEmpty()
+  @IsString()
+  postId: string;
+}

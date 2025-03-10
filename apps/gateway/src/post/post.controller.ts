@@ -38,9 +38,6 @@ export class PostController {
     @UserPayload() userPayload: UserPayloadDto,
     @Query() getPostsDto: GetPostsDto,
   ) {
-    console.log(userPayload);
-    console.log(getPostsDto);
-
     return this.postService.getPosts(getPostsDto, userPayload);
   }
 

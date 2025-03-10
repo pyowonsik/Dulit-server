@@ -40,6 +40,7 @@ export class PostController {
   @UsePipes(ValidationPipe)
   @UseInterceptors(RpcInterceptor)
   getPosts(@Payload() payload: GetPostsDto) {
+
     return this.postService.getPosts(payload);
   }
 

@@ -16,12 +16,14 @@ export class CommentService {
   createComment(
     createCommentDto: CreateCommentDto,
     userPayload: UserPayloadDto,
+    postId: string,
   ) {
     return this.commentMicroservice.send(
       {
         cmd: 'create_comment',
       },
       {
+        postId,
         ...createCommentDto,
         meta: {
           user: userPayload,
@@ -30,12 +32,17 @@ export class CommentService {
     );
   }
 
-  getComments(getCommentsDto: GetCommentsDto, userPayload: UserPayloadDto) {
+  getComments(
+    getCommentsDto: GetCommentsDto,
+    userPayload: UserPayloadDto,
+    postId: string,
+  ) {
     return this.commentMicroservice.send(
       {
         cmd: 'get_comments',
       },
       {
+        postId,
         ...getCommentsDto,
         meta: {
           user: userPayload,
@@ -44,24 +51,10 @@ export class CommentService {
     );
   }
 
-  //   getComment(userPayload: UserPayloadDto, commentId: string) {
-  //     return this.commentMicroservice.send(
-  //       {
-  //         cmd: 'get_comment',
-  //       },
-  //       {
-  //         // ...getCommentDto,
-  //         commentId,
-  //         meta: {
-  //           user: userPayload,
-  //         },
-  //       },
-  //     );
-  //   }
-
   updateComment(
     updateCommentDto: UpdateCommentDto,
     userPayload: UserPayloadDto,
+    postId: string,
     commentId: string,
   ) {
     return this.commentMicroservice.send(
@@ -70,6 +63,7 @@ export class CommentService {
       },
       {
         ...updateCommentDto,
+        postId,
         commentId,
         meta: {
           user: userPayload,
@@ -78,13 +72,18 @@ export class CommentService {
     );
   }
 
-  deleteComment(userPayload: UserPayloadDto, commentId: string) {
+  deleteComment(
+    userPayload: UserPayloadDto,
+    postId: string,
+    commentId: string,
+  ) {
     return this.commentMicroservice.send(
       {
         cmd: 'delete_comment',
       },
       {
         commentId,
+        postId,
         meta: {
           user: userPayload,
         },

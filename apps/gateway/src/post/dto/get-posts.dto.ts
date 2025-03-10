@@ -4,7 +4,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { IsNumber, IsOptional, IsString } from 'class-validator';
 
-export class GetPostsDto extends PaginationService {
+export class GetPostsDto extends CursorPaginationDto {
   @IsString()
   @IsOptional()
   @ApiProperty({

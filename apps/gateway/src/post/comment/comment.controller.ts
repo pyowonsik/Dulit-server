@@ -21,7 +21,7 @@ import { GetCommentsDto } from './dto/get-comments.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 import { CreateCommentDto } from './dto/create-comment.dto';
 
-@Controller('')
+@Controller('post/:postId')
 export class CommentController {
   constructor(private readonly commentService: CommentService) {}
 
@@ -29,35 +29,36 @@ export class CommentController {
   async createComment(
     @UserPayload() userPayload: UserPayloadDto,
     @Body() createCommentDto: CreateCommentDto,
+    @Param('postId') postId: string,
   ) {
-    return this.commentService.createComment(createCommentDto, userPayload);
+    return this.commentService.createComment(
+      createCommentDto,
+      userPayload,
+      postId,
+    );
   }
 
   @Get('/comments')
   async getComments(
     @UserPayload() userPayload: UserPayloadDto,
     @Query() getCommentsDto: GetCommentsDto,
+    @Param('postId') postId: string,
   ) {
-    return this.commentService.getComments(getCommentsDto, userPayload);
+    return this.commentService.getComments(getCommentsDto, userPayload, postId);
   }
 
-  // @Get('/comment/:commentId')
-  // async getComment(
-  //   @UserPayload() userPayload: UserPayloadDto,
-  //   @Param('commentId') commentId: string,
-  // ) {
-  //   return this.commentService.getComment(userPayload, commentId);
-  // }
 
   @Patch('/comment/:commentId')
   async updateComment(
     @UserPayload() userPayload: UserPayloadDto,
     @Body() updateCommentDto: UpdateCommentDto,
+    @Param('postId') postId: string,
     @Param('commentId') commentId: string,
   ) {
     return this.commentService.updateComment(
       updateCommentDto,
       userPayload,
+      postId,
       commentId,
     );
   }
@@ -65,8 +66,9 @@ export class CommentController {
   @Delete('/comment/:commentId')
   async deleteComment(
     @UserPayload() userPayload: UserPayloadDto,
+    @Param('postId') postId: string,
     @Param('commentId') commentId: string,
   ) {
-    return this.commentService.deleteComment(userPayload, commentId);
+    return this.commentService.deleteComment(userPayload, postId, commentId);
   }
 }
