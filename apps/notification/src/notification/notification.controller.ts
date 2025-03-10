@@ -2,6 +2,7 @@ import { Controller, Get, UseInterceptors } from '@nestjs/common';
 import { NotificationService } from './notification.service';
 import { EventPattern, MessagePattern, Payload } from '@nestjs/microservices';
 import { RpcInterceptor } from '@app/common';
+import { CreateCoupleNotificationDto } from 'apps/dulit/src/notification/dto/create-couple-notificaiton.dto';
 
 @Controller()
 export class NotificationController {
@@ -9,8 +10,7 @@ export class NotificationController {
 
   @EventPattern({ cmd: 'matched_notification' })
   @UseInterceptors(RpcInterceptor)
-  handleMatchedNotification(@Payload() data: { userId: string }) {
-    // console.log(`NotificationController : ${data}`);
-    return this.notificationService.matchedNotification(data.userId);
+  matchedNotification(@Payload() data: CreateCoupleNotificationDto) {
+    return this.notificationService.matchedNotification(data);
   }
 }

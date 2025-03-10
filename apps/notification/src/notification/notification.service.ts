@@ -1,5 +1,6 @@
 import { Controller, Injectable } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
+import { CreateCoupleNotificationDto } from 'apps/dulit/src/notification/dto/create-couple-notificaiton.dto';
 import { Socket } from 'socket.io';
 
 @Injectable()
@@ -15,14 +16,12 @@ export class NotificationService {
   }
 
   /** 커플 매칭 알림 */
-  async matchedNotification(userId: string) {
-    const client = this.connectedClients.get(userId);
+  async matchedNotification(dto: CreateCoupleNotificationDto) {
+    const client = this.connectedClients.get(dto.userId);
 
     if (client) {
-      console.log('matchedNotification', '커플이 연결 되었습니다.');
-      client.emit('matchedNotification', '커플이 연결 되었습니다.');
+      client.emit('matchedNotification', dto.isConnect ? '커플이 연결 되었습니다.' : '커플 연결이 해제 되었습니다.' );
     } else {
-      console.log(`User ${userId} is not connected.`);
     }
   }
 }
