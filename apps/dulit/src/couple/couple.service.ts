@@ -83,6 +83,9 @@ export class CoupleService {
     if (!me.couple || !partner.couple)
       throw new BadRequestException('매칭이 되지 않은 사용자입니다.');
 
+
+
+    
     // 1. 유저가 속한 chatRoom - chat 삭제
     await this.deleteChatRoomsAndChats(me, qr);
 
@@ -124,9 +127,9 @@ export class CoupleService {
             await qr.manager.delete(CommentModel, { author: user });
           }),
         );
-
-        await qr.manager.delete(Plan, { couple: user.couple });
+        
         await qr.manager.delete(Post, { couple: user.couple });
+        await qr.manager.delete(Plan, { couple: user.couple });
         await qr.manager.delete(Anniversary, { couple: user.couple });
         await qr.manager.delete(Calendar, { couple: user.couple });
         await qr.manager.delete(Couple, couple.id);

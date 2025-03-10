@@ -1,7 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsString } from 'class-validator';
+import { IsBoolean, IsEmail, IsString } from 'class-validator';
 
 export class ConnectCoupleDto {
   @IsString()
-  partnerId: string;
+  partnerId : string;
+
+  @IsBoolean()
+  isConnect : boolean;
 }

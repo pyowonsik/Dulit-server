@@ -6,9 +6,10 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { ChatService } from './chat.service';
-import { MessagePattern, Payload } from '@nestjs/microservices';
+import { EventPattern, MessagePattern, Payload } from '@nestjs/microservices';
 import { RpcInterceptor } from '@app/common';
 import { CreateChatRoomDto } from './dto/create-chat-room.dto';
+import { DeleteChatroomAndChatsDto } from './dto/delete-chatroom-and-chats.dto';
 
 @Controller()
 export class ChatController {
@@ -21,5 +22,14 @@ export class ChatController {
   @UseInterceptors(RpcInterceptor)
   createChatRoom(@Payload() data: CreateChatRoomDto) {
     return this.chatService.createChatRoom(data);
+  }
+
+  @EventPattern({
+    cmd : 'delete_chatroom_and_chats'
+  })
+  @UsePipes(ValidationPipe)
+  @UseInterceptors(RpcInterceptor)
+  deleteChatRoomAndChats(@Payload() data : DeleteChatroomAndChatsDto){
+    return this.chatService.deleteChatroomAndChatsDto(data);
   }
 }

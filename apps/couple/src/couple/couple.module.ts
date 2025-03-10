@@ -8,7 +8,7 @@ import { Anniversary } from './anniversary/entity/anniversary.entity';
 import { Calendar } from './calendar/entity/calendar.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Couple])],
+  imports: [TypeOrmModule.forFeature([Couple, Anniversary, Plan, Calendar])],
   controllers: [CoupleController],
   providers: [CoupleService],
   exports: [CoupleService],

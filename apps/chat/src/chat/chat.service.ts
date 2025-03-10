@@ -8,6 +8,7 @@ import { Socket } from 'socket.io';
 import { Chat } from './schema/chat.schema';
 import { CreateChatDto } from './dto/create-chat.dto';
 import { plainToClass } from 'class-transformer';
+import { DeleteChatroomAndChatsDto } from './dto/delete-chatroom-and-chats.dto';
 
 @Injectable()
 export class ChatService {
@@ -28,7 +29,7 @@ export class ChatService {
     this.connectedClients.delete(userId);
   }
 
-  // 채팅방 생성성
+  // 채팅방 생성
   async createChatRoom(dto: CreateChatRoomDto) {
     const chatroom = await this.chatroomModel.create({
       user1Id: dto.user1Id,
@@ -77,5 +78,10 @@ export class ChatService {
     });
 
     return chatRoom;
+  }
+
+  async deleteChatroomAndChatsDto(dto: DeleteChatroomAndChatsDto) {
+    const { coupleId } = dto;
+    await this.chatroomModel.findByIdAndDelete(coupleId);
   }
 }
