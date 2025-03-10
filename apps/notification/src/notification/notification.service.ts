@@ -20,7 +20,18 @@ export class NotificationService {
     const client = this.connectedClients.get(dto.userId);
 
     if (client) {
-      client.emit('matchedNotification', dto.isConnect ? '커플이 연결 되었습니다.' : '커플 연결이 해제 되었습니다.' );
+      client.emit(
+        'matchedNotification',
+        dto.isConnect
+          ? '커플이 연결 되었습니다.'
+          : '커플 연결이 해제 되었습니다.',
+      );
+
+      /**  커플 해제시 소켓 close */
+      if (!dto.isConnect) {
+        client.disconnect();
+        this.removeClient(dto.userId);
+      }
     } else {
     }
   }

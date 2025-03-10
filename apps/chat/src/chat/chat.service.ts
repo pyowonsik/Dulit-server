@@ -81,7 +81,23 @@ export class ChatService {
   }
 
   async deleteChatroomAndChatsDto(dto: DeleteChatroomAndChatsDto) {
-    const { coupleId } = dto;
-    await this.chatroomModel.findByIdAndDelete(coupleId);
+    const { coupleId, user1Id, user2Id } = dto;
+    const userIds = [user1Id, user2Id];
+
+
+    // 소켓 연결 해제 및 클라이언트 제거
+    userIds.forEach((userId) => {
+      const client = this.connectedClients.get(userId);
+      if (client) {
+        client.disconnect();
+        this.removeClient(userId);
+      }
+    });
+
+    // DB 삭제 병렬 처리
+    await Promise.all([
+      this.chatroomModel.findByIdAndDelete(coupleId),
+      this.chatModel.deleteMany({ userId: { $in: userIds } }),
+    ]);
   }
 }

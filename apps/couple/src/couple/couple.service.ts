@@ -59,7 +59,7 @@ export class CoupleService {
       const coupleId = await this.getCoupleByUserId(me.id);
 
       // 4.1) 유저 chatRoom - chat 삭제
-      await this.deleteChatroomAndChats(coupleId);
+      await this.deleteChatroomAndChats(coupleId, me.id, partner.id);
 
       // 4.2) 유저 couple 관련 테이블 삭제 (plan,post,calendar)
       await this.deleteCoupleAndRelatedData(coupleId);
@@ -160,35 +160,34 @@ export class CoupleService {
     );
   }
 
+
+  /** 커플 채팅방 , 채팅 삭제 */
+  private async deleteChatroomAndChats(
+    coupleId: string,
+    user1Id: string,
+    user2Id: string,
+  ) {
+    this.chatService.emit(
+      { cmd: 'delete_chatroom_and_chats' },
+      { coupleId, user1Id, user2Id },
+    );
+  }
+
+  /** 커플 관계 데이터 삭제 */
+  private async deleteCoupleAndRelatedData(coupleId: string) {
+    await Promise.all([
+      this.anniversaryRepository.delete({ coupleId }),
+      this.planRepository.delete({ coupleId }),
+      this.calendarRepository.delete({ coupleId }),
+      this.coupleRepository.delete({ id: coupleId }),
+    ]);
+  }
+
   async getCoupleByUserId(userId: string): Promise<string | null> {
     const couple = await this.coupleRepository.findOne({
       where: [{ user1Id: userId }, { user2Id: userId }],
     });
 
     return couple ? couple.id : null;
-  }
-
-  // 현재 들어가 있는 소켓 연결 해제 기능 필요 , 커플 Id만 받아서 한번만 호출하도록 변경.
-  // -> 커플 연결 해제시 , 채팅소켓 알림소켓이 유지되고 있음.
-
-  /** 커플 채팅방 , 채팅 삭제 */
-  private async deleteChatroomAndChats(coupleId: string) {
-    this.chatService.emit({ cmd: 'delete_chatroom_and_chats' }, { coupleId });
-  }
-
-  /** 커플 관계 데이터 삭제 */
-  private async deleteCoupleAndRelatedData(coupleId: string) {
-    await this.anniversaryRepository.delete({
-      coupleId,
-    });
-    await this.planRepository.delete({
-      coupleId,
-    });
-    await this.calendarRepository.delete({
-      coupleId,
-    });
-    await this.coupleRepository.delete({
-      id: coupleId,
-    });
   }
 }
