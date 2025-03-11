@@ -39,10 +39,13 @@ import { PostModule } from './post/post.module';
         {
           name: USER_SERVICE,
           useFactory: (configService: ConfigService) => ({
-            transport: Transport.TCP,
+            transport: Transport.RMQ,
             options: {
-              host: configService.getOrThrow<string>('USER_HOST'),
-              port: configService.getOrThrow<number>('USER_TCP_PORT'),
+              urls: ['amqp://rabbitmq:5672'],
+              queue: 'user_queue',
+              queueOptions: {
+                durable: false,
+              },
             },
           }),
           inject: [ConfigService],
@@ -50,10 +53,13 @@ import { PostModule } from './post/post.module';
         {
           name: COUPLE_SERVICE,
           useFactory: (configService: ConfigService) => ({
-            transport: Transport.TCP,
+            transport: Transport.RMQ,
             options: {
-              host: configService.getOrThrow<string>('COUPLE_HOST'),
-              port: configService.getOrThrow<number>('COUPLE_TCP_PORT'),
+              urls: ['amqp://rabbitmq:5672'],
+              queue: 'couple_queue',
+              queueOptions: {
+                durable: false,
+              },
             },
           }),
           inject: [ConfigService],
@@ -83,10 +89,13 @@ import { PostModule } from './post/post.module';
         {
           name: POST_SERVICE,
           useFactory: (configService: ConfigService) => ({
-            transport: Transport.TCP,
+            transport: Transport.RMQ,
             options: {
-              host: configService.getOrThrow<string>('POST_HOST'),
-              port: configService.getOrThrow<number>('POST_TCP_PORT'),
+              urls: ['amqp://rabbitmq:5672'],
+              queue: 'post_queue',
+              queueOptions: {
+                durable: false,
+              },
             },
           }),
           inject: [ConfigService],
