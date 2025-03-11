@@ -1,10 +1,13 @@
 import { Controller, Injectable } from '@nestjs/common';
-import { MessagePattern, Payload } from '@nestjs/microservices';
+import { InjectModel } from '@nestjs/mongoose';
 import { CreateCoupleNotificationDto } from 'apps/dulit/src/notification/dto/create-couple-notificaiton.dto';
+import { Model } from 'mongoose';
 import { Socket } from 'socket.io';
 
 @Injectable()
 export class NotificationService {
+  constructor() // private readonly notificationModel: Model<Notification>, // @InjectModel(Notification.name)
+  {}
   private readonly connectedClients = new Map<string, Socket>();
 
   registerClient(userId: string, client: Socket) {
@@ -20,6 +23,13 @@ export class NotificationService {
     const client = this.connectedClients.get(dto.userId);
 
     if (client) {
+      // const notification = await this.notificationModel.create({
+      //   userId: dto.userId,
+      //   message: dto.isConnect
+      //     ? '커플이 연결 되었습니다.'
+      //     : '커플 연결이 해제 되었습니다.',
+      // });
+
       client.emit(
         'matchedNotification',
         dto.isConnect
@@ -29,6 +39,7 @@ export class NotificationService {
 
       /**  커플 해제시 소켓 close */
       if (!dto.isConnect) {
+        // this.notificationModel.deleteMany({ userId : dto.userId }),
         client.disconnect();
         this.removeClient(dto.userId);
       }
