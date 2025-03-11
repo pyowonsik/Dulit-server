@@ -1,89 +1,165 @@
 import {
   BadRequestException,
-  Inject,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { Post } from './entity/post.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, DataSource, QueryRunner } from 'typeorm';
 import { CreatePostDto } from './dto/create-post.dto';
 import { GetPostsDto } from './dto/get-posts.dto';
 import { GetPostDto } from './dto/get-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
-import { ClientProxy } from '@nestjs/microservices';
-import { PaginationService, USER_SERVICE } from '@app/common';
+import { PaginationService } from '@app/common';
 import { join } from 'path';
 import { existsSync, mkdirSync, unlinkSync } from 'fs';
 import { rename } from 'fs/promises';
-import { lastValueFrom } from 'rxjs';
 import { CommentModel } from '../comment/entity/comment.entity';
 
 @Injectable()
 export class PostService {
   constructor(
+    private readonly dataSource: DataSource, // DataSource 추가
     @InjectRepository(Post)
     private readonly postRepository: Repository<Post>,
-    @InjectRepository(CommentModel)
-    private readonly commentRepository: Repository<CommentModel>,
     private readonly paginationService: PaginationService,
   ) {}
 
   async createPost(createPostDto: CreatePostDto) {
-    const { meta, title, description, filePaths } = createPostDto;
-    const userId = meta.user.sub;
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
 
-    // const user = await lastValueFrom(
-    //   this.userMicroservice.send({ cmd: 'get_user_info' }, { userId }),
-    // );
+    try {
+      const { meta, title, description, filePaths } = createPostDto;
+      const userId = meta.user.sub;
 
-    // console.log(user);
+      if (filePaths) {
+        const tempFolder = join('public', 'temp');
+        const filesFolder = join('public', 'files/post');
 
-    // if (!user.coupleId) {
-    //   throw new NotFoundException('커플 관계가 존재하지 않습니다.');
-    // }
+        if (!existsSync(filesFolder)) {
+          mkdirSync(filesFolder, { recursive: true });
+        }
 
-    // 커플 확인
-    if (filePaths) {
-      // movie 생성시, temp폴더의 movieFile을 movie폴더로 이동 시킨다.
-      const tempFolder = join('public', 'temp');
-      const filesFolder = join('public', 'files/post');
-
-      if (!existsSync(filesFolder)) {
-        mkdirSync(filesFolder, { recursive: true });
-      }
-
-      if (!filePaths || filePaths.length === 0) {
-        throw new BadRequestException('이동할 파일이 없습니다.');
-      }
-
-      try {
         await Promise.all(
-          filePaths.map(async (file) => {
-            await this.renameFiles(tempFolder, filesFolder, file);
-          }),
+          filePaths.map(async (file) =>
+            this.renameFiles(tempFolder, filesFolder, file),
+          ),
         );
-      } catch (error) {
-        // console.error('파일 이동 중 오류 발생:', error);
-        throw new InternalServerErrorException('파일 이동에 실패했습니다.');
       }
+
+      const post = queryRunner.manager.create(Post, {
+        title,
+        description,
+        filePaths,
+        authorId: userId,
+      });
+
+      await queryRunner.manager.save(post);
+      await queryRunner.commitTransaction();
+
+      return post;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
     }
+  }
 
-    const post = this.postRepository.create({
-      title,
-      description,
-      filePaths,
-      authorId: userId,
-    });
+  async updatePost(updatePostDto: UpdatePostDto) {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
 
-    this.postRepository.save(post);
+    try {
+      const { meta, title, description, filePaths, postId } = updatePostDto;
 
-    return post;
+      const post = await queryRunner.manager.findOne(Post, {
+        where: { id: postId },
+      });
+
+      if (!post) {
+        throw new NotFoundException('존재하지 않는 POST의 ID 입니다.');
+      }
+
+      if (filePaths) {
+        const tempFolder = join('public', 'temp');
+        const filesFolder = join('public', 'files/post');
+
+        filePaths.forEach((file) => {
+          const filePath = join(filesFolder, file);
+          if (existsSync(filePath)) {
+            unlinkSync(filePath);
+          }
+        });
+
+        await Promise.all(
+          filePaths.map(async (file) =>
+            this.renameFiles(tempFolder, filesFolder, file),
+          ),
+        );
+      }
+
+      await queryRunner.manager.update(
+        Post,
+        { id: postId },
+        {
+          title,
+          description,
+          filePaths,
+          authorId: meta.user.sub,
+        },
+      );
+
+      const updatedPost = await queryRunner.manager.findOne(Post, {
+        where: { id: postId },
+      });
+
+      await queryRunner.commitTransaction();
+
+      return updatedPost;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  async deletePost(getPostDto: GetPostDto) {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      const { postId } = getPostDto;
+
+      const post = await queryRunner.manager.findOne(Post, {
+        where: { id: postId },
+      });
+
+      if (!post) {
+        throw new NotFoundException('존재하지 않는 POST의 ID 입니다.');
+      }
+
+      await queryRunner.manager.delete(CommentModel, { postId });
+      await queryRunner.manager.delete(Post, { id: postId });
+
+      await queryRunner.commitTransaction();
+
+      return postId;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
   }
 
   async getPosts(getPostsDto: GetPostsDto) {
-
     const { title } = getPostsDto;
 
     const qb = this.postRepository.createQueryBuilder('post').select();
@@ -98,9 +174,8 @@ export class PostService {
         getPostsDto,
       );
 
-    let [data, count] = await qb.getManyAndCount();
+    const [data, count] = await qb.getManyAndCount();
 
-    // 기존 반환값에 cursor를 넣어줌
     return {
       data,
       nextCursor,
@@ -109,7 +184,7 @@ export class PostService {
   }
 
   async getPost(getPostDto: GetPostDto) {
-    const { meta, postId } = getPostDto;
+    const { postId } = getPostDto;
 
     const post = await this.postRepository.findOne({
       where: {
@@ -124,90 +199,21 @@ export class PostService {
     return post;
   }
 
-  async updatePost(updatePostDto: UpdatePostDto) {
-    const { meta, title, description, filePaths, postId } = updatePostDto;
-
-    const post = await this.postRepository.findOne({
-      where: {
-        id: postId,
-      },
-    });
-
-    if (!post) {
-      throw new NotFoundException('존재하지 않는 POST의 ID 입니다.');
-    }
-    if (filePaths) {
-      if (!filePaths) {
-        throw new BadRequestException('파일 선업로드 후 요청해주세요.');
-      }
-
-      // movie 생성시, temp폴더의 movieFile을 movie폴더로 이동 시킨다.
-      const tempFolder = join('public', 'temp');
-      const filesFolder = join('public', 'files/post');
-
-      // 1. public/files의 post.filePaths 삭제
-      filePaths.forEach((file) => {
-        const filePath = join(filesFolder, file);
-        if (existsSync(filePath)) {
-          unlinkSync(filePath);
-        }
-      });
-
-      // 2. 파일 이동 (병렬 처리)
-      await Promise.all(
-        filePaths.map(
-          async (file) => await this.renameFiles(tempFolder, filesFolder, file),
-        ),
-      );
-    }
-
-    await this.postRepository.update(
-      { id: postId },
-      {
-        title,
-        description,
-        filePaths,
-        authorId: meta.user.sub,
-      },
-    );
-
-    const newPost = await this.postRepository.findOne({
-      where: {
-        id: postId,
-      },
-    });
-
-    return newPost;
-  }
-
-  async deletePost(getPostDto: GetPostDto) {
-    const { meta, postId } = getPostDto;
-
-    const post = await this.postRepository.findOne({
-      where: {
-        id: postId,
-      },
-    });
-
-    if (!post) {
-      throw new NotFoundException('존재하지 않는 POST의 ID 입니다.');
-    }
-
-    await this.commentRepository.delete({
-      postId,
-    });
-
-    await this.postRepository.delete({
-      id: postId,
-    });
-
-    return postId;
-  }
-
   async renameFiles(tempFolder: string, filesFolder: string, file: string) {
-    return await rename(
+    return rename(
       join(process.cwd(), tempFolder, file),
       join(process.cwd(), filesFolder, file),
     );
+  }
+
+  async isPostMineOrAdmin(getPostDto: GetPostDto) {
+    const { meta, postId } = getPostDto;
+
+    return this.postRepository.exists({
+      where: {
+        id: postId,
+        authorId: meta.user.sub,
+      },
+    });
   }
 }

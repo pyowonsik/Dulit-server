@@ -60,4 +60,13 @@ export class PlanController {
   deletePlan(@Payload() payload: GetPlanDto) {
     return this.planService.deletePlan(payload);
   }
+
+  @MessagePattern({
+    cmd: 'is_plan_couple_or_admin',
+  })
+  @UsePipes(ValidationPipe)
+  @UseInterceptors(RpcInterceptor)
+  isPlanCoupleOrAdmin(@Payload() payload: GetPlanDto) {
+    return this.planService.isPlanCoupleOrAdmin(payload);
+  }
 }

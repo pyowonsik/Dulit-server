@@ -60,4 +60,16 @@ export class CalendarController {
   deleteCalendar(@Payload() payload: GetCalendarDto) {
     return this.calendarService.deleteCalendar(payload);
   }
+
+  
+  @MessagePattern({
+    cmd: 'is_calendar_couple_or_admin',
+  })
+  @UsePipes(ValidationPipe)
+  @UseInterceptors(RpcInterceptor)
+  isCalendarCoupleOrAdmin(@Payload() payload: GetCalendarDto) {
+    return this.calendarService.isCalendarCoupleOrAdmin(payload);
+  }
+
+  
 }

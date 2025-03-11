@@ -5,6 +5,7 @@ import { UserPayloadDto } from '@app/common/dto';
 import { CreateAnniversaryDto } from './dto/create-anniversary.dto';
 import { GetAnniversariesDto } from './dto/get-anniversaries.dto';
 import { UpdateAnniversaryDto } from './dto/update-anniversary.dto';
+import { lastValueFrom } from 'rxjs';
 
 @Injectable()
 export class AnniversaryService {
@@ -91,6 +92,25 @@ export class AnniversaryService {
           user: userPayload,
         },
       },
+    );
+  }
+
+  async isAnniversaryCoupleOrAdmin(
+    userPayload: UserPayloadDto,
+    anniversaryId: string,
+  ) {
+    return await lastValueFrom(
+      this.coupleMicroservice.send(
+        {
+          cmd: 'is_anniversary_couple_or_admin',
+        },
+        {
+          anniversaryId,
+          meta: {
+            user: userPayload,
+          },
+        },
+      ),
     );
   }
 }

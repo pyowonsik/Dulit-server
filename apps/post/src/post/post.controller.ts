@@ -40,7 +40,6 @@ export class PostController {
   @UsePipes(ValidationPipe)
   @UseInterceptors(RpcInterceptor)
   getPosts(@Payload() payload: GetPostsDto) {
-
     return this.postService.getPosts(payload);
   }
 
@@ -60,5 +59,14 @@ export class PostController {
   @UseInterceptors(RpcInterceptor)
   deletePost(@Payload() payload: GetPostDto) {
     return this.postService.deletePost(payload);
+  }
+
+  @MessagePattern({
+    cmd: 'is_post_mine_or_admin',
+  })
+  @UsePipes(ValidationPipe)
+  @UseInterceptors(RpcInterceptor)
+  isPostMineOrAdmin(@Payload() payload: GetPostDto) {
+    return this.postService.isPostMineOrAdmin(payload);
   }
 }

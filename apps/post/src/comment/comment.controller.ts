@@ -40,6 +40,7 @@ export class CommentController {
   @UsePipes(ValidationPipe)
   @UseInterceptors(RpcInterceptor)
   updateComment(@Payload() payload: UpdateCommentDto) {
+
     return this.commentService.updateComment(payload);
   }
 
@@ -50,5 +51,14 @@ export class CommentController {
   @UseInterceptors(RpcInterceptor)
   deleteComment(@Payload() payload: GetCommentDto) {
     return this.commentService.deleteComment(payload);
+  }
+
+  @MessagePattern({
+    cmd: 'is_comment_mine_or_admin',
+  })
+  @UsePipes(ValidationPipe)
+  @UseInterceptors(RpcInterceptor)
+  isCommentMineOrAdmin(@Payload() payload: GetCommentDto) {
+    return this.commentService.isCommentMineOrAdmin(payload);
   }
 }

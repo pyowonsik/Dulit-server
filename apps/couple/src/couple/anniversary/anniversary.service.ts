@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateAnniversaryDto } from './dto/create-anniversary.dto';
 import { Anniversary } from './entity/anniversary.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, DataSource, QueryRunner } from 'typeorm';
 import { CoupleService } from '../couple.service';
 import { GetAnniversaryDto } from './dto/get-anniversary.dto';
 import { UpdateAnniversaryDto } from './dto/update-anniversary.dto';
@@ -12,6 +12,7 @@ import { PaginationService } from '@app/common';
 @Injectable()
 export class AnniversaryService {
   constructor(
+    private readonly dataSource: DataSource, // DataSource 추가
     @InjectRepository(Anniversary)
     private readonly anniversaryRepository: Repository<Anniversary>,
     private readonly coupleService: CoupleService,
@@ -19,22 +20,116 @@ export class AnniversaryService {
   ) {}
 
   async createAnniversary(createAnniversaryDto: CreateAnniversaryDto) {
-    const { meta, title, date } = createAnniversaryDto;
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
 
-    const coupleId = await this.coupleService.getCoupleByUserId(meta.user.sub);
+    try {
+      const { meta, title, date } = createAnniversaryDto;
 
-    if (!coupleId) {
-      throw new NotFoundException('존재하지 않는 COUPLE의 ID 입니다.');
+      const coupleId = await this.coupleService.getCoupleByUserId(meta.user.sub);
+
+      if (!coupleId) {
+        throw new NotFoundException('존재하지 않는 COUPLE의 ID 입니다.');
+      }
+
+      const anniversary = queryRunner.manager.create(Anniversary, {
+        title,
+        date,
+        coupleId,
+      });
+
+      await queryRunner.manager.save(anniversary);
+      await queryRunner.commitTransaction();
+
+      return anniversary;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
     }
+  }
 
-    const anniversary = this.anniversaryRepository.create({
-      title,
-      date,
-      coupleId,
-    });
+  async updateAnniversary(updateAnniversaryDto: UpdateAnniversaryDto) {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
 
-    await this.anniversaryRepository.save(anniversary);
-    return anniversary;
+    try {
+      const { meta, title, date, anniversaryId } = updateAnniversaryDto;
+
+      const coupleId = await this.coupleService.getCoupleByUserId(meta.user.sub);
+
+      if (!coupleId) {
+        throw new NotFoundException('존재하지 않는 COUPLE의 ID 입니다.');
+      }
+
+      const anniversary = await queryRunner.manager.findOne(Anniversary, {
+        where: { id: anniversaryId },
+      });
+
+      if (!anniversary) {
+        throw new NotFoundException('존재하지 않는 ANNIVERSARY의 ID 입니다.');
+      }
+
+      await queryRunner.manager.update(
+        Anniversary,
+        { id: anniversaryId },
+        {
+          title,
+          date,
+        },
+      );
+
+      const updatedAnniversary = await queryRunner.manager.findOne(Anniversary, {
+        where: { id: anniversaryId },
+      });
+
+      await queryRunner.commitTransaction();
+
+      return updatedAnniversary;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  async deleteAnniversary(getAnniversaryDto: GetAnniversaryDto) {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      const { meta, anniversaryId } = getAnniversaryDto;
+
+      const coupleId = await this.coupleService.getCoupleByUserId(meta.user.sub);
+
+      if (!coupleId) {
+        throw new NotFoundException('존재하지 않는 COUPLE의 ID 입니다.');
+      }
+
+      const anniversary = await queryRunner.manager.findOne(Anniversary, {
+        where: { id: anniversaryId },
+      });
+
+      if (!anniversary) {
+        throw new NotFoundException('존재하지 않는 ANNIVERSARY의 ID 입니다.');
+      }
+
+      await queryRunner.manager.delete(Anniversary, { id: anniversaryId });
+
+      await queryRunner.commitTransaction();
+
+      return anniversaryId;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
   }
 
   async getAnniversaries(getAnniversariesDto: GetAnniversariesDto) {
@@ -83,64 +178,21 @@ export class AnniversaryService {
     return anniversary;
   }
 
-  async updateAnniversary(updateAnniversaryDto: UpdateAnniversaryDto) {
-    const { meta, title, date, anniversaryId } = updateAnniversaryDto;
-
-    const coupleId = await this.coupleService.getCoupleByUserId(meta.user.sub);
-
-    const anniversary = await this.anniversaryRepository.findOne({
-      where: {
-        id: anniversaryId,
-      },
-    });
-
-    if (!anniversary) {
-      throw new NotFoundException('존재하지 않는 ANNIVERSARY의 ID 입니다.');
-    }
-
-    await this.anniversaryRepository.update(
-      {
-        id: anniversaryId,
-      },
-      {
-        title,
-        date,
-      },
-    );
-
-    const newAnniversary = await this.anniversaryRepository.findOne({
-      where: {
-        id: anniversaryId,
-      },
-    });
-
-    return newAnniversary;
-  }
-
-  async deleteAnniversary(getAnniversaryDto: GetAnniversaryDto) {
+  async isAnniversaryCoupleOrAdmin(getAnniversaryDto: GetAnniversaryDto) {
     const { meta, anniversaryId } = getAnniversaryDto;
 
-    // 1) 커플 정보 메세지 패턴으로 가져오기
     const coupleId = await this.coupleService.getCoupleByUserId(meta.user.sub);
 
     if (!coupleId) {
-      throw new NotFoundException('존재하지 않는 COUPLE의 ID 입니다.');
+      return false; // 사용자가 커플에 속하지 않음
     }
 
-    const anniversary = await this.anniversaryRepository.findOne({
-      where: {
-        id: anniversaryId,
-      },
-    });
+    const exists = await this.anniversaryRepository
+      .createQueryBuilder('anniversary')
+      .where('anniversary.id = :anniversaryId', { anniversaryId })
+      .andWhere('anniversary.coupleId = :coupleId', { coupleId })
+      .getExists();
 
-    if (!anniversary) {
-      throw new NotFoundException('존재하지 않는 ANNIVERSARY의 ID 입니다.');
-    }
-
-    await this.anniversaryRepository.delete({
-      id: anniversaryId,
-    });
-
-    return anniversaryId;
+    return exists;
   }
 }

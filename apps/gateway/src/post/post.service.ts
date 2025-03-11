@@ -5,6 +5,7 @@ import { UserPayloadDto } from '@app/common/dto';
 import { GetPostsDto } from './dto/get-posts.dto';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
+import { lastValueFrom } from 'rxjs';
 
 @Injectable()
 export class PostService {
@@ -86,6 +87,22 @@ export class PostService {
           user: userPayload,
         },
       },
+    );
+  }
+
+  async isPostMineOrAdmin(userPayload: UserPayloadDto, postId: string) {
+    return await lastValueFrom(
+      this.postMicroservice.send(
+        {
+          cmd: 'is_post_mine_or_admin',
+        },
+        {
+          postId,
+          meta: {
+            user: userPayload,
+          },
+        },
+      ),
     );
   }
 }

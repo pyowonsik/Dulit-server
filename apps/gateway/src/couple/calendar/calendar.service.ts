@@ -5,6 +5,7 @@ import { UserPayloadDto } from '@app/common/dto';
 import { GetCalendarsDto } from './dto/get-calendars.dto';
 import { CreateCalendarDto } from './dto/create-calendar.dto';
 import { UpdateCalendarDto } from './dto/update-calendar.dto';
+import { lastValueFrom } from 'rxjs';
 
 @Injectable()
 export class CalendarService {
@@ -89,6 +90,21 @@ export class CalendarService {
           user: userPayload,
         },
       },
+    );
+  }
+  async isCalendarCoupleOrAdmin(userPayload: UserPayloadDto, calendarId: string) {
+    return await lastValueFrom(
+      this.coupleMicroservice.send(
+        {
+          cmd: 'is_calendar_couple_or_admin',
+        },
+        {
+          calendarId,
+          meta: {
+            user: userPayload,
+          },
+        },
+      ),
     );
   }
 }

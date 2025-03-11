@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Plan } from './entity/plan.entity';
-import { Repository } from 'typeorm';
+import { Repository, DataSource, QueryRunner } from 'typeorm';
 import { CoupleService } from '../couple.service';
 import { PaginationService } from '@app/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -12,6 +12,7 @@ import { GetPlansDto } from './dto/get-plans.dto';
 @Injectable()
 export class PlanService {
   constructor(
+    private readonly dataSource: DataSource, 
     @InjectRepository(Plan)
     private readonly planRepository: Repository<Plan>,
     private readonly coupleService: CoupleService,
@@ -19,23 +20,118 @@ export class PlanService {
   ) {}
 
   async createPlan(createPlanDto: CreatePlanDto) {
-    const { meta, topic, location, time } = createPlanDto;
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
 
-    const coupleId = await this.coupleService.getCoupleByUserId(meta.user.sub);
+    try {
+      const { meta, topic, location, time } = createPlanDto;
 
-    if (!coupleId) {
-      throw new NotFoundException('존재하지 않는 COUPLE의 ID 입니다.');
+      const coupleId = await this.coupleService.getCoupleByUserId(meta.user.sub);
+
+      if (!coupleId) {
+        throw new NotFoundException('존재하지 않는 COUPLE의 ID 입니다.');
+      }
+
+      const plan = queryRunner.manager.create(Plan, {
+        topic,
+        location,
+        time,
+        coupleId,
+      });
+
+      await queryRunner.manager.save(plan);
+      await queryRunner.commitTransaction();
+
+      return plan;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
     }
+  }
 
-    const plan = this.planRepository.create({
-      topic,
-      location,
-      time,
-      coupleId,
-    });
+  async updatePlan(updatePlanDto: UpdatePlanDto) {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
 
-    await this.planRepository.save(plan);
-    return plan;
+    try {
+      const { meta, topic, location, time, planId } = updatePlanDto;
+
+      const coupleId = await this.coupleService.getCoupleByUserId(meta.user.sub);
+
+      if (!coupleId) {
+        throw new NotFoundException('존재하지 않는 COUPLE의 ID 입니다.');
+      }
+
+      const plan = await queryRunner.manager.findOne(Plan, {
+        where: { id: planId },
+      });
+
+      if (!plan) {
+        throw new NotFoundException('존재하지 않는 PLAN의 ID 입니다.');
+      }
+
+      await queryRunner.manager.update(
+        Plan,
+        { id: planId },
+        {
+          topic,
+          location,
+          time,
+        },
+      );
+
+      const updatedPlan = await queryRunner.manager.findOne(Plan, {
+        where: { id: planId },
+      });
+
+      await queryRunner.commitTransaction();
+
+      return updatedPlan;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  async deletePlan(getPlanDto: GetPlanDto) {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      const { meta, planId } = getPlanDto;
+
+      const coupleId = await this.coupleService.getCoupleByUserId(meta.user.sub);
+
+      if (!coupleId) {
+        throw new NotFoundException('존재하지 않는 COUPLE의 ID 입니다.');
+      }
+
+      const plan = await queryRunner.manager.findOne(Plan, {
+        where: { id: planId },
+      });
+
+      if (!plan) {
+        throw new NotFoundException('존재하지 않는 PLAN의 ID 입니다.');
+      }
+
+      await queryRunner.manager.delete(Plan, { id: planId });
+
+      await queryRunner.commitTransaction();
+
+      return planId;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
   }
 
   async getPlans(getPlansDto: GetPlansDto) {
@@ -57,9 +153,8 @@ export class PlanService {
         getPlansDto,
       );
 
-    let [data, count] = await qb.getManyAndCount();
+    const [data, count] = await qb.getManyAndCount();
 
-    // 기존 반환값에 cursor를 넣어줌
     return {
       data,
       nextCursor,
@@ -76,65 +171,6 @@ export class PlanService {
       throw new NotFoundException('존재하지 않는 COUPLE의 ID 입니다.');
     }
 
-    const anniversary = await this.planRepository.findOne({
-      where: {
-        id: planId,
-      },
-    });
-
-    if (!anniversary) {
-      throw new NotFoundException('존재하지 않는 ANNIVERSARY의 ID 입니다.');
-    }
-
-    return anniversary;
-  }
-
-  async updatePlan(updatePlanDto: UpdatePlanDto) {
-    const { meta, topic, location, time, planId } = updatePlanDto;
-
-    const coupleId = await this.coupleService.getCoupleByUserId(meta.user.sub);
-
-    const plany = await this.planRepository.findOne({
-      where: {
-        id: planId,
-      },
-    });
-
-    if (!plany) {
-      throw new NotFoundException('존재하지 않는 ANNIVERSARY의 ID 입니다.');
-    }
-
-    await this.planRepository.update(
-      {
-        id: planId,
-      },
-      {
-        topic,
-        location,
-
-        time,
-      },
-    );
-
-    const newPlan = await this.planRepository.findOne({
-      where: {
-        id: planId,
-      },
-    });
-
-    return newPlan;
-  }
-
-  async deletePlan(GetPlanDto: GetPlanDto) {
-    const { meta, planId } = GetPlanDto;
-
-    // 1) 커플 정보 메세지 패턴으로 가져오기
-    const coupleId = await this.coupleService.getCoupleByUserId(meta.user.sub);
-
-    if (!coupleId) {
-      throw new NotFoundException('존재하지 않는 COUPLE의 ID 입니다.');
-    }
-
     const plan = await this.planRepository.findOne({
       where: {
         id: planId,
@@ -145,10 +181,24 @@ export class PlanService {
       throw new NotFoundException('존재하지 않는 PLAN의 ID 입니다.');
     }
 
-    await this.planRepository.delete({
-      id: planId,
-    });
+    return plan;
+  }
 
-    return planId;
+  async isPlanCoupleOrAdmin(getPlanDto: GetPlanDto) {
+    const { meta, planId } = getPlanDto;
+
+    const coupleId = await this.coupleService.getCoupleByUserId(meta.user.sub);
+
+    if (!coupleId) {
+      return false; // 사용자가 커플에 속하지 않음
+    }
+
+    const exists = await this.planRepository
+      .createQueryBuilder('plan')
+      .where('plan.id = :planId', { planId })
+      .andWhere('plan.coupleId = :coupleId', { coupleId })
+      .getExists();
+
+    return exists;
   }
 }

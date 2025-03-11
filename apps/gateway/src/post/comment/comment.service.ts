@@ -5,12 +5,13 @@ import { UserPayloadDto } from '@app/common/dto';
 import { GetCommentsDto } from './dto/get-comments.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 import { CreateCommentDto } from './dto/create-comment.dto';
+import { lastValueFrom } from 'rxjs';
 
 @Injectable()
 export class CommentService {
   constructor(
     @Inject(POST_SERVICE)
-    private readonly commentMicroservice: ClientProxy,
+    private readonly postMicroservice: ClientProxy,
   ) {}
 
   createComment(
@@ -18,7 +19,7 @@ export class CommentService {
     userPayload: UserPayloadDto,
     postId: string,
   ) {
-    return this.commentMicroservice.send(
+    return this.postMicroservice.send(
       {
         cmd: 'create_comment',
       },
@@ -37,7 +38,7 @@ export class CommentService {
     userPayload: UserPayloadDto,
     postId: string,
   ) {
-    return this.commentMicroservice.send(
+    return this.postMicroservice.send(
       {
         cmd: 'get_comments',
       },
@@ -57,7 +58,8 @@ export class CommentService {
     postId: string,
     commentId: string,
   ) {
-    return this.commentMicroservice.send(
+
+    return this.postMicroservice.send(
       {
         cmd: 'update_comment',
       },
@@ -77,7 +79,7 @@ export class CommentService {
     postId: string,
     commentId: string,
   ) {
-    return this.commentMicroservice.send(
+    return this.postMicroservice.send(
       {
         cmd: 'delete_comment',
       },
@@ -88,6 +90,30 @@ export class CommentService {
           user: userPayload,
         },
       },
+    );
+  }
+
+  async isCommentMineOrAdmin(
+    userPayload: UserPayloadDto,
+    postId: string,
+    commentId: string,
+  ) {
+    // last 없이 찔러보기
+
+
+    return await lastValueFrom(
+      this.postMicroservice.send(
+        {
+          cmd: 'is_comment_mine_or_admin',
+        },
+        {
+          commentId,
+          postId,
+          meta: {
+            user: userPayload,
+          },
+        },
+      ),
     );
   }
 }

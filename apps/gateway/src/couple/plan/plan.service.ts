@@ -5,21 +5,22 @@ import { UserPayloadDto } from '@app/common/dto';
 import { CreatePlanDto } from './dto/create-plan.dto';
 import { GetPlansDto } from './dto/get-plans.dto';
 import { UpdatePlanDto } from './dto/update-plan.dto';
+import { lastValueFrom } from 'rxjs';
 
 @Injectable()
-export class PalnService {
+export class PlanService {
   constructor(
     @Inject(COUPLE_SERVICE)
     private readonly coupleMicroservice: ClientProxy,
   ) {}
 
-  createPlan(ceeatePlanDto: CreatePlanDto, userPayload: UserPayloadDto) {
+  createPlan(createPlanDto: CreatePlanDto, userPayload: UserPayloadDto) {
     return this.coupleMicroservice.send(
       {
         cmd: 'create_plan',
       },
       {
-        ...ceeatePlanDto,
+        ...createPlanDto,
         meta: {
           user: userPayload,
         },
@@ -85,6 +86,22 @@ export class PalnService {
           user: userPayload,
         },
       },
+    );
+  }
+
+  async isPlanCoupleOrAdmin(userPayload: UserPayloadDto, planId: string) {
+    return await lastValueFrom(
+      this.coupleMicroservice.send(
+        {
+          cmd: 'is_plan_couple_or_admin',
+        },
+        {
+          planId,
+          meta: {
+            user: userPayload,
+          },
+        },
+      ),
     );
   }
 }

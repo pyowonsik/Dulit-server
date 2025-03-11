@@ -9,6 +9,7 @@ import {
   Post,
   Query,
   UploadedFiles,
+  UseGuards,
   UseInterceptors,
   UsePipes,
 } from '@nestjs/common';
@@ -20,6 +21,7 @@ import { GetPostsDto } from './dto/get-posts.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { UserPayload } from '../auth/decorator/user-payload.decorator';
 import { CreatePostDto } from './dto/create-post.dto';
+import { IsPostMineOrAdminGuard } from './guard/is-post-mine-or-admin.guard';
 
 @Controller('')
 export class PostController {
@@ -50,6 +52,7 @@ export class PostController {
   }
 
   @Patch('/post/:postId')
+  @UseGuards(IsPostMineOrAdminGuard)
   async updatePost(
     @UserPayload() userPayload: UserPayloadDto,
     @Body() updatePostDto: UpdatePostDto,
@@ -59,6 +62,7 @@ export class PostController {
   }
 
   @Delete('/post/:postId')
+  @UseGuards(IsPostMineOrAdminGuard)
   async deletePost(
     @UserPayload() userPayload: UserPayloadDto,
     @Param('postId') postId: string,
@@ -99,7 +103,6 @@ export class PostController {
     @UploadedFiles()
     files: Array<Express.Multer.File>,
   ) {
-    console.log(files);
     const fileNames = files.map((file) => file.filename);
 
     return {

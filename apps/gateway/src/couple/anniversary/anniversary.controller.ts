@@ -7,6 +7,7 @@ import {
   Patch,
   Post,
   Query,
+  UseGuards,
   UsePipes,
 } from '@nestjs/common';
 import { UserPayloadDto } from '@app/common/dto';
@@ -15,6 +16,7 @@ import { AnniversaryService } from './anniversary.service';
 import { CreateAnniversaryDto } from './dto/create-anniversary.dto';
 import { UserPayload } from '../../auth/decorator/user-payload.decorator';
 import { GetAnniversariesDto } from './dto/get-anniversaries.dto';
+import { IsAnniversaryCoupleOrAdmin } from './guard/is-anniversary-couple-or-admin.guard';
 
 @Controller('couple')
 export class AnniversaryController {
@@ -51,6 +53,7 @@ export class AnniversaryController {
   }
 
   @Patch('/anniversary/:anniversaryId')
+  @UseGuards(IsAnniversaryCoupleOrAdmin)
   async updateAnniversary(
     @UserPayload() userPayload: UserPayloadDto,
     @Body() updateAnniversaryDto: UpdateAnniversaryDto,
@@ -64,6 +67,7 @@ export class AnniversaryController {
   }
 
   @Delete('/anniversary/:anniversaryId')
+  @UseGuards(IsAnniversaryCoupleOrAdmin)
   async deleteAnniversary(
     @UserPayload() userPayload: UserPayloadDto,
     @Param('anniversaryId') anniversaryId: string,

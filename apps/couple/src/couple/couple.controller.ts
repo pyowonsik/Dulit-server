@@ -18,15 +18,6 @@ import { RpcInterceptor } from '@app/common';
 export class CoupleController {
   constructor(private readonly coupleService: CoupleService) {}
 
-  // @Post('/connect')
-  // @UsePipes(ValidationPipe)
-  // async connectCouple(
-  //   @Authorization() token: string,
-  //   @Body() createCoupleDto: CreateCoupleDto,
-  // ) {
-  //   return this.coupleService.connectCouple(token, createCoupleDto);
-  // }
-
   @MessagePattern({ cmd: 'connect_couple' })
   @UsePipes(ValidationPipe)
   @UseInterceptors(RpcInterceptor)

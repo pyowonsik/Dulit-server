@@ -9,6 +9,7 @@ import {
   Post,
   Query,
   UploadedFiles,
+  UseGuards,
   UseInterceptors,
   UsePipes,
 } from '@nestjs/common';
@@ -20,6 +21,7 @@ import { UserPayload } from '../../auth/decorator/user-payload.decorator';
 import { GetCommentsDto } from './dto/get-comments.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 import { CreateCommentDto } from './dto/create-comment.dto';
+import { IsCommentMineOrAdminGuard } from './guard/is-comment-mine-or-admin.guard';
 
 @Controller('post/:postId')
 export class CommentController {
@@ -47,8 +49,8 @@ export class CommentController {
     return this.commentService.getComments(getCommentsDto, userPayload, postId);
   }
 
-
   @Patch('/comment/:commentId')
+  @UseGuards(IsCommentMineOrAdminGuard)
   async updateComment(
     @UserPayload() userPayload: UserPayloadDto,
     @Body() updateCommentDto: UpdateCommentDto,
@@ -64,6 +66,7 @@ export class CommentController {
   }
 
   @Delete('/comment/:commentId')
+  @UseGuards(IsCommentMineOrAdminGuard)
   async deleteComment(
     @UserPayload() userPayload: UserPayloadDto,
     @Param('postId') postId: string,

@@ -7,18 +7,20 @@ import {
   Patch,
   Post,
   Query,
+  UseGuards,
   UsePipes,
 } from '@nestjs/common';
 import { UserPayloadDto } from '@app/common/dto';
 import { UserPayload } from '../../auth/decorator/user-payload.decorator';
-import { PalnService } from './plan.service';
 import { UpdatePlanDto } from './dto/update-plan.dto';
 import { GetPlansDto } from './dto/get-plans.dto';
 import { CreatePlanDto } from './dto/create-plan.dto';
+import { PlanService } from './plan.service';
+import { IsPlanCoupleOrAdminGuard } from './guard/is-plan-couple-or-admin.guard';
 
 @Controller('couple')
 export class PlanController {
-  constructor(private readonly planService: PalnService) {}
+  constructor(private readonly planService: PlanService) {}
 
   @Post('/plan')
   async createPlan(
@@ -45,6 +47,7 @@ export class PlanController {
   }
 
   @Patch('/plan/:planId')
+  @UseGuards(IsPlanCoupleOrAdminGuard)
   async updatePlan(
     @UserPayload() userPayload: UserPayloadDto,
     @Body() updatePlanDto: UpdatePlanDto,
@@ -54,6 +57,7 @@ export class PlanController {
   }
 
   @Delete('/plan/:planId')
+  @UseGuards(IsPlanCoupleOrAdminGuard)
   async deletePlan(
     @UserPayload() userPayload: UserPayloadDto,
     @Param('planId') planId: string,

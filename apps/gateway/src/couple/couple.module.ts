@@ -4,7 +4,7 @@ import { CoupleController } from './couple.controller';
 import { AnniversaryController } from './anniversary/anniversary.controller';
 import { AnniversaryService } from './anniversary/anniversary.service';
 import { PlanController } from './plan/plan.controller';
-import { PalnService } from './plan/plan.service';
+import { PlanService } from './plan/plan.service';
 import { CalendarController } from './calendar/calendar.controller';
 import { CalendarService } from './calendar/calendar.service';
 import { MulterModule } from '@nestjs/platform-express';
@@ -31,6 +31,6 @@ import { v4 } from 'uuid';
     PlanController,
     CalendarController,
   ],
-  providers: [CoupleService, AnniversaryService, PalnService, CalendarService],
+  providers: [CoupleService, AnniversaryService, PlanService, CalendarService],
 })
 export class CoupleModule {}

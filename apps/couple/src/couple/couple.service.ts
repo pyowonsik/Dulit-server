@@ -4,12 +4,10 @@ import {
   Inject,
   Injectable,
   NotFoundException,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Couple } from './entity/couple.entity';
-import { Repository } from 'typeorm';
-// import { CreateCoupleDto } from './dto/create-couple.dto';
+import { Repository, DataSource } from 'typeorm';
 import { lastValueFrom } from 'rxjs';
 import { ClientProxy } from '@nestjs/microservices';
 import { CHAT_SERVICE, NOTIFICATION_SERVICE, USER_SERVICE } from '@app/common';
@@ -21,6 +19,7 @@ import { Calendar } from './calendar/entity/calendar.entity';
 @Injectable()
 export class CoupleService {
   constructor(
+    private readonly dataSource: DataSource, // DataSource 추가
     @Inject(USER_SERVICE)
     private readonly userService: ClientProxy,
     @Inject(CHAT_SERVICE)
@@ -29,55 +28,68 @@ export class CoupleService {
     private readonly notificationService: ClientProxy,
     @InjectRepository(Couple)
     private readonly coupleRepository: Repository<Couple>,
-    @InjectRepository(Anniversary)
-    private readonly anniversaryRepository: Repository<Anniversary>,
-    @InjectRepository(Plan)
-    private readonly planRepository: Repository<Plan>,
-    @InjectRepository(Calendar)
-    private readonly calendarRepository: Repository<Calendar>,
   ) {}
 
   async connectCouple(createCoupleDto: ConnectCoupleDto) {
     const { partnerId, isConnect, meta } = createCoupleDto;
+    const queryRunner = this.dataSource.createQueryRunner();
 
-    // 1) 본인 정보 가져오기
-    const me = await this.getUserById(meta.user.sub);
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
 
-    // 2) 파트너 정보 가져오기
-    const partner = await this.getUserById(partnerId);
+    try {
+      // 1) 본인 정보 가져오기
+      const me = await this.getUserById(meta.user.sub);
 
-    // 3) 커플 상태 체크 및 기존 데이터 확인
-    await this.validateCoupleStatus(me.id, partner.id, isConnect);
+      // 2) 파트너 정보 가져오기
+      const partner = await this.getUserById(partnerId);
 
-    if (isConnect) {
-      // 4.1) 커플 생성 및 저장
-      const coupleId = await this.createCouple(me.id, partner.id);
+      // 3) 커플 상태 체크 및 기존 데이터 확인
+      await this.validateCoupleStatus(me.id, partner.id, isConnect);
 
-      // 4.2) 채팅방 생성 및 저장
-      await this.createChatRoom(me.id, partner.id, coupleId);
-    } else {
-      const coupleId = await this.getCoupleByUserId(me.id);
+      if (isConnect) {
+        // 4.1) 커플 생성 및 저장
+        const couple = queryRunner.manager.create(Couple, {
+          user1Id: me.id,
+          user2Id: partner.id,
+        });
+        await queryRunner.manager.save(couple);
 
-      // 4.1) 유저 chatRoom - chat 삭제
-      await this.deleteChatroomAndChats(coupleId, me.id, partner.id);
+        // 4.2) 채팅방 생성 및 저장
+        await this.createChatRoom(me.id, partner.id, couple.id);
+      } else {
+        const coupleId = await this.getCoupleByUserId(me.id);
 
-      // 4.2) 유저 couple 관련 테이블 삭제 (plan,post,calendar)
-      await this.deleteCoupleAndRelatedData(coupleId);
+        // 4.1) 유저 chatRoom - chat 삭제
+        await this.deleteChatroomAndChats(coupleId, me.id, partner.id);
+
+        // 4.2) 유저 couple 관련 테이블 삭제
+        await queryRunner.manager.delete(Anniversary, { coupleId });
+        await queryRunner.manager.delete(Plan, { coupleId });
+        await queryRunner.manager.delete(Calendar, { coupleId });
+        await queryRunner.manager.delete(Couple, { id: coupleId });
+      }
+
+      // 5) 커플 연결 상태 알림 생성 및 전송
+      this.createMatchedNotification(me.id, isConnect);
+      this.createMatchedNotification(partner.id, isConnect);
+
+      await queryRunner.commitTransaction();
+
+      return {
+        success: true,
+        message: isConnect
+          ? '커플이 연결 되었습니다.'
+          : '커플 연결이 해제되었습니다.',
+      };
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
     }
-
-    // 5) 커플 연결 상태 알림 생성 및 전송
-    this.createMatchedNotification(me.id, isConnect);
-    this.createMatchedNotification(partner.id, isConnect);
-
-    return {
-      success: true,
-      message: isConnect
-        ? '커플이 연결 되었습니다.'
-        : '커플 연결이 해제되었습니다.',
-    };
   }
 
-  // socialId를 이용하여 유저 정보를 가져옴
   private async getUserById(userId: string) {
     const resp = await lastValueFrom(
       this.userService.send({ cmd: 'get_user_info' }, { userId }),
@@ -90,7 +102,6 @@ export class CoupleService {
     return resp.data;
   }
 
-  /** 기존 커플 존재 여부 확인 */
   private async validateCoupleStatus(
     user1Id: string,
     user2Id: string,
@@ -113,7 +124,6 @@ export class CoupleService {
     }
   }
 
-  /** 커플 채팅방 생성 */
   private async createChatRoom(
     user1Id: string,
     user2Id: string,
@@ -135,24 +145,6 @@ export class CoupleService {
     return resp?.data ?? null;
   }
 
-  /** 커플 정보 저장 */
-  private async createCouple(user1Id: string, user2Id: string) {
-    const couple = await this.coupleRepository.create({
-      user1Id,
-      user2Id,
-    });
-    await this.coupleRepository.save(couple);
-
-    if (!couple) {
-      throw new BadRequestException(
-        '커플 정보를 생성할 수 없습니다. 다시 시도해주세요.',
-      );
-    }
-
-    return couple.id;
-  }
-
-  /** 알림 생성 및 전송 */
   private async createMatchedNotification(userId: string, isConnect: boolean) {
     this.notificationService.emit(
       { cmd: 'matched_notification' },
@@ -160,8 +152,6 @@ export class CoupleService {
     );
   }
 
-
-  /** 커플 채팅방 , 채팅 삭제 */
   private async deleteChatroomAndChats(
     coupleId: string,
     user1Id: string,
@@ -171,16 +161,6 @@ export class CoupleService {
       { cmd: 'delete_chatroom_and_chats' },
       { coupleId, user1Id, user2Id },
     );
-  }
-
-  /** 커플 관계 데이터 삭제 */
-  private async deleteCoupleAndRelatedData(coupleId: string) {
-    await Promise.all([
-      this.anniversaryRepository.delete({ coupleId }),
-      this.planRepository.delete({ coupleId }),
-      this.calendarRepository.delete({ coupleId }),
-      this.coupleRepository.delete({ id: coupleId }),
-    ]);
   }
 
   async getCoupleByUserId(userId: string): Promise<string | null> {

@@ -9,6 +9,7 @@ import {
   Post,
   Query,
   UploadedFiles,
+  UseGuards,
   UseInterceptors,
   UsePipes,
 } from '@nestjs/common';
@@ -20,6 +21,7 @@ import { UpdateCalendarDto } from './dto/update-calendar.dto';
 import { GetCalendarsDto } from './dto/get-calendars.dto';
 
 import { FilesInterceptor } from '@nestjs/platform-express';
+import { IsCalendarCoupleOrAdmin } from './guard/is-calendar-couple-or-admin.guard';
 
 @Controller('couple')
 export class CalendarController {
@@ -50,6 +52,7 @@ export class CalendarController {
   }
 
   @Patch('/calendar/:calendarId')
+  @UseGuards(IsCalendarCoupleOrAdmin)
   async updateCalendar(
     @UserPayload() userPayload: UserPayloadDto,
     @Body() updateCalendarDto: UpdateCalendarDto,
@@ -63,6 +66,7 @@ export class CalendarController {
   }
 
   @Delete('/calendar/:calendarId')
+  @UseGuards(IsCalendarCoupleOrAdmin)
   async deleteCalendar(
     @UserPayload() userPayload: UserPayloadDto,
     @Param('calendarId') calendarId: string,
@@ -103,7 +107,6 @@ export class CalendarController {
     @UploadedFiles()
     files: Array<Express.Multer.File>,
   ) {
-    console.log(files);
     const fileNames = files.map((file) => file.filename);
 
     return {

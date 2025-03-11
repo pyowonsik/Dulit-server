@@ -60,4 +60,16 @@ export class AnniversaryController {
   deleteAnniversary(@Payload() payload: GetAnniversaryDto) {
     return this.anniversaryService.deleteAnniversary(payload);
   }
+
+  
+    
+    @MessagePattern({
+      cmd: 'is_anniversary_couple_or_admin',
+    })
+    @UsePipes(ValidationPipe)
+    @UseInterceptors(RpcInterceptor)
+    isAnniversaryCoupleOrAdmin(@Payload() payload: GetAnniversaryDto) {
+      return this.anniversaryService.isAnniversaryCoupleOrAdmin(payload);
+    }
+  
 }

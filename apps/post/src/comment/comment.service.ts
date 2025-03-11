@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PaginationService } from '@app/common';
-import { Repository } from 'typeorm';
+import { Repository, DataSource, QueryRunner } from 'typeorm';
 import { CommentModel } from './entity/comment.entity';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { Post } from '../post/entity/post.entity';
@@ -12,45 +12,137 @@ import { GetCommentsDto } from './dto/get-comments.dto';
 @Injectable()
 export class CommentService {
   constructor(
+    private readonly dataSource: DataSource, // DataSource 추가
     @InjectRepository(CommentModel)
     private readonly commentRepository: Repository<CommentModel>,
-
     @InjectRepository(Post)
     private readonly postRepository: Repository<Post>,
     private readonly paginationService: PaginationService,
   ) {}
 
   async createComment(createCommentDto: CreateCommentDto) {
-    const { meta, postId, comment } = createCommentDto;
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
 
-    const authorId = meta.user.sub;
+    try {
+      const { meta, postId, comment } = createCommentDto;
+      const authorId = meta.user.sub;
 
-    if (!authorId) {
-      throw new NotFoundException('존재하지 않는 USER의 ID 입니다.');
+      if (!authorId) {
+        throw new NotFoundException('존재하지 않는 USER의 ID 입니다.');
+      }
+
+      const post = await queryRunner.manager.findOne(Post, {
+        where: { id: postId },
+      });
+
+      if (!post) {
+        throw new NotFoundException('존재하지 않는 POST의 ID 입니다.');
+      }
+
+      const commentModel = queryRunner.manager.create(CommentModel, {
+        comment,
+        authorId,
+        postId,
+      });
+
+      await queryRunner.manager.save(commentModel);
+      await queryRunner.commitTransaction();
+
+      return commentModel;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
     }
+  }
 
-    const post = await this.postRepository.findOne({
-      where: { id: postId },
-    });
+  async updateComment(updateCommentDto: UpdateCommentDto) {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
 
-    if (!post) {
-      throw new NotFoundException('존재하지 않는 POST의 ID 입니다.');
+    try {
+      const { meta, postId, comment, commentId } = updateCommentDto;
+
+      const post = await queryRunner.manager.findOne(Post, {
+        where: { id: postId },
+      });
+
+      if (!post) {
+        throw new NotFoundException('존재하지 않는 POST의 ID 입니다.');
+      }
+
+      const commentModel = await queryRunner.manager.findOne(CommentModel, {
+        where: { id: commentId },
+      });
+
+      if (!commentModel) {
+        throw new NotFoundException('존재하지 않는 COMMENT의 ID 입니다.');
+      }
+
+      await queryRunner.manager.update(
+        CommentModel,
+        { id: commentId },
+        { comment },
+      );
+
+      const updatedComment = await queryRunner.manager.findOne(CommentModel, {
+        where: { id: commentId },
+      });
+
+      await queryRunner.commitTransaction();
+
+      return updatedComment;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
     }
+  }
 
-    const commentModel = this.commentRepository.create({
-      comment,
-      authorId,
-      postId,
-    });
+  async deleteComment(deleteCommentDto: GetCommentDto) {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
 
-    await this.commentRepository.save(commentModel);
-    return commentModel;
+    try {
+      const { postId, commentId } = deleteCommentDto;
+
+      const post = await queryRunner.manager.findOne(Post, {
+        where: { id: postId },
+      });
+
+      if (!post) {
+        throw new NotFoundException('존재하지 않는 POST의 ID 입니다.');
+      }
+
+      const comment = await queryRunner.manager.findOne(CommentModel, {
+        where: { id: commentId },
+      });
+
+      if (!comment) {
+        throw new NotFoundException('존재하지 않는 COMMENT의 ID 입니다.');
+      }
+
+      await queryRunner.manager.delete(CommentModel, { id: commentId });
+
+      await queryRunner.commitTransaction();
+
+      return commentId;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
   }
 
   async getComments(getCommentsDto: GetCommentsDto) {
-    const { meta, postId } = getCommentsDto;
-
-    console.log(getCommentsDto);
+    const { postId } = getCommentsDto;
 
     const post = await this.postRepository.findOne({
       where: { id: postId },
@@ -67,65 +159,17 @@ export class CommentService {
 
     this.paginationService.applyPagePaginationParamsToQb(qb, getCommentsDto);
 
-    const comments = await qb.getMany();
-
-    return comments;
+    return qb.getMany();
   }
 
-  async updateComment(updateCommentDto: UpdateCommentDto) {
-    const { meta, postId, comment, commentId } = updateCommentDto;
+  async isCommentMineOrAdmin(getCommentDto: GetCommentDto) {
+    const { meta, commentId } = getCommentDto;
 
-    const post = await this.postRepository.findOne({
-      where: { id: postId },
-    });
-
-    if (!post) {
-      throw new NotFoundException('존재하지 않는 POST의 ID 입니다.');
-    }
-
-    const commentModel = await this.commentRepository.findOne({
+    return this.commentRepository.exists({
       where: {
         id: commentId,
+        authorId: meta.user.sub,
       },
     });
-
-    if (!commentModel) {
-      throw new NotFoundException('존재하지 않는 COMMENT의 ID 입니다.');
-    }
-
-    await this.commentRepository.update(commentId, {
-      comment,
-    });
-
-    const newCommentModel = await this.commentRepository.findOne({
-      where: { id: commentId },
-    });
-
-    return newCommentModel;
-  }
-
-  async deleteComment(deleteCommentDto: GetCommentDto) {
-    const { meta, postId, commentId } = deleteCommentDto;
-
-    const post = await this.postRepository.findOne({
-      where: { id: postId },
-    });
-
-    if (!post) {
-      throw new NotFoundException('존재하지 않는 POST의 ID 입니다.');
-    }
-
-    const comment = await this.commentRepository.findOne({
-      where: {
-        id: commentId,
-      },
-    });
-
-    if (!comment) {
-      throw new NotFoundException('존재하지 않는 COMMENT의 ID 입니다.');
-    }
-
-    await this.commentRepository.delete(commentId);
-    return commentId;
   }
 }
