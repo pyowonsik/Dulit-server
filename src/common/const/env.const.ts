@@ -1,4 +1,5 @@
 const env = 'ENV';
+const dbUrl = 'DB_URL';
 const dbType = 'DB_TYPE';
 const dbHost = 'DB_HOST';
 const dbPort = 'DB_PORT';
@@ -15,8 +16,10 @@ const kakaoCallbackUrl = 'KAKAO_CALLBACK_URL';
 const naverClientId = 'NAVER_CLIENT_ID';
 const naverClientSecret = 'NAVER_CLIENT_SECRET';
 const naverCallbackUrl = 'NAVER_CALLBACK_URL';
+
 export const envVariableKeys = {
   env,
+  dbUrl,
   dbType,
   dbHost,
   dbPort,

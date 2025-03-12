@@ -1,20 +1,23 @@
-version: '3.1'
+version: '3.8'
 
 services:
   dulit:
     build:
       context: .
       dockerfile: Dockerfile
-      target: development
+      target: production # 개발이 아닌 배포(target: production)
     env_file:
       - .env
     ports:
       - '3000:3000'
+    depends_on:
+      postgres_dulit:
+        condition: service_healthy
+    restart: always
+    command: ['node', 'dist/main.js']
     volumes:
       - .:/usr/src/app
-      - /usr/src/app/node_modules
-    restart: always
-    command: ["node", "dist/main.js"] 
+      - /usr/src/app/node_modules # node_modules는 컨테이너 내에서 관리
 
   postgres_dulit:
     image: postgres:16
@@ -23,15 +26,12 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: postgres
     ports:
-      - '6000:5432'
+      - '5432:5432'
     volumes:
-      - ./postgres/user:/var/lib/postgresql/data
+      - ./postgres/data:/var/lib/postgresql/data # 데이터 유지
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U postgres']
       interval: 5s
       timeout: 5s
       retries: 10
       start_period: 5s
-
-
-
