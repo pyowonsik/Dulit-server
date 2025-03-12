@@ -1,17 +1,14 @@
-FROM node:alpine AS development
+# prod stage
+FROM node:18-alpine
 
 WORKDIR /usr/src/app
 
+# 빌드된 결과물만 복사
+COPY --from=build /usr/src/app/dist ./dist
 COPY package*.json ./
 
-COPY pnpm-lock.yaml ./
+RUN pnpm install --prod
 
-RUN npm install -g @nestjs/cli
+EXPOSE 3000
 
-RUN npm i -g pnpm
-
-RUN pnpm i
-
-COPY . .
-
-CMD ["pnpm","start:dev","user"]
+CMD ["node", "dist/main.js"]

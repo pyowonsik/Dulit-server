@@ -6,7 +6,6 @@ services:
       context: .
       dockerfile: Dockerfile
       target: development
-    command: pnpm run start:dev dulit
     env_file:
       - .env
     ports:
@@ -14,6 +13,8 @@ services:
     volumes:
       - .:/usr/src/app
       - /usr/src/app/node_modules
+    restart: always
+    command: ["node", "dist/main.js"] 
 
   postgres_dulit:
     image: postgres:16
@@ -31,3 +32,6 @@ services:
       timeout: 5s
       retries: 10
       start_period: 5s
+
+
+
