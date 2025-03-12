@@ -1,28 +1,46 @@
-# ---- Base Image 설정 ----
-FROM node:18-alpine AS base
+# 1. Node.js 이미지를 기반으로 시작
+FROM node:18 AS build
+
+# 2. 작업 디렉토리 설정
+WORKDIR /usr/src/app
+
+# 3. pnpm 설치
+RUN npm install -g pnpm
+
+# 4. 의존성 파일 복사
+COPY package*.json ./
+
+# 5. pnpm으로 의존성 설치
+RUN pnpm install
+
+# 6. 소스 코드 복사
+COPY . .
+
+# 7. 애플리케이션 빌드
+RUN pnpm run build
+
+# 8. 프로덕션 이미지를 위한 새로운 레이어 생성
+FROM node:18 AS production
 
 WORKDIR /usr/src/app
 
-COPY package.json pnpm-lock.yaml ./
-
+# 9. pnpm 설치
 RUN npm install -g pnpm
-RUN pnpm install --frozen-lockfile
 
-# ---- Development 환경 ----
-FROM base AS development
+# 10. 의존성 파일 복사
+COPY package*.json ./
 
-COPY . .
+# 11. 프로덕션 의존성만 설치
+RUN pnpm install --prod
 
-CMD ["pnpm", "start:dev"]
+# 12. 빌드된 코드 복사
+COPY --from=build /usr/src/app/dist ./dist
 
-# ---- Production 환경 ----
-FROM base AS production
+# 13. 환경 변수 파일 복사
+COPY .env .env
 
-ARG NODE_ENV=production
-ENV NODE_ENV=${NODE_ENV}
+# 14. 애플리케이션 포트 노출
+EXPOSE 3000
 
-COPY . .
-
-RUN pnpm build
-
+# 15. 앱 실행 명령어
 CMD ["node", "dist/main.js"]
