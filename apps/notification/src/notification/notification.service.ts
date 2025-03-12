@@ -1,8 +1,8 @@
 import { Controller, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { CreateCoupleNotificationDto } from 'apps/dulit/src/notification/dto/create-couple-notificaiton.dto';
 import { Model } from 'mongoose';
 import { Socket } from 'socket.io';
+import { CreateCoupleNotificationDto } from './dto/create-couple-notification.dto';
 
 @Injectable()
 export class NotificationService {

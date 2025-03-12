@@ -7,7 +7,6 @@ import { Model } from 'mongoose';
 import { Socket } from 'socket.io';
 import { Chat } from './schema/chat.schema';
 import { CreateChatDto } from './dto/create-chat.dto';
-import { plainToClass } from 'class-transformer';
 import { DeleteChatroomAndChatsDto } from './dto/delete-chatroom-and-chats.dto';
 
 @Injectable()
