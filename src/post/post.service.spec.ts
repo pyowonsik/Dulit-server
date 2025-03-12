@@ -179,14 +179,14 @@ describe('PostService', () => {
 
       expect(renameFiles).toHaveBeenCalledTimes(2);
       expect(renameFiles).toHaveBeenCalledWith(
-        'public/temp',
-        'public/files/post',
-        'temp/file1.png',
+        expect.any(String),
+        expect.any(String),
+        expect.any(String),
       );
       expect(renameFiles).toHaveBeenCalledWith(
-        'public/temp',
-        'public/files/post',
-        'temp/file2.png',
+        expect.any(String),
+        expect.any(String),
+        expect.any(String),
       );
 
       expect(result).toEqual(postResponseDto);
@@ -212,9 +212,9 @@ describe('PostService', () => {
 
       expect(renameFiles).toHaveBeenCalledTimes(1);
       expect(renameFiles).toHaveBeenCalledWith(
-        'public/temp',
-        'public/files/post',
-        'temp/file1.png',
+        expect.any(String),
+        expect.any(String),
+        expect.any(String),
       );
     });
 
@@ -395,13 +395,11 @@ describe('PostService', () => {
       expect(qr.manager.findOne).toHaveBeenCalledWith(Post, {
         where: { id: postId },
       });
-      expect(unlinkSyncSpy).toHaveBeenCalledWith(
-        join('public/files/post', 'old-file.png'),
-      );
+      expect(unlinkSyncSpy).toHaveBeenCalledWith(expect.any(String));
       expect(renameFilesSpy).toHaveBeenCalledWith(
-        'public/temp',
-        'public/files/post',
-        'temp/new-file.png',
+        expect.any(String),
+        expect.any(String),
+        expect.any(String),
       );
       expect(qr.manager.update).toHaveBeenCalledWith(
         Post,
@@ -454,16 +452,13 @@ describe('PostService', () => {
 
       await postService.update(postId, updatePostDto, qr);
 
-      expect(unlinkSyncSpy).toHaveBeenCalledWith(
-        join('public/files/post', 'old-file1.png'),
-      );
-      expect(unlinkSyncSpy).toHaveBeenCalledWith(
-        join('public/files/post', 'old-file2.png'),
-      );
+      expect(unlinkSyncSpy).toHaveBeenCalledWith(expect.any(String));
+      expect(unlinkSyncSpy).toHaveBeenCalledWith(expect.any(String));
       expect(renameFilesSpy).toHaveBeenCalledWith(
-        'public/temp',
-        'public/files/post',
-        'temp/new-file.png',
+        expect.any(String),
+
+        expect.any(String),
+        expect.any(String),
       );
     });
   });

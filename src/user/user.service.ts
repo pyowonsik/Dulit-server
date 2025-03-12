@@ -24,7 +24,7 @@ import { Plan } from 'src/couple/plan/entities/plan.entity';
 import { Anniversary } from 'src/couple/anniversary/entity/anniversary.entity';
 import { Calendar } from 'src/couple/calendar/entities/calendar.entity';
 import { envVariableKeys } from 'src/common/const/env.const';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 
 @Injectable()
 export class UserService {

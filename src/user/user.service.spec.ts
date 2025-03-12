@@ -6,7 +6,7 @@ import { ConfigService } from '@nestjs/config';
 import { AuthService } from 'src/auth/auth.service';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 import { QueryRunner } from 'typeorm';
 import { Chat } from 'src/chat/entity/chat.entity';
 import { ChatRoom } from 'src/chat/entity/chat-room.entity';

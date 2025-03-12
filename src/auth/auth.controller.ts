@@ -29,6 +29,10 @@ export class AuthController {
   @Public()
   @Post('register')
   @ApiBasicAuth()
+  @ApiOperation({
+    summary: '일반 회원가입',
+    description: '일반 회원가입',
+  })
   registerUser(
     @Authorization() token: string,
     @Body() registerDto: RegisterDto,
@@ -39,6 +43,10 @@ export class AuthController {
   @Public()
   @Post('login')
   @ApiBasicAuth()
+  @ApiOperation({
+    summary: '일반 로그인',
+    description: '일반 로그인',
+  })
   loginUser(@Authorization() token: string) {
     return this.authService.login(token);
   }

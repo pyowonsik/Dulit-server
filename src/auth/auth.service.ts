@@ -15,7 +15,7 @@ import { UserService } from 'src/user/user.service';
 import axios from 'axios';
 import { RegisterDto } from './dto/register-dto';
 import { v4 as uuidv4 } from 'uuid';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 
 @Injectable()
 export class AuthService {

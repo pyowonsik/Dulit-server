@@ -69,6 +69,7 @@ import { PlanModule } from './couple/plan/plan.module';
     TypeOrmModule.forRootAsync({
       useFactory: (configService: ConfigService) => ({
         type: configService.get<string>(envVariableKeys.dbType) as 'postgres',
+        // url: configService.getOrThrow('DB_URL'),
         host: configService.get<string>(envVariableKeys.dbHost),
         port: configService.get<number>(envVariableKeys.dbPort),
         username: configService.get<string>(envVariableKeys.dbUsername),

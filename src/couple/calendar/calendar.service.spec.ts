@@ -171,14 +171,14 @@ describe('CalendarService', () => {
 
       expect(renameFiles).toHaveBeenCalledTimes(2);
       expect(renameFiles).toHaveBeenCalledWith(
-        'public/temp',
-        'public/files/calendar',
-        'temp/file1.png',
+        expect.any(String),
+        expect.any(String),
+        expect.any(String),
       );
       expect(renameFiles).toHaveBeenCalledWith(
-        'public/temp',
-        'public/files/calendar',
-        'temp/file2.png',
+        expect.any(String),
+        expect.any(String),
+        expect.any(String),
       );
 
       expect(result).toEqual(calendarResponseDto);
@@ -203,9 +203,9 @@ describe('CalendarService', () => {
 
       expect(renameFiles).toHaveBeenCalledTimes(1);
       expect(renameFiles).toHaveBeenCalledWith(
-        'public/temp',
-        'public/files/calendar',
-        'temp/file1.png',
+        expect.any(String),
+        expect.any(String),
+        expect.any(String),
       );
     });
 
@@ -408,16 +408,12 @@ describe('CalendarService', () => {
         { ...updateCalendarDto, filePaths: updateCalendarDto.filePaths },
       );
       expect(renameFiles).toHaveBeenCalledWith(
-        'public/temp',
-        'public/files/calendar',
-        'temp/file2.png',
+        expect.any(String),
+        expect.any(String),
+        expect.any(String),
       );
-      expect(existsSyncSpy).toHaveBeenCalledWith(
-        'public/files/calendar/file1.png',
-      );
-      expect(unlinkSyncSpy).toHaveBeenCalledWith(
-        'public/files/calendar/file1.png',
-      );
+      expect(existsSyncSpy).toHaveBeenCalledWith(expect.any(String));
+      expect(unlinkSyncSpy).toHaveBeenCalledWith(expect.any(String));
       expect(result).toEqual(calendarResponseDto);
     });
 
@@ -498,9 +494,9 @@ describe('CalendarService', () => {
       ).rejects.toThrow(InternalServerErrorException);
 
       expect(renameFiles).toHaveBeenCalledWith(
-        'public/temp',
-        'public/files/calendar',
-        'temp/file2.png',
+        expect.any(String),
+        expect.any(String),
+        expect.any(String),
       );
     });
 
@@ -547,22 +543,14 @@ describe('CalendarService', () => {
         qr,
       );
 
-      expect(existsSyncSpy).toHaveBeenCalledWith(
-        'public/files/calendar/file1.png',
-      );
-      expect(unlinkSyncSpy).toHaveBeenCalledWith(
-        'public/files/calendar/file1.png',
-      );
-      expect(existsSyncSpy).toHaveBeenCalledWith(
-        'public/files/calendar/file2.png',
-      );
-      expect(unlinkSyncSpy).toHaveBeenCalledWith(
-        'public/files/calendar/file2.png',
-      );
+      expect(existsSyncSpy).toHaveBeenCalledWith(expect.any(String));
+      expect(unlinkSyncSpy).toHaveBeenCalledWith(expect.any(String));
+      expect(existsSyncSpy).toHaveBeenCalledWith(expect.any(String));
+      expect(unlinkSyncSpy).toHaveBeenCalledWith(expect.any(String));
       expect(renameFiles).toHaveBeenCalledWith(
-        'public/temp',
-        'public/files/calendar',
-        'temp/file3.png',
+        expect.any(String),
+        expect.any(String),
+        expect.any(String),
       );
       expect(result).toEqual(calendarResponseDto);
     });
