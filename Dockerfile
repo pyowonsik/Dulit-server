@@ -31,16 +31,18 @@ RUN npm install -g pnpm
 COPY package*.json ./
 
 # 11. 프로덕션 의존성만 설치
-RUN pnpm install --prod
+RUN pnpm install
 
 # 12. 빌드된 코드 복사
-COPY --from=build /usr/src/app/dist ./dist
+COPY . .
 
-# 13. 환경 변수 파일 복사
-COPY .env .env
+# 13. 애플리케이션 빌드
+RUN pnpm run build
+
 
 # 14. 애플리케이션 포트 노출
 EXPOSE 3000
 
 # 15. 앱 실행 명령어
 CMD ["node", "dist/main.js"]
+
