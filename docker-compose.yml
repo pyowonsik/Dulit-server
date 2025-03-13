@@ -16,8 +16,8 @@ services:
     restart: always
     command: ['node', 'dist/main.js']
     volumes:
-      - .:/usr/src/app
-      - /usr/src/app/node_modules # node_modules는 컨테이너 내에서 관리
+      # - .:/usr/src/app
+      # - /usr/src/app/node_modules # node_modules는 컨테이너 내에서 관리
 
   postgres_dulit:
     image: postgres:16
