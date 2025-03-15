@@ -48,12 +48,6 @@ import { PlanModule } from './couple/plan/plan.module';
       isGlobal: true,
       validationSchema: Joi.object({
         ENV: Joi.string().valid('dev').required(),
-        DB_TYPE: Joi.string().valid('postgres').required(),
-        DB_HOST: Joi.string().required(),
-        DB_PORT: Joi.number().required(),
-        DB_USERNAME: Joi.string().required(),
-        DB_PASSWORD: Joi.string().required(),
-        DB_DATABASE: Joi.string().required(),
         DB_URL: Joi.string().required(),
         HASH_ROUNDS: Joi.number().required(),
         REFRESH_TOKEN_SECRET: Joi.string().required(),
@@ -69,13 +63,7 @@ import { PlanModule } from './couple/plan/plan.module';
     // TypeORM 적용
     TypeOrmModule.forRootAsync({
       useFactory: (configService: ConfigService) => ({
-        type: configService.get<string>(envVariableKeys.dbType) as 'postgres',
         url: configService.getOrThrow('DB_URL'),
-        // host: configService.get<string>(envVariableKeys.dbHost),
-        // port: configService.get<number>(envVariableKeys.dbPort),
-        // username: configService.get<string>(envVariableKeys.dbUsername),
-        // password: configService.get<string>(envVariableKeys.dbPassword),
-        // database: configService.get<string>(envVariableKeys.dbDataBase),
         entities: [
           User,
           Chat,
