@@ -1,4 +1,5 @@
 const env = 'ENV';
+const buildTarget = 'BUILD_TARGET';
 const dbUrl = 'DB_URL';
 const dbType = 'DB_TYPE';
 const hashRounds = 'HASH_ROUNDS';
@@ -14,6 +15,7 @@ const naverCallbackUrl = 'NAVER_CALLBACK_URL';
 
 export const envVariableKeys = {
   env,
+  buildTarget,
   dbUrl,
   dbType,
   hashRounds,

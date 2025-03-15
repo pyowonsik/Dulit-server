@@ -48,6 +48,9 @@ import { PlanModule } from './couple/plan/plan.module';
       isGlobal: true,
       validationSchema: Joi.object({
         ENV: Joi.string().valid('prod', 'dev').required(),
+        BUILD_TARGET: Joi.string()
+          .valid('production', 'development')
+          .required(),
         DB_TYPE: Joi.string().valid('postgres').required(),
         HASH_ROUNDS: Joi.number().required(),
         REFRESH_TOKEN_SECRET: Joi.string().required(),
@@ -65,6 +68,7 @@ import { PlanModule } from './couple/plan/plan.module';
       useFactory: (configService: ConfigService) => ({
         url: configService.getOrThrow('DB_URL'),
         type: configService.get<string>(envVariableKeys.dbType) as 'postgres',
+        buildTarget: configService.get<string>(envVariableKeys.buildTarget),
         entities: [
           User,
           Chat,
@@ -77,7 +81,15 @@ import { PlanModule } from './couple/plan/plan.module';
           Anniversary,
           Calendar,
         ],
-        synchronize: true,
+        synchronize:
+          configService.get<string>(envVariableKeys.env) === 'prod'
+            ? false
+            : true,
+        ...(configService.get<string>(envVariableKeys.env) === 'prod' && {
+          ssl: {
+            rejectUnauthorized: false,
+          },
+        }),
       }),
       inject: [ConfigService],
     }),

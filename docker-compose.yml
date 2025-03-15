@@ -5,7 +5,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      target: production # 개발이 아닌 배포(target: production)
+      target: ${BUILD_TARGET} # 개발이 아닌 배포(target: production)
     env_file:
       - .env
     ports:
