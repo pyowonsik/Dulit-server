@@ -81,15 +81,7 @@ import { PlanModule } from './couple/plan/plan.module';
           Anniversary,
           Calendar,
         ],
-        synchronize:
-          configService.get<string>(envVariableKeys.env) === 'prod'
-            ? false
-            : true,
-        ...(configService.get<string>(envVariableKeys.env) === 'prod' && {
-          ssl: {
-            rejectUnauthorized: false,
-          },
-        }),
+        synchronize: true,
       }),
       inject: [ConfigService],
     }),
