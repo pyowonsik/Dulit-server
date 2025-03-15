@@ -47,7 +47,7 @@ import { PlanModule } from './couple/plan/plan.module';
     ConfigModule.forRoot({
       isGlobal: true,
       validationSchema: Joi.object({
-        ENV: Joi.string().valid('dev').required(),
+        ENV: Joi.string().valid('prod').required(),
         DB_TYPE: Joi.string().valid('postgres').required(),
         DB_HOST: Joi.string().required(),
         DB_PORT: Joi.number().required(),
