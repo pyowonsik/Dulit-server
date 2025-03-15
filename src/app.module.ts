@@ -47,7 +47,8 @@ import { PlanModule } from './couple/plan/plan.module';
     ConfigModule.forRoot({
       isGlobal: true,
       validationSchema: Joi.object({
-        ENV: Joi.string().valid('dev').required(),
+        ENV: Joi.string().valid('dev', 'prod').required(),
+        DB_TYPE: Joi.string().valid('postgres').required(),
         DB_URL: Joi.string().required(),
         HASH_ROUNDS: Joi.number().required(),
         REFRESH_TOKEN_SECRET: Joi.string().required(),
@@ -63,6 +64,7 @@ import { PlanModule } from './couple/plan/plan.module';
     // TypeORM 적용
     TypeOrmModule.forRootAsync({
       useFactory: (configService: ConfigService) => ({
+        type: configService.get<string>(envVariableKeys.dbType) as 'postgres',
         url: configService.getOrThrow('DB_URL'),
         entities: [
           User,
