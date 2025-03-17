@@ -66,9 +66,8 @@ import { PlanModule } from './couple/plan/plan.module';
     // TypeORM 적용
     TypeOrmModule.forRootAsync({
       useFactory: (configService: ConfigService) => ({
-        url: configService.getOrThrow('DB_URL'),
         type: configService.get<string>(envVariableKeys.dbType) as 'postgres',
-        buildTarget: configService.get<string>(envVariableKeys.buildTarget),
+        url: configService.get<string>(envVariableKeys.dbUrl),
         entities: [
           User,
           Chat,
@@ -81,7 +80,15 @@ import { PlanModule } from './couple/plan/plan.module';
           Anniversary,
           Calendar,
         ],
-        synchronize: true,
+        synchronize:
+          configService.get<string>(envVariableKeys.env) === 'prod'
+            ? false
+            : true,
+        ...(configService.get<string>(envVariableKeys.env) === 'prod' && {
+          ssl: {
+            rejectUnauthorized: false,
+          },
+        }),
       }),
       inject: [ConfigService],
     }),
