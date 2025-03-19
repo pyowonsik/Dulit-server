@@ -26,7 +26,11 @@ export class Calendar extends BaseTable {
   // PostgreSQL의 text[] 배열 타입으로 설정
   @Column('text', { array: true, nullable: true })
   @Transform(({ value }) =>
-    value.map((filePath) => `http://localhost:3000/${filePath}`),
+    value.map((filePath) =>
+      process.env.ENV === 'prod'
+        ? `http://${process.env.BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${value}`
+        : `http://localhost:3000/${filePath}`,
+    ),
   )
   filePaths: string[] | null;
 

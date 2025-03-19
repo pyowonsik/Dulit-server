@@ -83,4 +83,11 @@ export class CommonController {
       fileNames: fileNames,
     };
   }
+
+  @Post('presigned-url')
+  async cratePresignedUrl() {
+    return {
+      url: await this.commonService.createPresignedUrl(),
+    };
+  }
 }

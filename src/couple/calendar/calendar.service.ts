@@ -16,6 +16,9 @@ import { GetCalendarDto } from './dto/get-calendar.dto';
 import { Couple } from 'src/couple/entity/couple.entity';
 import { CalendarResponseDto } from './dto/calendar-response.dto';
 import { CoupleService } from '../couple.service';
+import { ConfigService } from '@nestjs/config';
+import { envVariableKeys } from 'src/common/const/env.const';
+import { CommonService } from 'src/common/common.service';
 
 @Injectable()
 export class CalendarService {
@@ -25,6 +28,8 @@ export class CalendarService {
     @InjectRepository(Calendar)
     private readonly calendarRepository: Repository<Calendar>,
     private readonly coupleService: CoupleService,
+    private readonly configService: ConfigService,
+    private readonly commonService: CommonService,
   ) {}
 
   async create(
@@ -227,10 +232,14 @@ export class CalendarService {
 
   /* istanbul ignore next */
   async renameFiles(tempFolder: string, filesFolder: string, file: string) {
-    return await rename(
-      join(process.cwd(), tempFolder, file),
-      join(process.cwd(), filesFolder, file),
-    );
+    if (this.configService.get<string>(envVariableKeys.env) !== 'prod') {
+      return rename(
+        join(process.cwd(), tempFolder, file),
+        join(process.cwd(), filesFolder, file),
+      );
+    } else {
+      return this.commonService.saveMovieToPermanentStorage(file, 'calendar');
+    }
   }
 
   /* istanbul ignore next */
