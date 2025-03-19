@@ -27,8 +27,7 @@ export class Couple extends BaseTable {
   // 디데이 , 달력
   @OneToMany(() => Anniversary, (anniversary) => anniversary.couple)
   anniversaries: Anniversary[];
-  
+
   @OneToMany(() => Calendar, (calendar) => calendar.couple)
   calendars: Calendar[];
 }
-

@@ -3,9 +3,7 @@ import { NotificationService } from './notification.service';
 import { NotificationGateway } from './notification.gateway';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from 'src/user/entity/user.entity';
-import { CommonModule } from 'src/common/common.module';
 import { AuthModule } from 'src/auth/auth.module';
-import { UserModule } from 'src/user/user.module';
 import { Couple } from 'src/couple/entity/couple.entity';
 
 @Module({

@@ -5,10 +5,7 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { Observable } from 'rxjs';
 import { AnniversaryService } from '../anniversary.service';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import { Role } from 'src/user/entity/user.entity';
 
 @Injectable()

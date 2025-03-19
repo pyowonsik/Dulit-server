@@ -6,7 +6,6 @@ import {
   Patch,
   Param,
   Delete,
-  Request,
   ParseIntPipe,
   UseInterceptors,
   UseGuards,
@@ -16,7 +15,6 @@ import { PlanService } from './plan.service';
 import { CreatePlanDto } from './dto/create-plan.dto';
 import { UpdatePlanDto } from './dto/update-plan.dto';
 import { TransactionInterceptor } from 'src/common/interceptor/transaction.interceptor';
-import { UpdatePostDto } from 'src/post/dto/update-post.dto';
 import { QueryRunner } from 'src/common/decorator/query-runner.decorator';
 import { QueryRunner as QR } from 'typeorm';
 import { IsPlanCoupleOrAdminGuard } from './guard/is-plan-couple-or-admin.guard';

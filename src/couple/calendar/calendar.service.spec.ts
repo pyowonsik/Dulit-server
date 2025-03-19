@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CalendarService } from './calendar.service';
-import { In, QueryBuilder, QueryRunner, Repository } from 'typeorm';
+import { In, QueryRunner, Repository } from 'typeorm';
 import { Couple } from '../entity/couple.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Calendar } from './entities/calendar.entity';
@@ -26,7 +26,6 @@ const mockCoupleService = {
 
 describe('CalendarService', () => {
   let calendarService: CalendarService;
-  let coupleRepository: Repository<Couple>;
   let calendarRepository: Repository<Calendar>;
   let coupleService: CoupleService;
 
@@ -48,10 +47,6 @@ describe('CalendarService', () => {
         },
       ],
     }).compile();
-
-    coupleRepository = module.get<Repository<Couple>>(
-      getRepositoryToken(Couple),
-    );
 
     calendarRepository = module.get<Repository<Calendar>>(
       getRepositoryToken(Calendar),
@@ -194,6 +189,7 @@ describe('CalendarService', () => {
         filePaths: ['temp/file1.png'],
       };
 
+      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
       (qr.manager.findOne as jest.Mock).mockResolvedValue(couple);
       renameFiles.mockRejectedValue(new Error('File rename error'));
 
@@ -207,6 +203,13 @@ describe('CalendarService', () => {
         expect.any(String),
         expect.any(String),
       );
+
+      expect(consoleSpy).toHaveBeenCalledWith(
+        '파일 이동 중 오류 발생',
+        'File rename error',
+      );
+
+      consoleSpy.mockRestore();
     });
 
     it('should throw BadRequestException if filePaths are empty', async () => {

@@ -2,13 +2,11 @@ import { Transform } from 'class-transformer';
 import { BaseTable } from 'src/common/entity/base-table.entity';
 import { User } from 'src/user/entity/user.entity';
 import {
-  BaseEntity,
   Column,
   Entity,
   JoinColumn,
   ManyToOne,
   OneToMany,
-  PrimaryColumn,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { CommentModel } from '../comment/entity/comment.entity';
@@ -27,7 +25,7 @@ export class Post extends BaseTable {
   description: string;
 
   // PostgreSQL의 text[] 배열 타입으로 설정
-  @Column('text', { array: true ,nullable :true})
+  @Column('text', { array: true, nullable: true })
   @Transform(({ value }) =>
     value.map((filePath) => `http://localhost:3000/${filePath}`),
   )
@@ -47,5 +45,5 @@ export class Post extends BaseTable {
   comments: CommentModel[];
 
   @OneToMany(() => PostUserLike, (pul) => pul.post)
-  likedUsers : PostUserLike[];
+  likedUsers: PostUserLike[];
 }

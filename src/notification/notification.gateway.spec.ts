@@ -56,12 +56,20 @@ describe('NotificationGateway', () => {
         new Error('Invalid token'),
       );
 
+      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+
       await gateway.handleConnection(mockClient);
 
       expect(authService.parserBearerToken).toHaveBeenCalledWith(
         'invalid_token',
         false,
       );
+
+      expect(consoleSpy).toHaveBeenCalledWith(
+        'disConnection error',
+        'Invalid token',
+      );
+
       expect(mockClient.disconnect).toHaveBeenCalled();
     });
 

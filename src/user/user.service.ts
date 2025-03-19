@@ -6,8 +6,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { SocialProvider, User } from './entity/user.entity';
+import { User } from './entity/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { QueryRunner, Repository } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
@@ -15,11 +14,8 @@ import { ChatRoom } from 'src/chat/entity/chat-room.entity';
 import { Chat } from 'src/chat/entity/chat.entity';
 import { Post } from 'src/post/entity/post.entity';
 import { CommentModel } from 'src/post/comment/entity/comment.entity';
-import { NotificationGateway } from 'src/notification/notification.gateway';
-import { NotificationService } from 'src/notification/notification.service';
 import { AuthService } from 'src/auth/auth.service';
 import { Couple } from 'src/couple/entity/couple.entity';
-import { CreateCoupleDto } from 'src/couple/dto/create-couple.dto';
 import { Plan } from 'src/couple/plan/entities/plan.entity';
 import { Anniversary } from 'src/couple/anniversary/entity/anniversary.entity';
 import { Calendar } from 'src/couple/calendar/entities/calendar.entity';
@@ -94,7 +90,7 @@ export class UserService {
       user,
     };
   }
-  
+
   async findAll() {
     return await this.userRepository.find();
   }

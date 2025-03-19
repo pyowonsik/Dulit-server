@@ -47,7 +47,6 @@ describe('CoupleController', () => {
   describe('disconnectCouple', () => {
     it('should call coupleService.disConnectCouple with correct arguments', async () => {
       const req = { user: { socialId: 'mySocialId' } };
-      const partnerId = 2;
       const createCoupleDto: CreateCoupleDto = {
         myId: 'mySocialId',
         partnerId: 'abcde',

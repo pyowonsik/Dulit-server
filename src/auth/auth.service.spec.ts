@@ -13,7 +13,6 @@ import {
 } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
 import { RegisterDto } from './dto/register-dto';
-import { v4 as uuidv4 } from 'uuid';
 
 const mockUserRepository = {
   findOne: jest.fn(),
@@ -244,7 +243,7 @@ describe('AuthService', () => {
 
       // 과정은 보다 결과
       jest.spyOn(userRepository, 'findOne').mockResolvedValue(user as User);
-      jest.spyOn(bcrypt, 'compare').mockImplementation((a, b) => true);
+      jest.spyOn(bcrypt, 'compare').mockImplementation((_a, _b) => true);
 
       const result = await authService.authenticate(email, password);
 
@@ -276,7 +275,7 @@ describe('AuthService', () => {
     };
 
     jest.spyOn(userRepository, 'findOne').mockResolvedValue(user as User);
-    jest.spyOn(bcrypt, 'compare').mockImplementation((a, b) => false);
+    jest.spyOn(bcrypt, 'compare').mockImplementation((_a, _b) => false);
 
     await expect(
       authService.authenticate('test@codefactory.ai', 'a'),

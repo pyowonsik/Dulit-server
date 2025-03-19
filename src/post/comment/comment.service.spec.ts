@@ -9,7 +9,6 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { NotFoundException } from '@nestjs/common';
 import { UpdateCommentDto } from './dto/update-comment.dto';
-import { take } from 'rxjs';
 
 const mockUserRepository = {
   findOne: jest.fn(),

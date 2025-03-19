@@ -7,13 +7,10 @@ import { Repository } from 'typeorm';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Socket } from 'socket.io';
 import { QueryRunner } from 'typeorm';
-import { CreateChatDto } from './dto/create-chat.dto';
 import { plainToClass } from 'class-transformer';
 
 describe('ChatService', () => {
   let chatService: ChatService;
-  let chatRoomRepository: Repository<ChatRoom>;
-  let chatRepository: Repository<Chat>;
   let userRepository: Repository<User>;
 
   beforeEach(async () => {
@@ -36,10 +33,6 @@ describe('ChatService', () => {
     }).compile();
 
     chatService = module.get<ChatService>(ChatService);
-    chatRoomRepository = module.get<Repository<ChatRoom>>(
-      getRepositoryToken(ChatRoom),
-    );
-    chatRepository = module.get<Repository<Chat>>(getRepositoryToken(Chat));
     userRepository = module.get<Repository<User>>(getRepositoryToken(User));
   });
 

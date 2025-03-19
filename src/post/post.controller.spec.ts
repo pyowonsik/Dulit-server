@@ -1,4 +1,3 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { PostController } from './post.controller';
 import { PostService } from './post.service';
 import { TestBed } from '@automock/jest';
@@ -64,11 +63,6 @@ describe('PostController', () => {
           id: 2,
         },
       ] as Post[];
-      const dto: GetPostDto = {
-        title: 'topic',
-        order: [],
-        take: 0,
-      };
 
       const resultDto = {
         data: posts,

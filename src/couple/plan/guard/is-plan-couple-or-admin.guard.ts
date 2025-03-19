@@ -6,7 +6,6 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { Observable } from 'rxjs';
 import { Role } from 'src/user/entity/user.entity';
 import { PlanService } from '../plan.service';
 
@@ -38,7 +37,6 @@ export class IsPlanCoupleOrAdminGuard implements CanActivate {
     }
 
     const isOk = await this.planService.isPlanCouple(userId, parseInt(planId));
-
 
     if (!isOk) {
       throw new ForbiddenException('권한이 없습니다.');

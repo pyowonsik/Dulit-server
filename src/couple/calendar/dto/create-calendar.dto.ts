@@ -25,7 +25,7 @@ export class CreateCalendarDto {
   })
   description: string;
 
-  @Type(() => Date) 
+  @Type(() => Date)
   @IsDate()
   @ApiProperty({
     description: '캘린더 일정 날짜',

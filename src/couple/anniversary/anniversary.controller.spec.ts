@@ -1,4 +1,3 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { AnniversaryController } from './anniversary.controller';
 import { AnniversaryService } from './anniversary.service';
 import { TestBed } from '@automock/jest';

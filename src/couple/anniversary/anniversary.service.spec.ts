@@ -9,7 +9,6 @@ import { CreateAnniversaryDto } from './dto/create-anniversary.dto';
 import { AnniversaryResponseDto } from './dto/anniversary-response.dto';
 import { NotFoundException } from '@nestjs/common';
 import { Anniversary } from './entity/anniversary.entity';
-import { GetAnniversaryDto } from './dto/get-anniversary.dto';
 import { UpdateAnniversaryDto } from './dto/update-anniversary.dto';
 
 const mockAnniversaryRepository = {
@@ -29,7 +28,6 @@ const mockCommonService = {
 describe('AnniversaryService', () => {
   let anniversaryService: AnniversaryService;
   let anniversaryRepository: Repository<Anniversary>;
-  let coupleRepository: Repository<Couple>;
   let coupleService: CoupleService;
   let commonService: CommonService;
 
@@ -59,9 +57,6 @@ describe('AnniversaryService', () => {
     anniversaryService = module.get<AnniversaryService>(AnniversaryService);
     anniversaryRepository = module.get<Repository<Anniversary>>(
       getRepositoryToken(Anniversary),
-    );
-    coupleRepository = module.get<Repository<Couple>>(
-      getRepositoryToken(Couple),
     );
     coupleService = module.get<CoupleService>(CoupleService);
     commonService = module.get<CommonService>(CommonService);
@@ -297,7 +292,7 @@ describe('AnniversaryService', () => {
       };
 
       (qr.manager.findOne as jest.Mock).mockImplementation(
-        (entity, options) => {
+        (entity, _options) => {
           if (entity === Couple) return Promise.resolve(couple);
           if (entity === Anniversary)
             return Promise.resolve({

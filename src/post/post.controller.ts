@@ -20,12 +20,7 @@ import { QueryRunner } from 'src/common/decorator/query-runner.decorator';
 import { QueryRunner as QR } from 'typeorm';
 import { IsPostMineOrAdminGuard } from './guard/is-post-mine-or-admin.guard';
 import { UserId } from 'src/user/decorator/user-id.decorator';
-import {
-  ApiBearerAuth,
-  ApiOperation,
-  ApiResponse,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { GetPostDto } from './dto/get-post-dto';
 
 @Controller('post')
@@ -93,7 +88,7 @@ export class PostController {
     @Param('postId', ParseIntPipe) id: number,
     @QueryRunner() qr: QR,
   ) {
-    return this.postService.remove(id,qr);
+    return this.postService.remove(id, qr);
   }
 
   @Post(':postId/like')
@@ -107,7 +102,7 @@ export class PostController {
     @UserId() userId: number,
     @QueryRunner() qr: QR,
   ) {
-    return this.postService.togglePostLike(postId, userId, true,qr);
+    return this.postService.togglePostLike(postId, userId, true, qr);
   }
 
   @Post(':postId/dislike')
@@ -121,6 +116,6 @@ export class PostController {
     @UserId() userId: number,
     @QueryRunner() qr: QR,
   ) {
-    return this.postService.togglePostLike(postId, userId, false,qr);
+    return this.postService.togglePostLike(postId, userId, false, qr);
   }
 }

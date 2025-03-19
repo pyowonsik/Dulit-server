@@ -4,7 +4,7 @@ import {
   Injectable,
   NestInterceptor,
 } from '@nestjs/common';
-import { catchError, Observable, pipe, tap } from 'rxjs';
+import { catchError, Observable, tap } from 'rxjs';
 import { DataSource } from 'typeorm';
 
 @Injectable()

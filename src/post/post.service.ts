@@ -12,7 +12,7 @@ import { User } from 'src/user/entity/user.entity';
 import { Post } from './entity/post.entity';
 import { join } from 'path';
 import { rename } from 'fs/promises';
-import { existsSync, mkdirSync, unlinkSync } from 'fs';
+import { existsSync, unlinkSync } from 'fs';
 import { CommentModel } from './comment/entity/comment.entity';
 import { console } from 'inspector';
 import { PostUserLike } from './comment/entity/post-user-like.entity';
@@ -94,7 +94,7 @@ export class PostService {
     const { nextCursor } =
       await this.commonService.applyCursorPaginationParamsToQb(qb, dto);
 
-    let [data, count] = await qb.getManyAndCount();
+    const [data, count] = await qb.getManyAndCount();
 
     // 기존 반환값에 cursor를 넣어줌
     return {

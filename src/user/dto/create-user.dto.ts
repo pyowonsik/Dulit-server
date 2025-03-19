@@ -1,4 +1,4 @@
-import { IsEmail, IsEnum, IsString } from 'class-validator';
+import { IsEnum, IsString } from 'class-validator';
 import { SocialProvider } from '../entity/user.entity';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -16,14 +16,13 @@ export class CreateUserDto {
     example: 'test@test.com',
   })
   email: string;
-  
+
   @IsString()
   @ApiProperty({
     description: '유저 password',
     example: 'testtest',
   })
   password?: string;
-
 
   @IsString()
   @ApiProperty({

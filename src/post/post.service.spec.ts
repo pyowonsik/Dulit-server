@@ -16,7 +16,6 @@ import { CreatePostDto } from './dto/create-post.dto';
 import { PostResponseDto } from './dto/post-response.dto';
 import { GetPostDto } from './dto/get-post-dto';
 import { PostUserLike } from './comment/entity/post-user-like.entity';
-import { join } from 'path';
 import { UpdatePostDto } from './dto/update-post.dto';
 import * as fs from 'fs';
 

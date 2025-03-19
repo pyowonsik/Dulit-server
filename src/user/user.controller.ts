@@ -81,5 +81,4 @@ export class UserController {
   remove(@Param('id', ParseIntPipe) id: number, @QueryRunner() qr: QR) {
     return this.userService.remove(id, qr);
   }
-
 }

@@ -77,7 +77,7 @@ export class AnniversaryController {
     @Body() updateAnniversaryDto: UpdateAnniversaryDto,
     @QueryRunner() qr: QR, // 트랜잭션 미적용을 감지하기 위한 데코레이터
   ) {
-    return this.anniversaryService.update(userId, id, updateAnniversaryDto,qr);
+    return this.anniversaryService.update(userId, id, updateAnniversaryDto, qr);
   }
 
   @Delete(':anniversaryId')

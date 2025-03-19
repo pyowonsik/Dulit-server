@@ -2,7 +2,6 @@ import { BaseTable } from 'src/common/entity/base-table.entity';
 import { Couple } from 'src/couple/entity/couple.entity';
 import {
   Column,
-  CreateDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,

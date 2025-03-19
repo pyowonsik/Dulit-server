@@ -6,8 +6,8 @@ export class AnniversaryResponseDto {
   date: Date;
 
   constructor(anniversary: Anniversary) {
-    (this.id = anniversary.id),
-      (this.title = anniversary.title),
-      (this.date = anniversary.date);
+    this.id = anniversary.id;
+    this.title = anniversary.title;
+    this.date = anniversary.date;
   }
 }

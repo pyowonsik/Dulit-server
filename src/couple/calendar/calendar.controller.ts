@@ -46,8 +46,8 @@ export class CalendarController {
     summary: '캘린더 일정 조회',
     description: '캘린더 일정 조회',
   })
-  findAll(@UserId() userId: number,@Body() getCalendarDto : GetCalendarDto) {
-    return this.calendarService.findAll(userId,getCalendarDto);
+  findAll(@UserId() userId: number, @Body() getCalendarDto: GetCalendarDto) {
+    return this.calendarService.findAll(userId, getCalendarDto);
   }
 
   @Get(':calendarId')
@@ -75,7 +75,7 @@ export class CalendarController {
     @Body() updateCalendarDto: UpdateCalendarDto,
     @QueryRunner() qr: QR,
   ) {
-    return this.calendarService.update(userId, id, updateCalendarDto,qr);
+    return this.calendarService.update(userId, id, updateCalendarDto, qr);
   }
 
   @Delete(':calendarId')

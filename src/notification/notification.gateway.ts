@@ -1,9 +1,6 @@
 import {
-  ConnectedSocket,
-  MessageBody,
   OnGatewayConnection,
   OnGatewayDisconnect,
-  SubscribeMessage,
   WebSocketGateway,
 } from '@nestjs/websockets';
 import { NotificationService } from './notification.service';
@@ -44,9 +41,8 @@ export class NotificationGateway
         // console.log('Client disconnected due to missing payload');
       }
     } catch (e) {
-      // console.log('Connection error', e.message);
+      console.log('disConnection error', e.message);
       client.disconnect();
-      // console.log('Client disconnected due to invalid token');
     }
   }
 }

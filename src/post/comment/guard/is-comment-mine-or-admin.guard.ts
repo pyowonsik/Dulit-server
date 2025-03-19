@@ -6,13 +6,12 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { Observable } from 'rxjs';
 import { Role } from 'src/user/entity/user.entity';
 import { CommentService } from '../comment.service';
 
 @Injectable()
 export class IsCommentMineOrAdminGuard implements CanActivate {
-  constructor(private readonly commentService : CommentService) {}
+  constructor(private readonly commentService: CommentService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const req = context.switchToHttp().getRequest();
@@ -36,7 +35,10 @@ export class IsCommentMineOrAdminGuard implements CanActivate {
       throw new BadRequestException('COMMENT ID가 파라미터로 제공 돼야합니다.');
     }
 
-    const isOk = await this.commentService.isCommentMine(user.id, parseInt(commentId));
+    const isOk = await this.commentService.isCommentMine(
+      user.id,
+      parseInt(commentId),
+    );
 
     if (!isOk) {
       throw new ForbiddenException('권한이 없습니다.');

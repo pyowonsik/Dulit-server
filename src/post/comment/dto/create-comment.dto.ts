@@ -1,5 +1,3 @@
-import { PickType } from '@nestjs/mapped-types';
-import { CommentModel } from '../entity/comment.entity';
 import { IsOptional, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 

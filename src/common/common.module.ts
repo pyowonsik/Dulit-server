@@ -26,7 +26,7 @@ import { Plan } from 'src/couple/plan/entities/plan.entity';
         },
       }),
     }),
-    TypeOrmModule.forFeature([Post, Plan,Couple]),
+    TypeOrmModule.forFeature([Post, Plan, Couple]),
     NotificationModule,
   ],
   controllers: [CommonController],

@@ -12,7 +12,6 @@ export class CommonService {
     const { take, page } = dto;
     const skip = (page - 1) * take;
 
-
     // 3,2  -> (4,5,6) , 1페이지(1,2,3) 스킵
     qb.take(take);
     qb.skip(skip);
@@ -21,7 +20,8 @@ export class CommonService {
     qb: SelectQueryBuilder<T>,
     dto: CursorPaginationDto,
   ) {
-    let { cursor, order, take } = dto;
+    const { cursor, take } = dto;
+    let { order } = dto;
     /**
      * {
      *  values : {

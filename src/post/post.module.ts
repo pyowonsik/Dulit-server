@@ -12,9 +12,9 @@ import { Couple } from 'src/couple/entity/couple.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, Couple, Post, CommentModel,PostUserLike]),
+    TypeOrmModule.forFeature([User, Couple, Post, CommentModel, PostUserLike]),
     CommentModule,
-    CommonModule
+    CommonModule,
   ],
   controllers: [PostController],
   providers: [PostService],

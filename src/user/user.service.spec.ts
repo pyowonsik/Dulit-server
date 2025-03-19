@@ -97,7 +97,7 @@ describe('UserService', () => {
       // bcrypt.hash(password,hashRounds)를 감시하고,반환값을 hashedPassword로 설정
       jest
         .spyOn(bcrypt, 'hash')
-        .mockImplementation((password, hashRounds) => hashedPassword);
+        .mockImplementation((_password, _hashRounds) => hashedPassword);
       // mockUserRepository.findOne()를 다시 감시하고,반환값을 한번만 result로 설정
       jest.spyOn(mockUserRepository, 'findOne').mockResolvedValueOnce(result);
       //

@@ -19,7 +19,7 @@ import { NotificationModule } from 'src/notification/notification.module';
     ConfigModule,
     UserModule,
     JwtModule.register({}),
-    NotificationModule
+    NotificationModule,
   ],
   controllers: [AuthController], // 컨트롤러 추가
   providers: [KakaoStrategy, AuthService, NaverStrategy],

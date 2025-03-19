@@ -1,8 +1,7 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { TestBed } from '@automock/jest';
-import { SocialProvider, User } from 'src/user/entity/user.entity';
+import { User } from 'src/user/entity/user.entity';
 import { RegisterDto } from './dto/register-dto';
 
 describe('AuthController', () => {

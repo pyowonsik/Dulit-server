@@ -1,11 +1,10 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { CalendarController } from './calendar.controller';
 import { CalendarService } from './calendar.service';
 import { CreateCalendarDto } from './dto/create-calendar.dto';
 import { UpdateCalendarDto } from './dto/update-calendar.dto';
 import { GetCalendarDto } from './dto/get-calendar.dto';
 import { QueryRunner } from 'typeorm';
-import { NotFoundException, BadRequestException } from '@nestjs/common';
+import { NotFoundException } from '@nestjs/common';
 import { TestBed } from '@automock/jest';
 import { CalendarResponseDto } from './dto/calendar-response.dto';
 import { Calendar } from './entities/calendar.entity';

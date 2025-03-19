@@ -1,16 +1,15 @@
-import { Plan } from "../entities/plan.entity";
+import { Plan } from '../entities/plan.entity';
 
 export class PlanResponseDto {
-    id: number;
-    topic: string;
-    location: string;
-    time: Date;
+  id: number;
+  topic: string;
+  location: string;
+  time: Date;
 
-    constructor(plan: Plan) {
-        this.id = plan.id,
-        this.topic = plan.topic,
-        this.location = plan.location,
-        this.time = plan.time
-    }
+  constructor(plan: Plan) {
+    this.id = plan.id; // ✅ 세미콜론 사용
+    this.topic = plan.topic; // ✅ 세미콜론 사용
+    this.location = plan.location; // ✅ 세미콜론 사용
+    this.time = plan.time; // ✅ 세미콜론 사용
   }
-  
+}

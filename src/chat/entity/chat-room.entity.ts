@@ -27,5 +27,4 @@ export class ChatRoom extends BaseTable {
   @OneToOne(() => Couple, (couple) => couple.chatRoom)
   @JoinColumn()
   couple: Couple;
-  
 }

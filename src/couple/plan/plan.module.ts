@@ -10,8 +10,12 @@ import { CoupleService } from '../couple.service';
 import { NotificationModule } from 'src/notification/notification.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Couple, Plan, User]), CommonModule,NotificationModule],
+  imports: [
+    TypeOrmModule.forFeature([Couple, Plan, User]),
+    CommonModule,
+    NotificationModule,
+  ],
   controllers: [PlanController],
-  providers: [PlanService,CoupleService],
+  providers: [PlanService, CoupleService],
 })
 export class PlanModule {}

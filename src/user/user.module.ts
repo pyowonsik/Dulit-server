@@ -7,7 +7,6 @@ import { Chat } from 'src/chat/entity/chat.entity';
 import { Post } from 'src/post/entity/post.entity';
 import { NotificationModule } from 'src/notification/notification.module';
 import { AuthModule } from 'src/auth/auth.module';
-import { AuthService } from 'src/auth/auth.service';
 import { Couple } from 'src/couple/entity/couple.entity';
 import { Anniversary } from 'src/couple/anniversary/entity/anniversary.entity';
 import { UserController } from './user.controller';

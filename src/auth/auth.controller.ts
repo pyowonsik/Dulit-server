@@ -1,19 +1,8 @@
-import {
-  Controller,
-  Get,
-  UseGuards,
-  Request,
-  Res,
-  Post,
-  Req,
-  Param,
-  Body,
-} from '@nestjs/common';
+import { Controller, Get, Request, Post, Body } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Public } from './decorator/public.decorator';
 import {
   ApiBasicAuth,
-  ApiBearerAuth,
   ApiExcludeEndpoint,
   ApiOperation,
   ApiTags,

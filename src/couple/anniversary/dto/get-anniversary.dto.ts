@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsInt, IsOptional, IsString } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 import { PagePaginationDto } from 'src/common/dto/page-pagination.dto';
 
 export class GetAnniversaryDto extends PagePaginationDto {

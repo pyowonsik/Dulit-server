@@ -5,9 +5,6 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { Observable } from 'rxjs';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import { Role } from 'src/user/entity/user.entity';
 import { CalendarService } from '../calendar.service';
 

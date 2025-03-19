@@ -66,7 +66,7 @@ export class PlanService {
     const { nextCursor } =
       await this.commonService.applyCursorPaginationParamsToQb(qb, dto);
 
-    let [data, count] = await qb.getManyAndCount();
+    const [data, count] = await qb.getManyAndCount();
 
     // 기존 반환값에 cursor를 넣어줌
     return {

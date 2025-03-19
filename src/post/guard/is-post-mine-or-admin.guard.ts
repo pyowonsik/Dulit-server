@@ -6,7 +6,6 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { Observable } from 'rxjs';
 import { PostService } from '../post.service';
 import { Role } from 'src/user/entity/user.entity';
 

@@ -1,4 +1,3 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { CommentController } from './comment.controller';
 import { CommentService } from './comment.service';
 import { TestBed } from '@automock/jest';

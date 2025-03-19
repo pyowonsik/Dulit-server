@@ -1,4 +1,3 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { UserController } from './user.controller';
 import { UserService } from './user.service';
 import { TestBed } from '@automock/jest';
@@ -72,7 +71,7 @@ describe('UserController', () => {
 
       jest.spyOn(userService, 'findOne').mockResolvedValue(user as User);
 
-      const req = { user: { sub: 1 } }; 
+      const req = { user: { sub: 1 } };
       const result = await userController.getMe(req);
 
       expect(userService.findOne).toHaveBeenCalledWith(req.user.sub);

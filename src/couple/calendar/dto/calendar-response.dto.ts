@@ -8,10 +8,10 @@ export class CalendarResponseDto {
   filePaths: string[] | null;
 
   constructor(calendar: Calendar) {
-    (this.id = calendar.id),
-      (this.title = calendar.title),
-      (this.description = calendar.description),
-      (this.date = calendar.date),
-      (this.filePaths = calendar.filePaths);
+    this.id = calendar.id;
+    this.title = calendar.title;
+    this.description = calendar.description;
+    this.date = calendar.date;
+    this.filePaths = calendar.filePaths;
   }
 }

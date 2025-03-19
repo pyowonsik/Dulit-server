@@ -1,12 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  ArrayNotEmpty,
-  IsArray,
-  IsNotEmpty,
-  IsNumber,
-  IsOptional,
-  IsString,
-} from 'class-validator';
+import { IsArray, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class CreatePostDto {
   @IsNotEmpty()
@@ -24,7 +17,7 @@ export class CreatePostDto {
     example: '1000일 맞이 여행 다녀왔습니다. ~~~~',
   })
   description: string;
-  
+
   @IsOptional() // 필수값 아님
   @IsArray()
   @IsString({ each: true })

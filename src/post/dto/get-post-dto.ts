@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsInt, IsOptional, IsString } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 import { CursorPaginationDto } from 'src/common/dto/cursor-pagination.dto';
 
 export class GetPostDto extends CursorPaginationDto {

@@ -8,7 +8,6 @@ import {
   ManyToMany,
   ManyToOne,
   OneToMany,
-  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Post } from 'src/post/entity/post.entity';
@@ -68,7 +67,7 @@ export class User extends BaseTable {
 
   @OneToMany(() => Post, (post) => post.author)
   posts: Post[];
-  
+
   @OneToMany(() => CommentModel, (comment) => comment.author)
   comments: CommentModel[];
 

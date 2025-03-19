@@ -28,7 +28,6 @@ const mockCommonService = {
 
 describe('PlanService', () => {
   let planService: PlanService;
-  let userRepository: Repository<User>;
   let planRepository: Repository<Plan>;
   let coupleService: CoupleService;
   let commonService: CommonService;
@@ -55,7 +54,6 @@ describe('PlanService', () => {
         },
       ],
     }).compile();
-    userRepository = module.get<Repository<User>>(getRepositoryToken(User));
     coupleService = module.get<CoupleService>(CoupleService);
     planRepository = module.get<Repository<Plan>>(getRepositoryToken(Plan));
     commonService = module.get<CommonService>(CommonService);

@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Socket } from 'socket.io';
 import { ChatRoom } from './entity/chat-room.entity';
@@ -15,8 +15,6 @@ export class ChatService {
   constructor(
     @InjectRepository(ChatRoom)
     private readonly chatRoomRepository: Repository<ChatRoom>,
-    @InjectRepository(Chat)
-    private readonly chatRepository: Repository<Chat>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
   ) {}
@@ -44,7 +42,7 @@ export class ChatService {
 
   async createMessage(
     payload: { sub: number },
-    { message, room }: CreateChatDto,
+    { message }: CreateChatDto,
     qr: QueryRunner,
   ) {
     const user = await this.userRepository.findOne({

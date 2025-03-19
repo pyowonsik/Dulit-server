@@ -10,7 +10,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { In, QueryRunner, Repository } from 'typeorm';
 import { Calendar } from './entities/calendar.entity';
 import { join } from 'path';
-import { existsSync, mkdirSync, unlinkSync } from 'fs';
+import { existsSync, unlinkSync } from 'fs';
 import { rename } from 'fs/promises';
 import { GetCalendarDto } from './dto/get-calendar.dto';
 import { Couple } from 'src/couple/entity/couple.entity';
@@ -64,8 +64,8 @@ export class CalendarService {
             await this.renameFiles(tempFolder, filesFolder, file);
           }),
         );
-      } catch (error) {
-        // console.error('파일 이동 중 오류 발생:', error);
+      } catch (e) {
+        console.log('파일 이동 중 오류 발생', e.message);
         throw new InternalServerErrorException('파일 이동에 실패했습니다.');
       }
     }
