@@ -20,12 +20,15 @@ import { GetPostDto } from './dto/get-post-dto';
 import { CommonService } from 'src/common/common.service';
 import { Couple } from 'src/couple/entity/couple.entity';
 import { PostResponseDto } from './dto/post-response.dto';
+import { ConfigService } from '@nestjs/config';
+import { envVariableKeys } from 'src/common/const/env.const';
 
 @Injectable()
 export class PostService {
   constructor(
     @InjectRepository(Post)
     private readonly postRepository: Repository<Post>,
+    private readonly configService: ConfigService,
     private readonly commonService: CommonService,
   ) {}
 
@@ -134,20 +137,13 @@ export class PostService {
     }
 
     if (updatePostDto.filePaths) {
-      if (!post.filePaths) {
-        throw new BadRequestException('파일 선업로드 후 요청해주세요.');
-      }
       // movie 생성시, temp폴더의 movieFile을 movie폴더로 이동 시킨다.
       const tempFolder = join('public', 'temp');
       const filesFolder = join('public', 'files/post');
 
-      // 1. public/files의 post.filePaths 삭제
-      post.filePaths.forEach((file) => {
-        const filePath = join(filesFolder, file);
-        if (existsSync(filePath)) {
-          unlinkSync(filePath);
-        }
-      });
+      // 1. delete local 기존 파일
+      if (post.filePaths?.length)
+        await this.deleteOldFiles(post.filePaths, filesFolder);
 
       // 2. 파일 이동 (병렬 처리)
       await Promise.all(
@@ -264,11 +260,31 @@ export class PostService {
   }
 
   /* istanbul ignore next */
+  async deleteOldFiles(filePaths: string[], filesFolder: string) {
+    if (this.configService.get<string>(envVariableKeys.env) !== 'prod') {
+      filePaths.forEach((file) => {
+        const filePath = join(filesFolder, file);
+        if (existsSync(filePath)) {
+          unlinkSync(filePath);
+        }
+      });
+    } else {
+      return filePaths.forEach((file) => {
+        this.commonService.deleteOldFilesFromStorage(file, 'post');
+      });
+    }
+  }
+
+  /* istanbul ignore next */
   async renameFiles(tempFolder: string, filesFolder: string, file: string) {
-    return await rename(
-      join(process.cwd(), tempFolder, file),
-      join(process.cwd(), filesFolder, file),
-    );
+    if (this.configService.get<string>(envVariableKeys.env) !== 'prod') {
+      return await rename(
+        join(process.cwd(), tempFolder, file),
+        join(process.cwd(), filesFolder, file),
+      );
+    } else {
+      return this.commonService.saveMovieToPermanentStorage(file, 'post');
+    }
   }
 
   /* istanbul ignore next */

@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  Body,
   Controller,
   Post,
   UploadedFiles,
@@ -85,9 +86,22 @@ export class CommonController {
   }
 
   @Post('presigned-url')
-  async cratePresignedUrl() {
+  async cratePresignedUrl(@Body() body: { fileExtensions: string[] }) {
+    const urls = await Promise.all(
+      body.fileExtensions.map(async (fileExtension) => {
+        const allowedMimeTypes = ['jpeg', 'png', 'gif', 'mp4', 'mpeg', 'webm'];
+
+        if (!allowedMimeTypes.includes(fileExtension)) {
+          throw new BadRequestException(
+            '이미지 또는 영상 파일만 업로드 가능합니다.',
+          );
+        }
+
+        return await this.commonService.createPresignedUrl(fileExtension);
+      }),
+    );
     return {
-      url: await this.commonService.createPresignedUrl(),
+      urls,
     };
   }
 }

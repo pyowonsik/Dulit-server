@@ -31,7 +31,9 @@ export class IsAnniversaryCoupleOrAdmin implements CanActivate {
     const anniversaryId = req.params.anniversaryId;
 
     if (!anniversaryId) {
-      throw new BadRequestException('COMMENT ID가 파라미터로 제공 돼야합니다.');
+      throw new BadRequestException(
+        'ANNIVERSARY ID가 파라미터로 제공 돼야합니다.',
+      );
     }
 
     const isOk = await this.anniversaryService.isAnniversaryCouple(
