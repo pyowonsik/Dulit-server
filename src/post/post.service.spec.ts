@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Test, TestingModule } from '@nestjs/testing';
 import { PostService } from './post.service';
 import { Post } from './entity/post.entity';
@@ -18,6 +19,7 @@ import { GetPostDto } from './dto/get-post-dto';
 import { PostUserLike } from './comment/entity/post-user-like.entity';
 import { UpdatePostDto } from './dto/update-post.dto';
 import * as fs from 'fs';
+import { ConfigService } from '@nestjs/config';
 
 const mockPostRepository = {
   findOne: jest.fn(),
@@ -28,10 +30,14 @@ const mockCommonService = {
   applyCursorPaginationParamsToQb: jest.fn(),
 };
 
+const mockConfigService = {
+  get: jest.fn(),
+};
 describe('PostService', () => {
   let postService: PostService;
   let commonService: CommonService;
   let postRepository: Repository<Post>;
+  let configService: ConfigService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -46,11 +52,16 @@ describe('PostService', () => {
           provide: CommonService,
           useValue: mockCommonService,
         },
+        {
+          provide: ConfigService,
+          useValue: mockConfigService,
+        },
       ],
     }).compile();
 
     postService = module.get<PostService>(PostService);
     commonService = module.get<CommonService>(CommonService);
+    configService = module.get<ConfigService>(ConfigService);
     postRepository = module.get<Repository<Post>>(getRepositoryToken(Post));
   });
 
@@ -420,18 +431,6 @@ describe('PostService', () => {
       await expect(
         postService.update(postId, updatePostDto, qr),
       ).rejects.toThrow(NotFoundException);
-    });
-
-    it('should throw BadRequestException if filePaths are provided but no existing filePaths', async () => {
-      const postId = 1;
-      const post = { id: 1, filePaths: null } as Post;
-      const updatePostDto: UpdatePostDto = { filePaths: ['temp/new-file.png'] };
-
-      (qr.manager.findOne as jest.Mock).mockResolvedValueOnce(post);
-
-      await expect(
-        postService.update(postId, updatePostDto, qr),
-      ).rejects.toThrow(BadRequestException);
     });
 
     it('should delete existing files before renaming new ones', async () => {

@@ -169,11 +169,21 @@ export class CalendarService {
         await this.deleteOldFiles(calendar.filePaths, filesFolder);
 
       // 2. 파일 이동 (병렬 처리)
-      await Promise.all(
-        updateCalendarDto.filePaths.map(
-          async (file) => await this.renameFiles(tempFolder, filesFolder, file),
-        ),
-      );
+      try {
+        await Promise.all(
+          updateCalendarDto.filePaths.map(
+            async (file) =>
+              await this.renameFiles(tempFolder, filesFolder, file),
+          ),
+        );
+      } catch (err) {
+        if (err.code === 'ENOENT') {
+          throw new BadRequestException(
+            '파일 이동에 실패했습니다. 파일 경로를 확인해주세요.',
+          );
+        }
+        throw err;
+      }
     }
 
     // 3. post의 filePaths 수정

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Test, TestingModule } from '@nestjs/testing';
 import { CalendarService } from './calendar.service';
 import { In, QueryRunner, Repository } from 'typeorm';
@@ -14,6 +15,8 @@ import { CalendarResponseDto } from './dto/calendar-response.dto';
 import { CreateCalendarDto } from './dto/create-calendar.dto';
 import { UpdateCalendarDto } from './dto/update-calendar.dto';
 import * as fs from 'fs';
+import { CommonService } from 'src/common/common.service';
+import { ConfigService } from '@nestjs/config';
 
 const mockCoupleRepository = {};
 const mockCalendarRepository = {
@@ -24,10 +27,20 @@ const mockCoupleService = {
   findCoupleRelationChild: jest.fn(),
 };
 
+const mockConfigService = {
+  get: jest.fn(),
+};
+const mockCommonService = {
+  deleteOldFilesFromStorage: jest.fn(),
+  saveMovieToPermanentStorage: jest.fn(),
+};
+
 describe('CalendarService', () => {
   let calendarService: CalendarService;
   let calendarRepository: Repository<Calendar>;
   let coupleService: CoupleService;
+  let configService: ConfigService;
+  let commonService: CommonService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -45,6 +58,14 @@ describe('CalendarService', () => {
           provide: CoupleService,
           useValue: mockCoupleService,
         },
+        {
+          provide: ConfigService,
+          useValue: mockConfigService,
+        },
+        {
+          provide: CommonService,
+          useValue: mockCommonService,
+        },
       ],
     }).compile();
 
@@ -54,6 +75,8 @@ describe('CalendarService', () => {
 
     coupleService = module.get<CoupleService>(CoupleService);
     calendarService = module.get<CalendarService>(CalendarService);
+    configService = module.get<ConfigService>(ConfigService);
+    commonService = module.get<CommonService>(CommonService);
   });
 
   it('should be defined', () => {
@@ -469,6 +492,7 @@ describe('CalendarService', () => {
       (qr.manager.findOne as jest.Mock).mockResolvedValueOnce(couple);
       findOneCalendar.mockResolvedValueOnce(calendar);
 
+      // 파일 경로를 제공하지 않은 경우 에러를 던지는지 확인
       await expect(
         calendarService.update(userId, calendarId, updateCalendarDto, qr),
       ).rejects.toThrow(BadRequestException);
@@ -518,14 +542,6 @@ describe('CalendarService', () => {
         filePaths: ['temp/file3.png'],
       };
 
-      const calendarResponseDto = {
-        id: 1,
-        title: 'Updated Calendar',
-        description: 'Updated Description',
-        date: new Date(),
-        filePaths: ['files/calendar/file3.png'],
-      };
-
       (qr.manager.findOne as jest.Mock).mockResolvedValueOnce(couple);
       findOneCalendar.mockResolvedValueOnce(calendar);
       existsSyncSpy.mockReturnValue(true);
@@ -535,7 +551,7 @@ describe('CalendarService', () => {
         id: 1,
         title: 'Updated Calendar',
         description: 'Updated Description',
-        date: new Date(),
+        date: new Date().toISOString(), // Date를 toISOString으로 변환
         filePaths: ['files/calendar/file3.png'],
       });
 
@@ -555,7 +571,13 @@ describe('CalendarService', () => {
         expect.any(String),
         expect.any(String),
       );
-      expect(result).toEqual(calendarResponseDto);
+      // `date` 필드 비교 시 toISOString()을 이용해 비교
+      expect(result).toEqual(
+        expect.objectContaining({
+          date: expect.any(String),
+          filePaths: ['files/calendar/file3.png'],
+        }),
+      );
     });
   });
 

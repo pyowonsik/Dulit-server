@@ -6,7 +6,6 @@ import {
 import { SelectQueryBuilder } from 'typeorm';
 import { CursorPaginationDto } from './dto/cursor-pagination.dto';
 import { PagePaginationDto } from './dto/page-pagination.dto';
-import * as AWS from 'aws-sdk';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { ObjectCannedACL, PutObjectCommand, S3 } from '@aws-sdk/client-s3';
 import { v4 as Uuid } from 'uuid';
