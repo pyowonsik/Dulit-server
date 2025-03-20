@@ -7,8 +7,9 @@ import { SelectQueryBuilder } from 'typeorm';
 import { CursorPaginationDto } from './dto/cursor-pagination.dto';
 import { PagePaginationDto } from './dto/page-pagination.dto';
 import * as AWS from 'aws-sdk';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { ObjectCannedACL, PutObjectCommand, S3 } from '@aws-sdk/client-s3';
 import { v4 as Uuid } from 'uuid';
-import { S3 } from 'aws-sdk';
 import { ConfigService } from '@nestjs/config';
 import { envVariableKeys } from './const/env.const';
 
@@ -17,49 +18,70 @@ export class CommonService {
   private s3: S3;
 
   constructor(private readonly configService: ConfigService) {
-    AWS.config.update({
+    this.s3 = new S3({
       credentials: {
         accessKeyId: configService.get<string>(envVariableKeys.awsAccessKeyId),
         secretAccessKey: configService.get<string>(
           envVariableKeys.awsSecretAccessKey,
         ),
       },
+
       region: configService.get<string>(envVariableKeys.awsRegion),
     });
-
-    this.s3 = new AWS.S3();
   }
 
-  async saveMovieToPermanentStorage(filename: string, foldername: string) {
+  async deleteOldFilesFromStorage(filename: string, foldername: string) {
+    const bucketName = this.configService.get<string>(
+      envVariableKeys.bucketName,
+    );
+
+    try {
+      await this.s3.deleteObject({
+        Bucket: bucketName,
+        Key: `public/${foldername}/${filename}`,
+      });
+    } catch (error) {
+      console.error('기존 파일 삭제 중 오류 발생:', error);
+    }
+  }
+
+  async saveMovieToPermanentStorage(
+    filename: string,
+    foldername: string,
+    // oldFiles?: string[],
+  ) {
     try {
       const bucketName = this.configService.get<string>(
         envVariableKeys.bucketName,
       );
+
       await this.s3.copyObject({
         Bucket: bucketName,
         CopySource: `${bucketName}/public/temp/${filename}`,
         Key: `public/${foldername}/${filename}`,
         ACL: 'public-read',
       });
+
       await this.s3.deleteObject({
         Bucket: bucketName,
-        Key: `public/temp/${filename},`,
+        Key: `public/temp/${filename}`,
       });
     } catch (e) {
-      console.log(e);
+      console.error('S3 이동 중 에러 발생:', e);
       throw new InternalServerErrorException('S3 에러!');
     }
   }
 
-  async createPresignedUrl(expiresIn = 300) {
+  async createPresignedUrl(fileExtension: string, expiresIn = 300) {
     const params = {
       Bucket: this.configService.get<string>(envVariableKeys.bucketName),
-      Key: `public/temp/${Uuid()}.mp4`,
-      Expires: expiresIn,
-      ACL: 'public-read',
+      Key: `public/temp/${Uuid()}.${fileExtension}`,
+      ACL: ObjectCannedACL.public_read,
     };
     try {
-      const url = await this.s3.getSignedUrlPromise('putObject', params);
+      const url = await getSignedUrl(this.s3, new PutObjectCommand(params), {
+        expiresIn,
+      });
 
       return url;
     } catch (error) {

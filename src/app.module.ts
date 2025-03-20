@@ -84,11 +84,11 @@ import { PlanModule } from './couple/plan/plan.module';
           configService.get<string>(envVariableKeys.env) === 'prod'
             ? false
             : true,
-        ...(configService.get<string>(envVariableKeys.env) === 'prod' && {
-          ssl: {
-            rejectUnauthorized: false,
-          },
-        }),
+        // ...(configService.get<string>(envVariableKeys.env) === 'prod' && {
+        //   ssl: {
+        //     rejectUnauthorized: false,
+        //   },
+        // }),
       }),
       inject: [ConfigService],
     }),

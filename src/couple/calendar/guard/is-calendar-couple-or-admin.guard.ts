@@ -31,7 +31,9 @@ export class IsCalendarCoupleOrAdmin implements CanActivate {
     const calendarId = req.params.calendarId;
 
     if (!calendarId) {
-      throw new BadRequestException('COMMENT ID가 파라미터로 제공 돼야합니다.');
+      throw new BadRequestException(
+        'CALENDAR ID가 파라미터로 제공 돼야합니다.',
+      );
     }
 
     const isOk = await this.calendarService.isCalendarCouple(

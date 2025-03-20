@@ -160,21 +160,13 @@ export class CalendarService {
     }
 
     if (updateCalendarDto.filePaths) {
-      if (!calendar.filePaths) {
-        throw new BadRequestException('파일 선업로드 후 요청해주세요.');
-      }
-
       // movie 생성시, temp폴더의 movieFile을 movie폴더로 이동 시킨다.
       const tempFolder = join('public', 'temp');
       const filesFolder = join('public', 'files/calendar');
 
-      // 1. public/files의 post.filePaths 삭제
-      calendar.filePaths.forEach((file) => {
-        const filePath = join(filesFolder, file);
-        if (existsSync(filePath)) {
-          unlinkSync(filePath);
-        }
-      });
+      // 1. delete local 기존 파일
+      if (calendar.filePaths?.length)
+        await this.deleteOldFiles(calendar.filePaths, filesFolder);
 
       // 2. 파일 이동 (병렬 처리)
       await Promise.all(
@@ -222,12 +214,28 @@ export class CalendarService {
     const couple = await this.findMyCouple(userId);
 
     if (!couple) {
-      return false; // 사용자가 커플에 속하지 않음
+      return false;
     }
 
-    const exists = await this.isExistsCalendar(calendarId, userId);
+    const exists = await this.isExistsCalendar(calendarId, couple.id);
 
     return exists;
+  }
+
+  /* istanbul ignore next */
+  async deleteOldFiles(filePaths: string[], filesFolder: string) {
+    if (this.configService.get<string>(envVariableKeys.env) !== 'prod') {
+      filePaths.forEach((file) => {
+        const filePath = join(filesFolder, file);
+        if (existsSync(filePath)) {
+          unlinkSync(filePath);
+        }
+      });
+    } else {
+      return filePaths.forEach((file) => {
+        this.commonService.deleteOldFilesFromStorage(file, 'calendar');
+      });
+    }
   }
 
   /* istanbul ignore next */
