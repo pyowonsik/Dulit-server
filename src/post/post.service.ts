@@ -51,7 +51,6 @@ export class PostService {
     }
 
     if (createPostDto.filePaths) {
-      // movie 생성시, temp폴더의 movieFile을 movie폴더로 이동 시킨다.
       const tempFolder = join('public', 'temp');
       const filesFolder = join('public', 'files/post');
 
@@ -122,10 +121,6 @@ export class PostService {
   }
 
   async update(id: number, updatePostDto: UpdatePostDto, qr: QueryRunner) {
-    // 수정 기능 .
-    // author가 현재 post의 author일 경우 .
-    // title , description , filePaths
-
     const post = await qr.manager.findOne(Post, {
       where: {
         id,
@@ -137,7 +132,6 @@ export class PostService {
     }
 
     if (updatePostDto.filePaths) {
-      // movie 생성시, temp폴더의 movieFile을 movie폴더로 이동 시킨다.
       const tempFolder = join('public', 'temp');
       const filesFolder = join('public', 'files/post');
 
