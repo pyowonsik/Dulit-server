@@ -1,11 +1,11 @@
-# version: '3.8'
+version: '3.8'
 
 services:
   dulit:
     build:
       context: .
       dockerfile: Dockerfile
-      target: ${BUILD_TARGET} # 개발이 아닌 배포(target: production)
+      target: ${BUILD_TARGET}
     env_file:
       - .env
     ports:
@@ -17,6 +17,9 @@ services:
     command: ['node', 'dist/main.js']
     volumes:
       - /usr/src/app/node_modules # node_modules는 컨테이너 내에서 관리
+    # 리소스 제한 추가
+    mem_limit: 512m # 메모리 512MB로 제한
+    cpus: 0.5 # CPU 사용을 0.5로 제한
 
   postgres_dulit:
     image: postgres:16
@@ -34,3 +37,27 @@ services:
       timeout: 5s
       retries: 10
       start_period: 5s
+    # 리소스 제한 추가
+    mem_limit: 512m # 메모리 512MB로 제한
+    cpus: 0.5 # CPU 사용을 0.5로 제한
+
+  jenkins:
+    image: jenkins/jenkins:lts # Jenkins 공식 이미지 사용
+    container_name: jenkins
+    ports:
+      - '8080:8080' # Jenkins 웹 UI에 접근하기 위한 포트 매핑
+      - '50000:50000' # Jenkins 에이전트와의 통신용 포트
+    environment:
+      JENKINS_OPTS: '--prefix=/jenkins' # 만약 Jenkins가 하위 경로로 접근되도록 설정할 경우
+    volumes:
+      - jenkins_home:/var/jenkins_home # Jenkins 데이터 유지
+    restart: always
+    networks:
+      - default # 필요시 네트워크를 추가로 설정할 수 있음
+    # 리소스 제한 추가
+    mem_limit: 512m # 메모리 512MB로 제한
+    cpus: 1 # CPU 사용을 1로 제한
+
+volumes:
+  jenkins_home:
+    driver: local

@@ -9,9 +9,9 @@ async function bootstrap() {
     logger: ['verbose'],
   });
 
-  // CORS 설정 - localhost:3000에서 오는 요청만 허용
+  // CORS 설정
   app.enableCors({
-    origin: 'http://localhost:3000',
+    origin: '*',
   });
   //
 
