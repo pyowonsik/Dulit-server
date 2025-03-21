@@ -7,6 +7,7 @@ import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 async function bootstrap() {
   // jenkins 테스트 주석
   // jenkins 테스트 주석
+  // jenkins 테스트 주석
 
   const app = await NestFactory.create(AppModule, {
     logger: ['verbose'],
