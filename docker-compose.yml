@@ -16,7 +16,9 @@ services:
     restart: always
     command: ['node', 'dist/main.js']
     volumes:
+      - ./test:/usr/src/app/test # 테스트 코드 추가 마운트
       - /usr/src/app/node_modules # node_modules는 컨테이너 내에서 관리
+
     # 리소스 제한 추가
     mem_limit: 512m # 메모리 512MB로 제한
     cpus: 0.5 # CPU 사용을 0.5로 제한
