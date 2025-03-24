@@ -7,6 +7,7 @@ import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 async function bootstrap() {
   // CICD 주석 테스트
   // CICD 주석 테스트
+  // CICD 주석 테스트
 
   const app = await NestFactory.create(AppModule, {
     logger: ['verbose'],
