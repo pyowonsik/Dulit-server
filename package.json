@@ -104,7 +104,7 @@
       "ts"
     ],
     "roots": [
-      "src"
+      "<rootDir>/src"
     ],
     "testRegex": ".*\\.spec\\.ts$",
     "transform": {
