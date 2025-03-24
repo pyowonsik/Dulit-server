@@ -16,7 +16,7 @@ services:
     restart: always
     command: ['node', 'dist/main.js']
     volumes:
-      - ./test:/usr/src/app/test # 테스트 코드 추가 마운트
+      - .:/usr/src/app # 현재 프로젝트 디렉토리를 컨테이너 내 /usr/src/app에 매핑
       - /usr/src/app/node_modules # node_modules는 컨테이너 내에서 관리
 
     # 리소스 제한 추가
