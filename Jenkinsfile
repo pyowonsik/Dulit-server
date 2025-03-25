@@ -7,6 +7,7 @@ pipeline {
 
     environment {
         GIT_REPO = 'git@github.com:pyowonsik/Dulit-server.git'  // SSH 방식
+        GITHUB_API_TOKEN = credentials('jenkins_ssh_token')  // Jenkins에 설정된 GitHub API 토큰을 가져오기
         SSH_KEY = '/var/jenkins_home/.ssh/id_rsa'  // Jenkins 서버에서 id_rsa 키 경로 설정
         EC2_USER = 'ubuntu'                       // EC2 사용자명
         EC2_HOST = '54.180.97.150'                // EC2 IP 주소
