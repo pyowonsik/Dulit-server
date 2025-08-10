@@ -1,6 +1,21 @@
 version: '3.8'
 
 services:
+  nginx:
+    image: nginx:alpine
+    container_name: nginx-proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./ssl:/etc/ssl/certs
+      - ./nginx/html:/var/www/html
+    depends_on:
+      - dulit
+      - jenkins
+    restart: unless-stopped
+
   dulit:
     build:
       context: .
@@ -8,8 +23,8 @@ services:
       target: ${BUILD_TARGET}
     env_file:
       - .env
-    ports:
-      - '3000:3000'
+    expose:
+      - "3000"
     depends_on:
       postgres_dulit:
         condition: service_healthy
@@ -17,7 +32,6 @@ services:
     command: ['node', 'dist/main.js']
     volumes:
       - /usr/src/app/node_modules # node_modules는 컨테이너 내에서 관리
-
     # 리소스 제한 추가
     mem_limit: 512m # 메모리 512MB로 제한
     cpus: 0.5 # CPU 사용을 0.5로 제한
@@ -28,8 +42,8 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: postgres
-    ports:
-      - '5555:5432'
+    expose:
+      - "5432"
     volumes:
       - ./postgres/data:/var/lib/postgresql/data # 데이터 유지
     healthcheck:
@@ -45,11 +59,11 @@ services:
   jenkins:
     image: jenkins/jenkins:lts # Jenkins 공식 이미지 사용
     container_name: jenkins
-    ports:
-      - '8080:8080' # Jenkins 웹 UI에 접근하기 위한 포트 매핑
-      - '50000:50000' # Jenkins 에이전트와의 통신용 포트
+    expose:
+      - "8080" # Jenkins 웹 UI에 접근하기 위한 포트 매핑
+      - "50000" # Jenkins 에이전트와의 통신용 포트
     environment:
-      JENKINS_OPTS: '--prefix=/jenkins' # 만약 Jenkins가 하위 경로로 접근되도록 설정할 경우
+      - JENKINS_OPTS=--prefix=/jenkins # 만약 Jenkins가 하위 경로로 접근되도록 설정할 경우
     volumes:
       - jenkins_home:/var/jenkins_home # Jenkins 데이터 유지
     restart: always
