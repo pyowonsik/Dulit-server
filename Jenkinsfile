@@ -50,8 +50,14 @@ pipeline {
                             cd /home/ubuntu && 
                             tar -xvzf Dulit-server.tar.gz && 
                             rm Dulit-server.tar.gz && 
-                            cd Dulit-server &&  # Dulit-server 디렉토리로 이동
-                            
+                            cd Dulit-server &&
+
+                            # Git으로 최신 코드 pull
+                            git fetch origin
+                            git reset --hard origin/main
+                            git clean -fd
+
+                            # 도커 명령어 실행
                             docker-compose stop dulit nginx && 
                             docker-compose up -d dulit nginx
                             echo "Current Directory: \$(pwd)"  # 현재 작업 디렉토리 출력
