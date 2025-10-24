@@ -505,7 +505,7 @@ server {
 
 ```nginx
 location /jenkins/ {
-    proxy_pass http://localhost:8080/jenkins/;  # ← 이것만으로는 안됨!
+    proxy_pass http://localhost:8080/jenkins/;
 }
 ```
 
