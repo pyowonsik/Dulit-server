@@ -46,7 +46,7 @@ export class User extends BaseTable {
   @Column()
   name: string;
 
-  @Column()
+  @Column({ nullable: true })
   password: string;
 
   @Column({

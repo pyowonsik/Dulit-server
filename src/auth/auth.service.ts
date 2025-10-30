@@ -162,6 +162,9 @@ export class AuthService {
       throw new BadRequestException('잘못된 로그인 정보입니다.');
     }
 
+    console.log('[authenticate] user:', user);
+    console.log('[authenticate] user.id:', user.id);
+
     // 비밀번호 인증
     const passOk = bcrypt.compare(password, user.password);
 
@@ -177,6 +180,10 @@ export class AuthService {
     user: { id: number; role: Role; socialId: string },
     isRefresh: boolean,
   ) {
+    console.log('[issueToken] user:', user);
+    console.log('[issueToken] user.id:', user.id);
+    console.log('[issueToken] isRefresh:', isRefresh);
+
     // 환경변수(.env) ACCESS_TOKEN_SECRET,REFRESH_TOKEN_SECRET 저장
     const accessTokenSecret = this.configService.get<string>(
       envVariableKeys.accessTokenSecret,
@@ -185,18 +192,19 @@ export class AuthService {
       envVariableKeys.refreshTokenSecret,
     );
 
-    return await this.jwtService.signAsync(
-      {
-        sub: user.id,
-        role: user.role,
-        socialId: user.socialId,
-        type: isRefresh ? 'refresh' : 'access',
-      },
-      {
-        secret: isRefresh ? refreshTokenSecret : accessTokenSecret,
-        expiresIn: isRefresh ? '24h' : 300,
-      },
-    );
+    const payload = {
+      sub: user.id,
+      role: user.role,
+      socialId: user.socialId,
+      type: isRefresh ? 'refresh' : 'access',
+    };
+
+    console.log('[issueToken] payload:', payload);
+
+    return await this.jwtService.signAsync(payload, {
+      secret: isRefresh ? refreshTokenSecret : accessTokenSecret,
+      expiresIn: isRefresh ? '24h' : 300,
+    });
   }
 
   async getMe(userId: number) {

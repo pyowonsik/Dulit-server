@@ -61,7 +61,15 @@ export class AnniversaryService {
 
     const qb = await this.findMyCoupleAnniversary(couple.id);
 
-    this.commonService.applyPagePaginationParamsToQb(qb, dto);
+    // 제목 검색 (선택사항)
+    if (dto.title) {
+      qb.andWhere('anniversary.title LIKE :title', {
+        title: `%${dto.title}%`,
+      });
+    }
+
+    // 날짜순 정렬 (오름차순: 가까운 기념일이 먼저)
+    qb.orderBy('anniversary.date', 'ASC');
 
     const anniversaries = await qb.getMany();
 
@@ -175,8 +183,7 @@ export class AnniversaryService {
   async findMyCoupleAnniversary(coupleId: number) {
     return this.anniversaryRepository
       .createQueryBuilder('anniversary')
-      .where('anniversary.coupleId = :coupleId', { coupleId })
-      .select();
+      .where('anniversary.coupleId = :coupleId', { coupleId });
   }
 
   /* istanbul ignore next */

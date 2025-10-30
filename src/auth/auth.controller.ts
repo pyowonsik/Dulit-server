@@ -65,10 +65,17 @@ export class AuthController {
       'access 토큰 재발급 - 로그인 정보를 통해 accessToken을 재발급 .',
   })
   async rotateAccessToken(@Request() req: any) {
-    // payload(user 정보)를 통해 accessToken 재발급
-    // BearerTokenMiddleWear를 통해 req.user를 반환받아 user정보로 payload를 대체하여 issueToken
+    // req.user = JWT payload = { sub, role, socialId, type }
+    // issueToken은 { id, role, socialId } 형태를 기대함
+    // 따라서 sub를 id로 변환
+    const userForToken = {
+      id: req.user.sub, // sub → id로 변환
+      role: req.user.role,
+      socialId: req.user.socialId,
+    };
+
     return {
-      accessToken: await this.authService.issueToken(req.user, false),
+      accessToken: await this.authService.issueToken(userForToken, false),
     };
   }
 

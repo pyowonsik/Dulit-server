@@ -5,13 +5,9 @@ import { CreateDateColumn, UpdateDateColumn, VersionColumn } from 'typeorm';
 // Entity Inharitance
 export class BaseTable {
   @CreateDateColumn()
-  @Exclude()
-  @ApiHideProperty()
   createdAt: Date;
 
-  @UpdateDateColumn({ select: false })
-  @Exclude()
-  @ApiHideProperty()
+  @UpdateDateColumn()
   updatedAt: Date;
 
   @VersionColumn({ select: false })

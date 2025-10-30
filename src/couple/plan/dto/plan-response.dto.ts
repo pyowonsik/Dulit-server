@@ -5,11 +5,15 @@ export class PlanResponseDto {
   topic: string;
   location: string;
   time: Date;
+  createdAt: Date;
+  updatedAt: Date;
 
   constructor(plan: Plan) {
-    this.id = plan.id; // ✅ 세미콜론 사용
-    this.topic = plan.topic; // ✅ 세미콜론 사용
-    this.location = plan.location; // ✅ 세미콜론 사용
-    this.time = plan.time; // ✅ 세미콜론 사용
+    this.id = plan.id;
+    this.topic = plan.topic;
+    this.location = plan.location;
+    this.time = plan.time;
+    this.createdAt = plan.createdAt;
+    this.updatedAt = plan.updatedAt;
   }
 }

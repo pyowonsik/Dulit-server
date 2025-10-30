@@ -16,6 +16,14 @@ export class AuthGuard implements CanActivate {
 
     const request = context.switchToHttp().getRequest();
 
+    // /auth/token/access 엔드포인트는 리프레시 토큰 허용
+    if (
+      request.url === '/auth/token/access' &&
+      request.user?.type === 'refresh'
+    ) {
+      return true;
+    }
+
     if (!request.user || request.user.type !== 'access') {
       return false;
     }

@@ -20,11 +20,17 @@ export class NotificationGateway
 
   handleDisconnect(client: Socket) {
     const user = client.data.user;
-    // console.log('Notification Disconnect', user);
+
+    console.log('==================== DISCONNECT ====================');
+    console.log('🔌 사용자:', user?.sub);
+    console.log('📍 소켓 ID:', client.id);
+    console.log('⏰ 시간:', new Date().toISOString());
 
     if (user) {
       this.notificationService.removeClient(user.sub);
+      console.log('✅ Map에서 제거 완료');
     }
+    console.log('====================================================');
   }
 
   async handleConnection(client: Socket) {

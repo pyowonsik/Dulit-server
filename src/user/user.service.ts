@@ -73,7 +73,13 @@ export class UserService {
   async socialJoinAndLogin(createUserDto: CreateUserDto) {
     let user = await this.userRepository.findOne({
       where: { socialId: createUserDto.socialId },
+      relations: ['couple'],
     });
+
+    console.log('[socialJoinAndLogin] createUserDto:', createUserDto);
+    console.log('[socialJoinAndLogin] user from DB:', user);
+    console.log('[socialJoinAndLogin] user.id:', user?.id);
+    console.log('[socialJoinAndLogin] user.role:', user?.role);
 
     if (!user) {
       user = await this.userRepository.save({
@@ -81,13 +87,23 @@ export class UserService {
         email: createUserDto.email,
         name: createUserDto.name,
         socialProvider: createUserDto.socialProvider,
+        password: null, // 소셜 로그인 사용자는 password가 null
       });
+      console.log('[socialJoinAndLogin] 새로 생성된 user:', user);
+      console.log('[socialJoinAndLogin] 새로 생성된 user.id:', user.id);
     }
+
+    console.log('[socialJoinAndLogin] issueToken 호출 전 - user:', {
+      id: user.id,
+      role: user.role,
+      socialId: user.socialId,
+    });
 
     return {
       accessToken: await this.authService.issueToken(user, false),
       refreshToken: await this.authService.issueToken(user, true),
       user,
+      isCouple: !!user.couple,
     };
   }
 
@@ -100,13 +116,21 @@ export class UserService {
       where: {
         id,
       },
+      relations: ['couple'],
     });
 
     if (!user) {
       throw new NotFoundException('존재하지 않는 유저의 ID 입니다.');
     }
 
-    return user;
+    console.log('[user.couple]', user.couple);
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      socialId: user.socialId,
+      coupleId: user.couple?.id ?? null, // 👈 추가!
+    };
   }
 
   async findPartnerById(partnerId: number) {

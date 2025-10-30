@@ -80,10 +80,10 @@ import { PlanModule } from './couple/plan/plan.module';
           Anniversary,
           Calendar,
         ],
-        synchronize:
-          configService.get<string>(envVariableKeys.env) === 'prod'
-            ? false
-            : true,
+        synchronize: true,
+        // configService.get<string>(envVariableKeys.env) === 'prod'
+        //   ? false
+        //   : true,
         // ...(configService.get<string>(envVariableKeys.env) === 'prod' && {
         //   ssl: {
         //     rejectUnauthorized: false, // prod 환경에서만 SSL 활성화

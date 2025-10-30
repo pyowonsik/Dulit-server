@@ -19,7 +19,13 @@ export class BearerTokenMiddleWare implements NestMiddleware {
     const authHeader = req.headers['authorization'];
     // console.log(req.headers);
 
+    console.log('[BearerTokenMiddleware] URL:', req.url);
+    console.log('[BearerTokenMiddleware] Authorization Header:', authHeader);
+
     if (!authHeader) {
+      console.log(
+        '[BearerTokenMiddleware] No Authorization Header! req.user will be undefined',
+      );
       next();
       return;
     }
@@ -61,6 +67,7 @@ export class BearerTokenMiddleWare implements NestMiddleware {
       }
 
       req.user = payload;
+      console.log('[BearerTokenMiddleware] req.user 설정 완료:', req.user);
       next();
     } catch (e) {
       if (e.name === 'TokenExpiredError') {

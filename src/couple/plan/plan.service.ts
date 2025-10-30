@@ -43,7 +43,12 @@ export class PlanService {
 
     const savedPlan = await qr.manager.save(Plan, plan);
 
-    return new PlanResponseDto(savedPlan);
+    // createdAt, updatedAt이 포함된 엔티티 재조회
+    const planWithTimestamps = await qr.manager.findOne(Plan, {
+      where: { id: savedPlan.id },
+    });
+
+    return new PlanResponseDto(planWithTimestamps);
   }
 
   async findAll(userId: number, dto: GetPlanDto) {
@@ -51,29 +56,24 @@ export class PlanService {
 
     const user = await this.findMeRelationCouple(userId);
 
+    // 커플이 없는 경우 빈 배열 반환
+    if (!user || !user.couple) {
+      return [];
+    }
+
     const qb = await this.findMyCouplePlan(user.couple.id);
 
-    this.planRepository.find({
-      where: {
-        couple: user.couple,
-      },
-    });
-
+    // 주제 검색 (선택사항)
     if (topic) {
       qb.andWhere('plan.topic LIKE :topic', { topic: `%${topic}%` });
     }
 
-    const { nextCursor } =
-      await this.commonService.applyCursorPaginationParamsToQb(qb, dto);
+    // 시간순 정렬 (오름차순: 가까운 약속이 먼저)
+    qb.orderBy('plan.time', 'ASC');
 
-    const [data, count] = await qb.getManyAndCount();
+    const plans = await qb.getMany();
 
-    // 기존 반환값에 cursor를 넣어줌
-    return {
-      data,
-      nextCursor,
-      count,
-    };
+    return plans;
   }
 
   async findOne(userId: number, id: number) {
