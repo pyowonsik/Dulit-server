@@ -93,8 +93,7 @@ docker-compose up -d
 
 ## 개발
 
-- **개발자**: 표원식 (1인 개발)
-- **개발 기간**: 2024.12 ~ 2025.03
+- **개발자**: 표원식
 - **아키텍처**: 모놀리식 (Monolithic)
 - **배포 환경**: AWS EC2 + Docker + Jenkins CI/CD
 - **도메인**: [https://pyowonsik.site](https://pyowonsik.site)
